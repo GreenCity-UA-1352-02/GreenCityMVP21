@@ -87,8 +87,7 @@ public class CustomShoppingListItemController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.BAD_REQUEST)
     })
     @PatchMapping("/{userId}/custom-shopping-list-items")
-    public ResponseEntity<CustomShoppingListItemResponseDto> updateItemStatus(
-        @PathVariable @CurrentUserId Long userId,
+    public ResponseEntity<CustomShoppingListItemResponseDto> updateItemStatus(@PathVariable @CurrentUserId Long userId,
         @RequestParam("itemId") Long itemId,
         @RequestParam("status") String itemStatus) {
         return ResponseEntity.status(HttpStatus.OK)
