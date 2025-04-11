@@ -191,3 +191,4 @@ public class CustomShoppingListItemControllerTest {
         verify(customShoppingListItemService, times(1)).findAllUsersCustomShoppingListItemsByStatus(userId, status);
     }
 }
+
