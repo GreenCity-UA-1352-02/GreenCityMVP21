@@ -56,7 +56,7 @@ public class CustomShoppingListMapperTest {
     }
 
     @Test
-    void mapAllToList_nullCustomShoppingListItemResponseDto_returnsEmptyList() {
+    void mapAllToList_nullCustomShoppingListItemResponseDto_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> mapper.mapAllToList(null));
     }
 }
