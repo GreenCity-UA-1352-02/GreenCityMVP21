@@ -119,11 +119,11 @@ public class EcoNewsCommentDtoMapperTest {
         when(user.getId()).thenReturn(1L);
         when(user.getName()).thenReturn("John Doe");
         when(user.getProfilePicturePath()).thenReturn("/path/to/profile/pic");
+
         User user2 = mock(User.class);
-        when(ecoNewsComment.getUser()).thenReturn(user);
-        when(user.getId()).thenReturn(1L);
-        when(user.getName()).thenReturn("John Doe");
-        when(user.getProfilePicturePath()).thenReturn("/path/to/profile/pic");
+        when(user2.getId()).thenReturn(2L);
+        when(user2.getName()).thenReturn("Jane Smith");
+        when(user2.getProfilePicturePath()).thenReturn("/path/to/another/pic");
 
         Set<User> usersLiked = new HashSet<>();
         usersLiked.add(user);

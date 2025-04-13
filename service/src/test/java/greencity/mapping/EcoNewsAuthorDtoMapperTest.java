@@ -25,7 +25,7 @@ public class EcoNewsAuthorDtoMapperTest {
     }
 
     @Test
-    void convert_NullUser_ThrowsNullPointerException() {
+    void convert_UserWithNullProperties_ReturnsValidDtoWithNullProperties() {
         User user = new User();
         EcoNewsAuthorDto dto = mapper.convert(user);
 
