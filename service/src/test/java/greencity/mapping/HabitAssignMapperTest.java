@@ -41,7 +41,7 @@ public class HabitAssignMapperTest {
         UserShoppingListItemAdvanceDto item2 = UserShoppingListItemAdvanceDto.builder()
                 .id(11L)
                 .dateCompleted(LocalDateTime.now())
-                .status(ShoppingListItemStatus.DONE)
+                .status(ShoppingListItemStatus.INPROGRESS)
                 .shoppingListItemId(101L)
                 .build();
 
@@ -76,13 +76,83 @@ public class HabitAssignMapperTest {
         assertEquals(habitAssignDto.getDuration(), habitAssign.getHabit().getDefaultDuration());
 
         assertNotNull(habitAssign.getUserShoppingListItems());
-        assertEquals(1, habitAssign.getUserShoppingListItems().size());
+        assertEquals(2, habitAssign.getUserShoppingListItems().size());
 
         UserShoppingListItem mappedItem = habitAssign.getUserShoppingListItems().getFirst();
         assertEquals(item1.getId(), mappedItem.getId());
         assertEquals(item1.getDateCompleted(), mappedItem.getDateCompleted());
         assertEquals(item1.getStatus(), mappedItem.getStatus());
         assertEquals(item1.getShoppingListItemId(), mappedItem.getShoppingListItem().getId());
+
+        UserShoppingListItem mappedItem2 = habitAssign.getUserShoppingListItems().get(1);
+        assertEquals(item2.getId(), mappedItem2.getId());
+        assertEquals(item2.getDateCompleted(), mappedItem2.getDateCompleted());
+        assertEquals(item2.getStatus(), mappedItem2.getStatus());
+        assertEquals(item2.getShoppingListItemId(), mappedItem2.getShoppingListItem().getId());
+    }
+
+    @Test
+    void convert_FromHabitAssignDtoToHabitAssign_OnlyInProgressShoppingListItemsAreAdded() {
+
+        ZonedDateTime createDateTime = ZonedDateTime.of(LocalDateTime.now().minusDays(4), ZoneId.of("Europe/Kyiv"));
+        HabitDto habitDto = HabitDto.builder().id(100L).complexity(3).build();
+
+        UserShoppingListItemAdvanceDto itemInProgress1 = UserShoppingListItemAdvanceDto.builder()
+                .id(20L)
+                .dateCompleted(LocalDateTime.now().minusDays(3))
+                .status(ShoppingListItemStatus.INPROGRESS)
+                .shoppingListItemId(300L)
+                .build();
+        UserShoppingListItemAdvanceDto itemDone = UserShoppingListItemAdvanceDto.builder()
+                .id(21L)
+                .dateCompleted(LocalDateTime.now().minusDays(1))
+                .status(ShoppingListItemStatus.DONE)
+                .shoppingListItemId(301L)
+                .build();
+        UserShoppingListItemAdvanceDto itemPlanned = UserShoppingListItemAdvanceDto.builder()
+                .id(22L)
+                .dateCompleted(null)
+                .status(ShoppingListItemStatus.DISABLED)
+                .shoppingListItemId(302L)
+                .build();
+        UserShoppingListItemAdvanceDto itemInProgress2 = UserShoppingListItemAdvanceDto.builder()
+                .id(23L)
+                .dateCompleted(LocalDateTime.now())
+                .status(ShoppingListItemStatus.INPROGRESS)
+                .shoppingListItemId(303L)
+                .build();
+
+        HabitAssignDto habitAssignDto = HabitAssignDto.builder()
+                .id(40L)
+                .duration(60)
+                .habitStreak(15)
+                .createDateTime(createDateTime)
+                .status(HabitAssignStatus.ACTIVE)
+                .workingDays(30)
+                .lastEnrollmentDate(createDateTime)
+                .habit(habitDto)
+                .userShoppingListItems(List.of(itemInProgress1, itemDone, itemPlanned, itemInProgress2))
+                .build();
+
+        HabitAssign habitAssign = mapper.convert(habitAssignDto);
+
+        assertNotNull(habitAssign);
+        assertNotNull(habitAssign.getUserShoppingListItems());
+        assertEquals(2, habitAssign.getUserShoppingListItems().size());
+
+        List<ShoppingListItemStatus> actualStatuses = habitAssign.getUserShoppingListItems().stream()
+                .map(UserShoppingListItem::getStatus)
+                .toList();
+        assertTrue(actualStatuses.contains(ShoppingListItemStatus.INPROGRESS));
+        assertEquals(2, actualStatuses.stream().filter(ShoppingListItemStatus.INPROGRESS::equals).count());
+
+        List<Long> actualItemIds = habitAssign.getUserShoppingListItems().stream()
+                .map(UserShoppingListItem::getId)
+                .toList();
+        assertTrue(actualItemIds.contains(itemInProgress1.getId()));
+        assertTrue(actualItemIds.contains(itemInProgress2.getId()));
+        assertFalse(actualItemIds.contains(itemDone.getId()));
+        assertFalse(actualItemIds.contains(itemPlanned.getId()));
     }
 
     @Test
