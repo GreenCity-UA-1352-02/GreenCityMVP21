@@ -55,7 +55,7 @@ jobs:
           
       - name: Upload test report artifact
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: junit-test-report
           path: '**/target/surefire-reports/*.xml'
