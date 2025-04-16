@@ -35,14 +35,14 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           git fetch --unshallow
-          mvn formatter:format; mvn clean install sonar:sonar -Dsonar.projectKey=OlhenShu_GreenCityMVPTemplate -Dsonar.organization=olhenshu -Dsonar.host.url=https://sonarcloud.io -Dsonar.binaries=target/classes -Dsonar.dynamicAnalysis=reuseReports -Dsonar.scanner.force-deprecated-java-version
+          mvn formatter:format; mvn clean install sonar:sonar -Dsonar.projectKey=GreenCity-UA-1352-02_GreenCityMVP21  -Dsonar.host.url=https://sonarcloud.io -Dsonar.binaries=target/classes -Dsonar.dynamicAnalysis=reuseReports -Dsonar.scanner.force-deprecated-java-version
 
       - name: Test Reporter
         uses: dorny/test-reporter@v1.5.0
         if: success() || failure()
         with:
           name: Tests Report
-          path: target/surefire-reports/*.xml
+          path: '**/target/surefire-reports/*.xml'  
           reporter: java-junit
 
       - name: Set outputs
