@@ -379,6 +379,7 @@ public class EcoNewsController {
      */
     @Operation(summary = "Check if user liked news")
     @ApiResponses(value = {
+            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
             @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/isLikedByUser")
