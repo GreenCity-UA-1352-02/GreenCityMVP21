@@ -1,49 +1,51 @@
-name: CI/CD GreenCity
-
-concurrency: Testing
+name: SonarQube
 
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
   push:
-    branches: ['*'] 
+    branches:
+      - dev_java21
   pull_request:
-    branches: ['*']
+    types: [opened, synchronize, reopened]
 
-env:
-  userRepoName: core
-
-  # Allows you to run this workflow manually from the Actions tab
- # workflow_dispatch:
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   build:
+    name: Build and analyze
     runs-on: ubuntu-latest
-    # Steps represent a sequence of tasks that will be executed as part of the job
-    permissions: write-all
+
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v4
         with:
           java-version: 21
-      
-      - name: Run a multi-line script
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          git fetch --unshallow
-          mvn formatter:format; mvn clean install sonar:sonar -Dsonar.projectKey=GreenCity-UA-1352-02_GreenCityMVP21  -Dsonar.host.url=https://sonarcloud.io -Dsonar.binaries=target/classes -Dsonar.dynamicAnalysis=reuseReports -Dsonar.scanner.force-deprecated-java-version
+          distribution: 'zulu'
 
-      - name: Test Reporter
+      - name: Cache SonarQube packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Build and analyze
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=GreenCity-UA-1352-02_GreenCityMVP21
+
+      - name: Publish JUnit Test Report
         uses: dorny/test-reporter@v1.5.0
         if: success() || failure()
         with:
-          name: Tests Report
-          path: '**/target/surefire-reports/*.xml'  
+          name: JUnit Tests
+          path: '**/target/surefire-reports/*.xml'
           reporter: java-junit
-
-      - name: Set outputs
-        run: echo "GITHUB_SHA_SHORT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
