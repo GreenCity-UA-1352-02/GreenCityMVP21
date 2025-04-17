@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(SpringExtension.class)
 public class LanguageTranslationDtoMapperTest {
@@ -18,7 +19,7 @@ public class LanguageTranslationDtoMapperTest {
     private LanguageTranslationDtoMapper languageTranslationDtoMapper;
 
     @Test
-    void convertTest() {
+    void convert_habitFactTranslationToLanguageTranslationDTO_habitFactTranslation() {
         HabitFactTranslation habitFactTranslation = ModelUtils.getFactTranslation();
 
         LanguageTranslationDTO expected = LanguageTranslationDTO.builder()
@@ -28,10 +29,18 @@ public class LanguageTranslationDtoMapperTest {
                         .code(habitFactTranslation.getLanguage().getCode())
                         .build())
                 .build();
-        ;
 
+        assertNotNull(languageTranslationDtoMapper.convert(habitFactTranslation));
         assertEquals(expected, languageTranslationDtoMapper.convert(habitFactTranslation));
-
-
+        assertEquals(habitFactTranslation.getLanguage().getId(), habitFactTranslation.getLanguage().getId());
+        assertEquals(habitFactTranslation.getContent(), habitFactTranslation.getContent());
+        assertEquals(habitFactTranslation.getLanguage().getCode(), habitFactTranslation.getLanguage().getCode());
     }
+
+//    @Test
+//    void convert_habitFactTranslationToHabitFactTranslationDTO_NullValue() {
+//        HabitFactTranslation habitFactTranslation = HabitFactTranslation.builder().id(1L).build();
+//
+//        assertNotNull(languageTranslationDtoMapper.convert(habitFactTranslation));
+//    }
 }
