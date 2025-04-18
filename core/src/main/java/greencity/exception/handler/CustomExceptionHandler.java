@@ -589,7 +589,6 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     /**
      * Exception handler for {@link AccessDeniedException}.
      *
-     * <p>Returns HTTP 403 (FORBIDDEN) when a user tries to perform an action without sufficient permissions.
      * @param ex the thrown {@link AccessDeniedException}.
      * @return a {@link ResponseEntity} with HTTP status 403 and error message in the body.
      * @author [Dmytro Kravchuk]
