@@ -142,13 +142,14 @@ public class UtilsMapperTest {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Destination that = (Destination) o;
-            return id.equals(that.id) && data.equals(that.data);
+            return (id == null ? that.id == null : id.equals(that.id)) &&
+                (data == null ? that.data == null : data.equals(that.data));
         }
 
         @Override
         public int hashCode() {
-            int result = id.hashCode();
-            result = 31 * result + data.hashCode();
+            int result = id != null ? id.hashCode() : 0;
+            result = 31 * result + (data != null ? data.hashCode() : 0);
             return result;
         }
     }

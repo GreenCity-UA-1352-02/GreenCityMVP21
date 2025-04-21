@@ -49,7 +49,7 @@ public class ShoppingListItemDtoMapperTest {
     }
 
     @Test
-    void convert_ShouldThrowNullPointerException_WhenContentIsNull() {
+    void convert_ShouldHandleNullContent_Successfully() {
 
         ShoppingListItem item = mock(ShoppingListItem.class);
         when(item.getId()).thenReturn(15L);
