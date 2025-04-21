@@ -6,7 +6,6 @@ name: CI/CD GreenCity
 concurrency: Testing
 
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
   push:
     branches:
       - dev_java21
@@ -19,15 +18,11 @@ env:
   onbootJarName: app.jar
   dockerRepoName: skyere/greencity
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   build:
     name: Build and analyze
     runs-on: ubuntu-latest
-    # Steps represent a sequence of tasks that will be executed as part of the job
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -37,11 +32,11 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 21
-      
-      #       - name: Set up Go
-#         uses: actions/setup-go@v3
-#         with:
-#           go-version: 1.18
+
+      # - name: Set up Go
+      #   uses: actions/setup-go@v3
+      #   with:
+      #     go-version: 1.18
 
       - name: Run a multi-line script
         env:
