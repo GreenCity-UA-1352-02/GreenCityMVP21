@@ -230,7 +230,7 @@ public class HabitControllerTest {
     }
 
     @Test
-    public void getAllByTagsAndLanguageCode_BadRequest() throws Exception {
+    public void getAllByTagsAndLanguageCode_WithoutTags_BadRequest() throws Exception {
         mockMvc.perform(get("/habit/tags/search")
                         .param("page", "0")
                         .param("size", "10")
@@ -292,7 +292,7 @@ public class HabitControllerTest {
     }
 
     @Test
-    public void getAllByDifferentParameters_BadRequest() throws Exception {
+    public void getAllByDifferentParameters_NoParametersProvided_BadRequest() throws Exception {
         UserVO userVO = new UserVO();
         Locale locale = Locale.ENGLISH;
         Optional<List<String>> tags = Optional.empty();
@@ -394,7 +394,7 @@ public class HabitControllerTest {
     }
 
     @Test
-    public void addCustomHabit_InvalidRequest_BadRequest() throws Exception {
+    public void addCustomHabit_InvalidParamsProvided_BadRequest() throws Exception {
         mockMvc.perform(multipart("/habit/custom")
                         .param("complexity", "")
                         .param("tagIds", "")
