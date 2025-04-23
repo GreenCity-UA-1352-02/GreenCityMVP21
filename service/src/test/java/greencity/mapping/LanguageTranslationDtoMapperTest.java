@@ -4,7 +4,6 @@ import greencity.ModelUtils;
 import greencity.dto.language.LanguageDTO;
 import greencity.dto.language.LanguageTranslationDTO;
 import greencity.entity.HabitFactTranslation;
-import greencity.enums.FactOfDayStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,11 +35,4 @@ public class LanguageTranslationDtoMapperTest {
         assertEquals(habitFactTranslation.getContent(), habitFactTranslation.getContent());
         assertEquals(habitFactTranslation.getLanguage().getCode(), habitFactTranslation.getLanguage().getCode());
     }
-
-//    @Test
-//    void convert_habitFactTranslationToHabitFactTranslationDTO_NullValue() {
-//        HabitFactTranslation habitFactTranslation = HabitFactTranslation.builder().id(1L).build();
-//
-//        assertNotNull(languageTranslationDtoMapper.convert(habitFactTranslation));
-//    }
 }
