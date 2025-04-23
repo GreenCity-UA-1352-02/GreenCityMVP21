@@ -261,7 +261,8 @@ public class SecurityConfig {
                                 "/user/roles")
                         .hasAnyRole(ADMIN, MODERATOR)
                         .requestMatchers(HttpMethod.POST,
-                                "/place/filter/predicate")
+                                "/place/filter/predicate",
+                                "/econews/uploadImages")
                         .hasAnyRole(ADMIN, MODERATOR)
                         .requestMatchers(HttpMethod.PUT,
                                 "/place/update/")
