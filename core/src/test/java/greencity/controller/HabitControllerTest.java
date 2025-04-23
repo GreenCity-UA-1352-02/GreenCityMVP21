@@ -91,7 +91,7 @@ public class HabitControllerTest {
     }
 
     @Test
-    public void getHabitById_BadRequest() throws Exception {
+    public void getHabitById_InvalidHabitId_BadRequest() throws Exception {
 
         mockMvc.perform(get("/habit/invalid-id")
                         .header(HttpHeaders.ACCEPT_LANGUAGE, Locale.ENGLISH.toLanguageTag())
