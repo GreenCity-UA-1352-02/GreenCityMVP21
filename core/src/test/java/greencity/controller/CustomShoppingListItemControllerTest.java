@@ -30,9 +30,6 @@ public class CustomShoppingListItemControllerTest {
     @Mock
     private CustomShoppingListItemService customShoppingListItemService;
 
-    @Mock
-    private ObjectMapper objectMapper;
-
     @InjectMocks
     private CustomShoppingListItemController controller;
 
@@ -66,15 +63,15 @@ public class CustomShoppingListItemControllerTest {
     }
 
     @Test
-    public void getAllAvailableCustomShoppingListItems_BadRequest() throws Exception {
-        mockMvc.perform(get("/custom/shopping-list-items/invalidString/1")
+    public void getAllAvailableCustomShoppingListItems_InvalidUserId_BadRequest() throws Exception {
+        mockMvc.perform(get("/custom/shopping-list-items/invalidUserId/1")
                         .accept("application/json"))
                 .andExpect(status().isBadRequest());
 
     }
 
     @Test
-    public void saveUserCustomShoppingListItems_Success() throws Exception {
+    public void saveUserCustomShoppingListItems_isCreated() throws Exception {
         Long userId = 1L;
         Long habitAssignId = 1L;
 
@@ -100,6 +97,27 @@ public class CustomShoppingListItemControllerTest {
                 .andExpect(jsonPath("$[0].text").value("itemName"));
 
         verify(customShoppingListItemService, times(1)).save(dto, userId, habitAssignId);
+    }
+
+    @Test
+    public void saveUserCustomShoppingListItems_withEmptyText_BadRequest() throws Exception {
+        Long userId = 1L;
+        Long habitAssignId = 1L;
+
+        CustomShoppingListItemSaveRequestDto invalidItem =
+                new CustomShoppingListItemSaveRequestDto("");
+        BulkSaveCustomShoppingListItemDto dto = new BulkSaveCustomShoppingListItemDto(
+                Collections.singletonList(invalidItem));
+
+        String content = new ObjectMapper().writeValueAsString(dto);
+
+        mockMvc.perform(post("/custom/shopping-list-items/{userId}/{habitAssignId}/custom-shopping-list-items", userId, habitAssignId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(content))
+                .andExpect(status().isBadRequest());
+
+        verify(customShoppingListItemService, never()).save(any(), anyLong(), anyLong());
     }
 
     @Test
@@ -191,5 +209,4 @@ public class CustomShoppingListItemControllerTest {
         verify(customShoppingListItemService, times(1)).findAllUsersCustomShoppingListItemsByStatus(userId, status);
     }
 }
-
 
