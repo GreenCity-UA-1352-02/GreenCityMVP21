@@ -17,10 +17,7 @@ import greencity.entity.Tag;
 import greencity.entity.User;
 import greencity.enums.Role;
 import greencity.enums.TagType;
-import greencity.exception.exceptions.BadRequestException;
-import greencity.exception.exceptions.NotFoundException;
-import greencity.exception.exceptions.NotSavedException;
-import greencity.exception.exceptions.UnsupportedSortException;
+import greencity.exception.exceptions.*;
 import greencity.filters.EcoNewsSpecification;
 import greencity.filters.SearchCriteria;
 import greencity.repository.EcoNewsRepo;
@@ -532,7 +529,8 @@ class EcoNewsServiceImplTest {
         when(ecoNewsRepo.findById(1L)).thenReturn(Optional.of(ecoNews));
         when(ecoNewsService.findById(1L)).thenReturn(ecoNewsVO);
         when(modelMapper.map(ecoNewsVO, EcoNews.class)).thenReturn(ecoNews);
-        assertThrows(BadRequestException.class, () -> ecoNewsService.update(updateEcoNewsDto, null, user));
+        assertThrows(UserHasNoPermissionToAccessException.class,
+            () -> ecoNewsService.update(updateEcoNewsDto, null, user));
 
     }
 
