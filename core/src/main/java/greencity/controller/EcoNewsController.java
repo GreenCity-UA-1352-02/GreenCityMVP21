@@ -19,11 +19,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
-
-import java.security.Principal;
-import java.util.List;
-import java.util.Locale;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -32,7 +27,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.security.Principal;
 import java.util.List;
 import java.util.Locale;
@@ -186,7 +180,7 @@ public class EcoNewsController {
     @ApiLocale
     @GetMapping("/{id}")
     public ResponseEntity<EcoNewsDto> getEcoNewsById(@PathVariable Long id,
-        @Parameter(hidden = true) @ValidLanguage Locale locale) {
+                                                     @Parameter(hidden = true) @ValidLanguage Locale locale) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ecoNewsService.findDtoByIdAndLanguage(id, locale.getLanguage()));
     }
@@ -260,7 +254,7 @@ public class EcoNewsController {
     })
     @DeleteMapping("/{econewsId}")
     public ResponseEntity<Object> delete(@PathVariable Long econewsId,
-        @Parameter(hidden = true) @CurrentUser UserVO user) {
+                                         @Parameter(hidden = true) @CurrentUser UserVO user) {
         ecoNewsService.delete(econewsId, user);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -383,7 +377,7 @@ public class EcoNewsController {
     @Operation(summary = "Check if user liked news")
     @GetMapping("/isLikedByUser")
     public ResponseEntity<Boolean> checkNewsIsLikedByUser(@RequestParam("econewsId") Long econewsId,
-        @Parameter(hidden = true) @CurrentUser UserVO user) {
+                                                          @Parameter(hidden = true) @CurrentUser UserVO user) {
         return ResponseEntity.status(HttpStatus.OK).body(ecoNewsService.checkNewsIsLikedByUser(econewsId, user));
     }
 

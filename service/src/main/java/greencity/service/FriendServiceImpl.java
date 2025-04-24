@@ -109,7 +109,7 @@ public class FriendServiceImpl implements FriendService {
     @Override
     public void addFriend(Long userId, Long friendId) {
         if (!isCurrentUser(userId)) {
-            throw new RuntimeException("You cannot send friend requests on behalf of another user.");
+            throw new IllegalStateException("You cannot send friend requests on behalf of another user.");
         }
 
         if (userId.equals(friendId)) {
@@ -131,7 +131,7 @@ public class FriendServiceImpl implements FriendService {
             Friend newRequest = new Friend(user, friend, FriendStatus.REQUESTED);
             friendRepo.save(newRequest);
         } else {
-            throw new BadRequestException("The request already exists or you are already friends.");
+            throw new IllegalArgumentException("The request already exists or you are already friends.");
         }
     }
 

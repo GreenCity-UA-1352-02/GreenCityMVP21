@@ -9,13 +9,17 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
 @RequestMapping("/friends")
+@Validated
 public class FriendController {
     private final FriendService friendService;
 
@@ -210,8 +214,8 @@ public class FriendController {
     })
     @GetMapping("/search")
     public ResponseEntity<List<FriendDto>> searchNewFriends(
-        @RequestParam String searchTerm,
-        @RequestParam Long currentUserId) {
+        @RequestParam @NotBlank(message = "Search term cannot be empty") String searchTerm,
+        @RequestParam @Positive(message = "User ID must be positive") Long currentUserId) {
         List<FriendDto> result = friendService.searchNewFriends(searchTerm, currentUserId);
         return ResponseEntity.ok(result);
     }
