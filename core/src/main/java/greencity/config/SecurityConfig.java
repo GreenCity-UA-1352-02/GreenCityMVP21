@@ -198,6 +198,7 @@ public class SecurityConfig {
                     "/habit/{habitId}/friends/profile-pictures",
                     "/friends/{userId}",
                     "/friends/{userId}")
+                    "/habit/{habitId}/friends/profile-pictures")
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.POST,
                     "/category",
@@ -221,6 +222,7 @@ public class SecurityConfig {
                     "/habit/custom",
                     "/custom/shopping-list-items/{userId}/{habitId}/custom-shopping-list-items",
                     "/friends/{userId}/add/{friendId}")
+                    "/custom/shopping-list-items/{userId}/{habitId}/custom-shopping-list-items")
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.PUT,
                     "/habit/statistic/{id}",
@@ -231,6 +233,7 @@ public class SecurityConfig {
                     "/habit/assign/{habitAssignId}/updateProgressNotificationHasDisplayed",
                     HABIT_ASSIGN_ID + "/allUserAndCustomList",
                     "/friends/{userId}/confirm/{requesterId}")
+                    HABIT_ASSIGN_ID + "/allUserAndCustomList")
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.PATCH,
                     ECONEWS_COMMENTS,
@@ -257,6 +260,7 @@ public class SecurityConfig {
                     USER_CUSTOM_SHOPPING_LIST_ITEMS,
                     USER_SHOPPING_LIST + "/user-shopping-list-items",
                     "/friends/{userId}/remove/{friendId}")
+                    USER_SHOPPING_LIST + "/user-shopping-list-items")
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.GET,
                     "/newsSubscriber",
