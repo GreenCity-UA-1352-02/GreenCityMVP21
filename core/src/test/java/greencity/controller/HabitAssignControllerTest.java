@@ -65,9 +65,9 @@ class HabitAssignControllerTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(habitAssignController)
-                .setCustomArgumentResolvers(new UserArgumentResolver(userService, modelMapper))
-                .setControllerAdvice(new CustomExceptionHandler(errorAttributes, objectMapper))
-                .build();
+            .setCustomArgumentResolvers(new UserArgumentResolver(userService, modelMapper))
+            .setControllerAdvice(new CustomExceptionHandler(errorAttributes, objectMapper))
+            .build();
     }
 
     @Test
@@ -199,8 +199,8 @@ class HabitAssignControllerTest {
     @SneakyThrows
     void getAllHabitAssignsByHabitIdAndAcquiredTest() {
         mockMvc.perform(get("%s/{habitId}/all".formatted(baseUrl), habitId)
-                        .principal(principal))
-                .andExpect(status().isOk());
+            .principal(principal))
+            .andExpect(status().isOk());
 
         verify(habitAssignService, times(1)).getAllHabitAssignsByHabitIdAndStatusNotCancelled(habitId, "en");
     }
@@ -232,17 +232,18 @@ class HabitAssignControllerTest {
     @Test
     @SneakyThrows
     void updateAssignByHabitId_ValidHabitIdAndRequestBody_Ok() {
-        @Language("JSON") String json = """
-                {
-                  "status": "INPROGRESS"
-                }
-                """;
+        @Language("JSON")
+        String json = """
+            {
+              "status": "INPROGRESS"
+            }
+            """;
 
         mockMvc.perform(patch("%s/{habitAssignId}".formatted(baseUrl), habitId)
-                        .principal(principal)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
-                .andExpect(status().isOk());
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(json))
+            .andExpect(status().isOk());
 
         HabitAssignStatDto dto = objectMapper.readValue(json, HabitAssignStatDto.class);
 
@@ -333,19 +334,20 @@ class HabitAssignControllerTest {
     @Test
     @SneakyThrows
     void updateShoppingListStatus_ValidHabitIdAndRequestBody_Ok() {
-        @Language("JSON") String json = """
-                {
-                  "habitAssignId": 1,
-                  "userShoppingListItemId": 1,
-                  "userShoppingListAdvanceDto": []
-                }
-                """;
+        @Language("JSON")
+        String json = """
+            {
+              "habitAssignId": 1,
+              "userShoppingListItemId": 1,
+              "userShoppingListAdvanceDto": []
+            }
+            """;
 
         mockMvc.perform(put("%s/saveShoppingListForHabitAssign".formatted(baseUrl))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json)
-                        .principal(principal))
-                .andExpect(status().isOk());
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(json)
+            .principal(principal))
+            .andExpect(status().isOk());
 
         UpdateUserShoppingListDto dto = objectMapper.readValue(json, UpdateUserShoppingListDto.class);
 

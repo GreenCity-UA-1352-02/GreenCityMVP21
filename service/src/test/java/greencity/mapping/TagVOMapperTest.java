@@ -51,8 +51,7 @@ public class TagVOMapperTest {
                     .id(translationId2)
                     .name(translationName2)
                     .language(Language.builder().id(languageId2).code(languageCode2).build())
-                    .build()
-            ))
+                    .build()))
             .build();
 
         TagVO tagVO = mapper.convert(tag);
@@ -123,8 +122,7 @@ public class TagVOMapperTest {
                     .id(8L)
                     .name("Акція")
                     .language(Language.builder().id(9L).code("ua").build())
-                    .build()
-            ))
+                    .build()))
             .build();
 
         TagVO tagVO = mapper.convert(tag);
@@ -153,8 +151,7 @@ public class TagVOMapperTest {
                     .id(11L)
                     .name("Important")
                     .language(null)
-                    .build()
-            ))
+                    .build()))
             .build();
 
         Assertions.assertThrows(NullPointerException.class, () -> mapper.convert(tag));

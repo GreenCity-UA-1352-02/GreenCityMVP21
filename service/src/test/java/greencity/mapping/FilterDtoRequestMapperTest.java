@@ -17,10 +17,10 @@ class FilterDtoRequestMapperTest {
     @Test
     void convert_ValidUserFilterDtoRequest_ReturnsFilter() {
         Filter expected = Filter.builder()
-                .name("Test_Filter")
-                .type("USERS")
-                .values("Test;USER;ACTIVATED")
-                .build();
+            .name("Test_Filter")
+            .type("USERS")
+            .values("Test;USER;ACTIVATED")
+            .build();
 
         Filter actual = filterDtoRequestMapper.convert(userFilterDtoRequest);
 

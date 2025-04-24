@@ -15,13 +15,13 @@ public final class SwaggerExampleModel {
         + "\t<pre>\n";
 
     private static final String EXAMPLE = """
-                "tags": [
-                  "string"
-                ],
-                "text": "string",
-                "title": "string",
-                "source": "string"
-              """;
+          "tags": [
+            "string"
+          ],
+          "text": "string",
+          "title": "string",
+          "source": "string"
+        """;
 
     private static final String AFTER_EXAMPLE = "\t</pre>\n"
         + "</div>";

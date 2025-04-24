@@ -13,14 +13,14 @@ public class CategoryDtoResponseMapperTest {
     @Test
     public void convert_validEntity_returnsCategoryDtoResponse() {
         Category category = Category.builder()
-                .id(1L)
-                .name("test")
-                .build();
+            .id(1L)
+            .name("test")
+            .build();
 
         CategoryDtoResponse expected = CategoryDtoResponse.builder()
-                .id(1L)
-                .name("test")
-                .build();
+            .id(1L)
+            .name("test")
+            .build();
 
         CategoryDtoResponse actual = categoryDtoResponseMapper.convert(category);
 
@@ -31,9 +31,9 @@ public class CategoryDtoResponseMapperTest {
     @Test
     public void convert_dtoWithNullFields_returnsCategoryDtoResponse() {
         Category category = Category.builder()
-                .id(null)
-                .name(null)
-                .build();
+            .id(null)
+            .name(null)
+            .build();
 
         CategoryDtoResponse actual = categoryDtoResponseMapper.convert(category);
         assertThat(actual).isNotNull();

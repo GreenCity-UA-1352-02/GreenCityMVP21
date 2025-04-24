@@ -41,11 +41,11 @@ class LanguageControllerTest {
         when(languageService.findAllLanguageCodes()).thenReturn(expectedLanguages);
 
         mockMvc.perform(get(languageLink)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0]").value("en"))
-                .andExpect(jsonPath("$[1]").value("ua"))
-                .andExpect(jsonPath("$[2]").value("fr"));
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0]").value("en"))
+            .andExpect(jsonPath("$[1]").value("ua"))
+            .andExpect(jsonPath("$[2]").value("fr"));
 
         verify(languageService).findAllLanguageCodes();
     }
@@ -56,9 +56,9 @@ class LanguageControllerTest {
         when(languageService.findAllLanguageCodes()).thenReturn(expectedLanguages);
 
         mockMvc.perform(get(languageLink)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isEmpty());
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$").isEmpty());
 
         verify(languageService).findAllLanguageCodes();
     }

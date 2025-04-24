@@ -321,9 +321,8 @@ public class EcoNewsServiceImpl implements EcoNewsService {
             throw new AccessDeniedException(ErrorMessage.USER_HAS_NO_PERMISSION);
         }
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
-        CompletableFuture.runAsync(() ->
-                ratingCalculation.ratingCalculation(RatingCalculationEnum.DELETE_ECO_NEWS, user, accessToken)
-        );
+        CompletableFuture.runAsync(
+            () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.DELETE_ECO_NEWS, user, accessToken));
         ecoNewsRepo.deleteById(ecoNewsVO.getId());
     }
 
@@ -482,7 +481,7 @@ public class EcoNewsServiceImpl implements EcoNewsService {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return EcoNewsGenericDto
      */
     @CacheEvict(value = CacheConstants.NEWEST_ECO_NEWS_CACHE_NAME, allEntries = true)

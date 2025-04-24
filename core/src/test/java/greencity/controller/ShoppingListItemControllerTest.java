@@ -7,7 +7,6 @@ import greencity.dto.user.UserVO;
 import greencity.service.ShoppingListItemService;
 import greencity.service.UserService;
 
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,7 +22,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.validation.Validator;
 
-
 import java.security.Principal;
 import java.util.List;
 import java.util.Locale;
@@ -34,7 +32,6 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -57,12 +54,11 @@ class ShoppingListItemControllerTest {
     @BeforeEach
     void setup() {
         this.mockMvc = MockMvcBuilders
-                .standaloneSetup(shoppingListItemController)
-                .setCustomArgumentResolvers(
-                        new UserArgumentResolver(userService, modelMapper)
-                )
-                .setValidator(validator)
-                .build();
+            .standaloneSetup(shoppingListItemController)
+            .setCustomArgumentResolvers(
+                new UserArgumentResolver(userService, modelMapper))
+            .setValidator(validator)
+            .build();
     }
 
     @Test
@@ -74,16 +70,16 @@ class ShoppingListItemControllerTest {
         List<UserShoppingListItemResponseDto> responseDto = List.of(getUserShoppingListItemResponseDto());
 
         when(userService.findByEmail(anyString())).thenReturn(userVO);
-        when(shoppingListItemService.saveUserShoppingListItems(userVO.getId(), habitId, dto, locale.getLanguage())).thenReturn(responseDto);
-
+        when(shoppingListItemService.saveUserShoppingListItems(userVO.getId(), habitId, dto, locale.getLanguage()))
+            .thenReturn(responseDto);
 
         mockMvc.perform(post(SHOPPING_LIST_ITEM_LINK)
-                        .principal(principal)
-                        .param("habitId", habitId.toString())
-                        .locale(locale)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isCreated());
+            .principal(principal)
+            .param("habitId", habitId.toString())
+            .locale(locale)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(dto)))
+            .andExpect(status().isCreated());
 
         verify(shoppingListItemService).saveUserShoppingListItems(userVO.getId(), habitId, dto, locale.getLanguage());
     }
@@ -96,13 +92,12 @@ class ShoppingListItemControllerTest {
         when(userService.findByEmail(anyString())).thenReturn(userVO);
 
         mockMvc.perform(get(SHOPPING_LIST_ITEM_LINK + "/" + "habits/" + habitId + "/shopping-list", habitId)
-                        .principal(principal)
-                        .locale(locale))
-                .andExpect(status().isOk());
+            .principal(principal)
+            .locale(locale))
+            .andExpect(status().isOk());
 
         verify(shoppingListItemService).getUserShoppingList(userVO.getId(), habitId, locale.getLanguage());
     }
-
 
     @Test
     void deleteUserShoppingListItem_ValidRequest_ReturnStatusOk() throws Exception {
@@ -112,14 +107,13 @@ class ShoppingListItemControllerTest {
         when(userService.findByEmail(anyString())).thenReturn(userVO);
 
         mockMvc.perform(delete(SHOPPING_LIST_ITEM_LINK)
-                        .principal(principal)
-                        .param("habitId", habitId.toString())
-                        .param("shoppingListItemId", shoppingListItemId.toString()))
-                .andExpect(status().isOk());
+            .principal(principal)
+            .param("habitId", habitId.toString())
+            .param("shoppingListItemId", shoppingListItemId.toString()))
+            .andExpect(status().isOk());
 
         verify(shoppingListItemService).deleteUserShoppingListItemByItemIdAndUserIdAndHabitId(
-                shoppingListItemId, userVO.getId(), habitId
-        );
+            shoppingListItemId, userVO.getId(), habitId);
     }
 
     @Test
@@ -128,11 +122,12 @@ class ShoppingListItemControllerTest {
         when(userService.findByEmail(anyString())).thenReturn(userVO);
 
         mockMvc.perform(delete(SHOPPING_LIST_ITEM_LINK)
-                        .principal(principal)
-                        .param("shoppingListItemId", "testValue"))
-                .andExpect(status().isBadRequest());
+            .principal(principal)
+            .param("shoppingListItemId", "testValue"))
+            .andExpect(status().isBadRequest());
 
-        verify(shoppingListItemService, never()).deleteUserShoppingListItemByItemIdAndUserIdAndHabitId(any(), any(), any());
+        verify(shoppingListItemService, never()).deleteUserShoppingListItemByItemIdAndUserIdAndHabitId(any(), any(),
+            any());
     }
 
     @Test
@@ -143,9 +138,9 @@ class ShoppingListItemControllerTest {
         when(userService.findByEmail(anyString())).thenReturn(userVO);
 
         mockMvc.perform(patch(SHOPPING_LIST_ITEM_LINK + "/{userShoppingListItemId}", 1)
-                        .principal(principal)
-                        .locale(locale))
-                .andExpect(status().isCreated());
+            .principal(principal)
+            .locale(locale))
+            .andExpect(status().isCreated());
 
         verify(shoppingListItemService).updateUserShopingListItemStatus(userVO.getId(), 1L, locale.getLanguage());
     }
@@ -159,13 +154,13 @@ class ShoppingListItemControllerTest {
         when(userService.findByEmail(anyString())).thenReturn(userVO);
 
         mockMvc.perform(patch(SHOPPING_LIST_ITEM_LINK + "/{userShoppingListItemId}/status/{status}", 1, status)
-                        .principal(principal)
-                        .locale(locale))
-                .andExpect(status().isOk());
+            .principal(principal)
+            .locale(locale))
+            .andExpect(status().isOk());
 
-        verify(shoppingListItemService).updateUserShoppingListItemStatus(userVO.getId(), 1L, locale.getLanguage(), status);
+        verify(shoppingListItemService).updateUserShoppingListItemStatus(userVO.getId(), 1L, locale.getLanguage(),
+            status);
     }
-
 
     @Test
     void bulkDeleteUserShoppingListItems_ValidIds_ReturnsStatusOk() throws Exception {
@@ -177,9 +172,9 @@ class ShoppingListItemControllerTest {
         when(shoppingListItemService.deleteUserShoppingListItems(ids)).thenReturn(deletedIds);
 
         mockMvc.perform(delete(SHOPPING_LIST_ITEM_LINK + "/user-shopping-list-items")
-                        .principal(principal)
-                        .param("ids", ids))
-                .andExpect(status().isOk());
+            .principal(principal)
+            .param("ids", ids))
+            .andExpect(status().isOk());
 
         verify(shoppingListItemService).deleteUserShoppingListItems(ids);
     }
@@ -191,7 +186,7 @@ class ShoppingListItemControllerTest {
         when(userService.findByEmail(anyString())).thenReturn(userVO);
 
         mockMvc.perform(get(SHOPPING_LIST_ITEM_LINK + "/{userId}/get-all-inprogress", userVO.getId())
-                .param("lang", locale.getLanguage()));
+            .param("lang", locale.getLanguage()));
 
         verify(shoppingListItemService).findInProgressByUserIdAndLanguageCode(userVO.getId(), locale.getLanguage());
     }
@@ -201,7 +196,7 @@ class ShoppingListItemControllerTest {
         Long userId = 1L;
 
         mockMvc.perform(get(SHOPPING_LIST_ITEM_LINK + "/{userId}/get-all-inprogress", userId))
-                .andExpect(status().isBadRequest());
+            .andExpect(status().isBadRequest());
 
         verify(shoppingListItemService, never()).findInProgressByUserIdAndLanguageCode(anyLong(), anyString());
     }

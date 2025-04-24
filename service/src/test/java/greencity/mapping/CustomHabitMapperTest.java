@@ -14,17 +14,17 @@ public class CustomHabitMapperTest {
     @Test
     void convert_validHabitDtoRequest_returnsHabit() {
         AddCustomHabitDtoRequest addCustomHabitDtoRequest = AddCustomHabitDtoRequest.builder()
-                .image("image.png")
-                .complexity(10)
-                .defaultDuration(25)
-                .build();
+            .image("image.png")
+            .complexity(10)
+            .defaultDuration(25)
+            .build();
 
         Habit expected = Habit.builder()
-                .image(addCustomHabitDtoRequest.getImage())
-                .complexity(addCustomHabitDtoRequest.getComplexity())
-                .defaultDuration(addCustomHabitDtoRequest.getDefaultDuration())
-                .isCustomHabit(true)
-                .build();
+            .image(addCustomHabitDtoRequest.getImage())
+            .complexity(addCustomHabitDtoRequest.getComplexity())
+            .defaultDuration(addCustomHabitDtoRequest.getDefaultDuration())
+            .isCustomHabit(true)
+            .build();
 
         Habit actual = customHabitMapper.convert(addCustomHabitDtoRequest);
 
@@ -48,15 +48,15 @@ public class CustomHabitMapperTest {
     @Test
     void convert_addCustomHabitDtoRequestWithOnlyImageField_returnsHabit() {
         AddCustomHabitDtoRequest addCustomHabitDtoRequest = AddCustomHabitDtoRequest.builder()
-                .image("image.png")
-                .complexity(null)
-                .defaultDuration(null)
-                .build();
+            .image("image.png")
+            .complexity(null)
+            .defaultDuration(null)
+            .build();
 
         Habit expected = Habit.builder()
-                .image("image.png")
-                .isCustomHabit(true)
-                .build();
+            .image("image.png")
+            .isCustomHabit(true)
+            .build();
 
         assertEquals(expected, customHabitMapper.convert(addCustomHabitDtoRequest));
         assertThat(addCustomHabitDtoRequest.getComplexity()).isNull();
