@@ -13,12 +13,12 @@ public class CategoryDtoMapperTest {
     @Test
     void convert_validCategoryDto_returnsValidEntity() {
         Category expected = Category.builder()
-                .name("test")
-                .build();
+            .name("test")
+            .build();
 
         CategoryDto categoryDto = CategoryDto.builder()
-                .name(expected.getName())
-                .build();
+            .name(expected.getName())
+            .build();
 
         Category actual = mapper.convert(categoryDto);
 

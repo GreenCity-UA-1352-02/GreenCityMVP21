@@ -42,9 +42,9 @@ class SearchControllerTest {
     @BeforeEach
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(searchController)
-                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
-                .setValidator(validator)
-                .build();
+            .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+            .setValidator(validator)
+            .build();
     }
 
     @Test
@@ -53,17 +53,17 @@ class SearchControllerTest {
         Locale locale = Locale.ENGLISH;
 
         SearchResponseDto expectedResponse = SearchResponseDto.builder()
-                .ecoNews(List.of())
-                .countOfResults(0L)
-                .build();
+            .ecoNews(List.of())
+            .countOfResults(0L)
+            .build();
 
         when(searchService.search(searchQuery, locale.getLanguage())).thenReturn(expectedResponse);
 
         mockMvc.perform(get("/search")
-                        .param("searchQuery", searchQuery)
-                        .param("locale", locale.getLanguage())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+            .param("searchQuery", searchQuery)
+            .param("locale", locale.getLanguage())
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
 
         verify(searchService).search(searchQuery, locale.getLanguage());
     }
@@ -75,13 +75,13 @@ class SearchControllerTest {
         PageableDto<SearchNewsDto> expectedResponse = new PageableDto<>(List.of(), 0, 0, 1);
 
         when(searchService.searchAllNews(any(Pageable.class), eq(searchQuery), eq(locale.getLanguage())))
-                .thenReturn(expectedResponse);
+            .thenReturn(expectedResponse);
 
         mockMvc.perform(get("/search/econews")
-                        .param("searchQuery", searchQuery)
-                        .param("locale", locale.getLanguage())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+            .param("searchQuery", searchQuery)
+            .param("locale", locale.getLanguage())
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
 
         verify(searchService).searchAllNews(any(Pageable.class), eq(searchQuery), eq(locale.getLanguage()));
     }
@@ -89,17 +89,17 @@ class SearchControllerTest {
     @Test
     void search_MissingSearchQuery_ReturnsBadRequest() throws Exception {
         mockMvc.perform(get("/search")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
     }
 
     @Test
     void searchEcoNews_MissingSearchQuery_ReturnsBadRequest() throws Exception {
         mockMvc.perform(get("/search/econews")
-                        .param("page", "0")
-                        .param("size", "10")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+            .param("page", "0")
+            .param("size", "10")
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -107,16 +107,16 @@ class SearchControllerTest {
         String searchQuery = "Eco news";
 
         SearchResponseDto expectedResponse = SearchResponseDto.builder()
-                .ecoNews(List.of())
-                .countOfResults(0L)
-                .build();
+            .ecoNews(List.of())
+            .countOfResults(0L)
+            .build();
 
         when(searchService.search(eq(searchQuery), any(String.class))).thenReturn(expectedResponse);
 
         mockMvc.perform(get("/search")
-                        .param("searchQuery", searchQuery)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+            .param("searchQuery", searchQuery)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
 
         verify(searchService).search(eq(searchQuery), any(String.class));
     }

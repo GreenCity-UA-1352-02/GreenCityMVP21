@@ -34,7 +34,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class HabitStatisticControllerTest {
@@ -48,8 +47,6 @@ public class HabitStatisticControllerTest {
     @Mock
     private ModelMapper modelMapper;
 
-
-
     private Principal principal = getPrincipal();
 
     @InjectMocks
@@ -58,24 +55,24 @@ public class HabitStatisticControllerTest {
     @BeforeEach
     void setUp() {
         this.mockMvc = MockMvcBuilders
-                .standaloneSetup(habitStatisticController)
-                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver(),
-                        new UserArgumentResolver(userService, modelMapper))
-                .build();
+            .standaloneSetup(habitStatisticController)
+            .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver(),
+                new UserArgumentResolver(userService, modelMapper))
+            .build();
     }
 
     @Test
     public void findAllByHabitId_habitExists_returns200() throws Exception {
         mockMvc.perform(get(baseUrl + "/{habitId}", 1L)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
         verify(habitStatisticService, times(1)).findAllStatsByHabitId(1L);
     }
 
     @Test
     public void findAllStatsByHabitAssignId_habitAssignExist_returns200() throws Exception {
         mockMvc.perform(get(baseUrl + "/assign/{habitAssignId}", 1L))
-                .andExpect(status().isOk());
+            .andExpect(status().isOk());
         verify(habitStatisticService, times(1)).findAllStatsByHabitAssignId(1L);
     }
 
@@ -87,16 +84,16 @@ public class HabitStatisticControllerTest {
 
         ZonedDateTime zonedDateTime = ZonedDateTime.now();
         String content = "{\n" +
-                "  \"amountOfItems\": 16,\n" +
-                "  \"habitRate\": \"" + HabitRate.DEFAULT + "\",\n" +
-                "  \"createDate\": \"" + zonedDateTime + "\"\n" +
-                "}";
+            "  \"amountOfItems\": 16,\n" +
+            "  \"habitRate\": \"" + HabitRate.DEFAULT + "\",\n" +
+            "  \"createDate\": \"" + zonedDateTime + "\"\n" +
+            "}";
 
         mockMvc.perform(post(baseUrl + "/{habitId}", 1L)
-                        .principal(principal)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(content))
-                .andExpect(status().isCreated());
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(content))
+            .andExpect(status().isCreated());
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
@@ -114,15 +111,15 @@ public class HabitStatisticControllerTest {
         when(modelMapper.map(userVO, UserVO.class)).thenReturn(userVO);
 
         String content = "{\n" +
-                "  \"amountOfItems\": 14,\n" +
-                "  \"habitRate\": \"" + HabitRate.GOOD + "\"\n" +
-                "}";
+            "  \"amountOfItems\": 14,\n" +
+            "  \"habitRate\": \"" + HabitRate.GOOD + "\"\n" +
+            "}";
 
         mockMvc.perform(put(baseUrl + "/{id}", 3L)
-                        .principal(principal)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(content))
-                .andExpect(status().isOk());
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(content))
+            .andExpect(status().isOk());
 
         ObjectMapper mapper = new ObjectMapper();
         UpdateHabitStatisticDto habitStatisticForUpdateDto = mapper.readValue(content, UpdateHabitStatisticDto.class);
@@ -136,22 +133,22 @@ public class HabitStatisticControllerTest {
     void getTodayStatisticsForAllHabitItems_statisticsForUaLocale_returns200() throws Exception {
         Locale locale = new Locale("ua");
         mockMvc.perform(get(baseUrl + "/todayStatisticsForAllHabitItems")
-                        .locale(locale))
-                .andExpect(status().isOk());
+            .locale(locale))
+            .andExpect(status().isOk());
         verify(habitStatisticService, times(1)).getTodayStatisticsForAllHabitItems("ua");
     }
 
     @Test
     void findAmountOfAcquiredHabits_countAcquiredHabits_returns200() throws Exception {
         mockMvc.perform(get(baseUrl + "/acquired/count?userId=" + 1L))
-                .andExpect(status().isOk());
+            .andExpect(status().isOk());
         verify(habitStatisticService, times(1)).getAmountOfAcquiredHabitsByUserId(1L);
     }
 
     @Test
     void findAmountOfHabitsInProgress_countInProgressHabits_returns200() throws Exception {
         mockMvc.perform(get(baseUrl + "/in-progress/count?userId=" + 1L))
-                .andExpect(status().isOk());
+            .andExpect(status().isOk());
         verify(habitStatisticService, times(1)).getAmountOfHabitsInProgressByUserId(1L);
     }
 }

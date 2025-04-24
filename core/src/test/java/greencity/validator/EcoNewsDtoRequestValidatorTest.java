@@ -12,7 +12,6 @@ import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-
 import java.util.Collections;
 import java.util.List;
 
@@ -21,7 +20,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
-
 
 class EcoNewsDtoRequestValidatorTest {
 
@@ -44,16 +42,14 @@ class EcoNewsDtoRequestValidatorTest {
         assertTrue(validator.isValid(request, context));
     }
 
-
     @Test
     void isValid_EmptyTags_ThrowsException() {
         AddEcoNewsDtoRequest request = new AddEcoNewsDtoRequest("title", "text",
-                Collections.emptyList(), null, null, "shortInfo");
+            Collections.emptyList(), null, null, "shortInfo");
 
         WrongCountOfTagsException exception = assertThrows(
-                WrongCountOfTagsException.class,
-                () -> validator.isValid(request, context)
-        );
+            WrongCountOfTagsException.class,
+            () -> validator.isValid(request, context));
 
         assertEquals(ErrorMessage.WRONG_COUNT_OF_TAGS_EXCEPTION, exception.getMessage());
     }
@@ -62,12 +58,11 @@ class EcoNewsDtoRequestValidatorTest {
     void isValid_TooManyTags_ThrowsException() {
         List<String> tags = List.of("tag1", "tag2", "tag3", "tag4");
         AddEcoNewsDtoRequest request = new AddEcoNewsDtoRequest("title", "text",
-                tags, null, null, "shortInfo");
+            tags, null, null, "shortInfo");
 
         WrongCountOfTagsException exception = assertThrows(
-                WrongCountOfTagsException.class,
-                () -> validator.isValid(request, context)
-        );
+            WrongCountOfTagsException.class,
+            () -> validator.isValid(request, context));
 
         assertEquals(ErrorMessage.WRONG_COUNT_OF_TAGS_EXCEPTION, exception.getMessage());
     }

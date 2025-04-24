@@ -30,8 +30,7 @@ public class ShoppingListItemResponseDtoMapperTest {
             .id(itemId)
             .translations(List.of(
                 ShoppingListItemTranslation.builder().id(1L).content("Молоко").build(),
-                ShoppingListItemTranslation.builder().id(2L).content("Хлеб").build()
-            ))
+                ShoppingListItemTranslation.builder().id(2L).content("Хлеб").build()))
             .build();
 
         ShoppingListItemResponseDto responseDto = mapper.convert(shoppingListItem);
@@ -86,8 +85,7 @@ public class ShoppingListItemResponseDtoMapperTest {
         ShoppingListItem shoppingListItem = ShoppingListItem.builder()
             .id(itemId)
             .translations(List.of(
-                ShoppingListItemTranslation.builder().id(3L).content("Яблоки").build()
-            ))
+                ShoppingListItemTranslation.builder().id(3L).content("Яблоки").build()))
             .build();
 
         ShoppingListItemResponseDto responseDto = mapper.convert(shoppingListItem);

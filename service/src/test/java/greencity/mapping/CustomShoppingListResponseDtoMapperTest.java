@@ -16,7 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class CustomShoppingListResponseDtoMapperTest {
     private final CustomShoppingListResponseDtoMapper mapper = new CustomShoppingListResponseDtoMapper();
     private final CustomShoppingListItem customShoppingListItem = getCustomShoppingListItem();
-    private final CustomShoppingListItemResponseDto customShoppingListItemResponseDto = getCustomShoppingListItemResponseDto();
+    private final CustomShoppingListItemResponseDto customShoppingListItemResponseDto =
+        getCustomShoppingListItemResponseDto();
 
     @Test
     void convert_validCustomShoppingListItem_returnsCustomShoppingListItemResponseDto() {
@@ -32,24 +33,23 @@ public class CustomShoppingListResponseDtoMapperTest {
     @Test
     void convert_emptyCustomShoppingListItem_returnsEmptyCustomShoppingListItemResponseDto() {
         CustomShoppingListItem emptyCustomShoppingListItem = new CustomShoppingListItem();
-        assertEquals(new CustomShoppingListItemResponseDto().setStatus(ShoppingListItemStatus.ACTIVE), mapper.convert(emptyCustomShoppingListItem));
+        assertEquals(new CustomShoppingListItemResponseDto().setStatus(ShoppingListItemStatus.ACTIVE),
+            mapper.convert(emptyCustomShoppingListItem));
     }
 
     @Test
     void mapAllToList_validCustomShoppingListItem_returnsListOfCustomShoppingListItemResponseDto() {
         List<CustomShoppingListItem> customShoppingListItemList = Arrays.asList(
-                new CustomShoppingListItem()
-                        .setId(5L)
-                        .setText("List item №1"),
-                customShoppingListItem
-        );
+            new CustomShoppingListItem()
+                .setId(5L)
+                .setText("List item №1"),
+            customShoppingListItem);
         List<CustomShoppingListItemResponseDto> expected = Arrays.asList(
-                new CustomShoppingListItemResponseDto()
-                        .setId(5L)
-                        .setStatus(ShoppingListItemStatus.ACTIVE)
-                        .setText("List item №1"),
-                customShoppingListItemResponseDto
-        );
+            new CustomShoppingListItemResponseDto()
+                .setId(5L)
+                .setStatus(ShoppingListItemStatus.ACTIVE)
+                .setText("List item №1"),
+            customShoppingListItemResponseDto);
         assertEquals(expected, mapper.mapAllToList(customShoppingListItemList));
     }
 

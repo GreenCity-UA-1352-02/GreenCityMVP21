@@ -28,7 +28,6 @@ public class UtilsMapperTest {
         assertEquals(source.getData(), destination.getData());
     }
 
-
     @Test
     void mapNullObject() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> UtilsMapper.map(null, Destination.class));
@@ -40,8 +39,7 @@ public class UtilsMapperTest {
         List<Source> sourceList = Arrays.asList(
             new Source(1L, "Data 1"),
             new Source(2L, "Data 2"),
-            new Source(3L, "Data 3")
-        );
+            new Source(3L, "Data 3"));
 
         List<Destination> destinationList = UtilsMapper.mapAllToList(sourceList, Destination.class);
 
@@ -63,7 +61,6 @@ public class UtilsMapperTest {
         assertNotNull(destinationList);
         assertEquals(0, destinationList.size());
     }
-
 
     @Test
     void mapAllToSet() {
@@ -123,7 +120,6 @@ public class UtilsMapperTest {
         private Long id;
         private String data;
 
-
         public Destination(Long id, String data) {
             this.id = id;
             this.data = data;
@@ -139,8 +135,10 @@ public class UtilsMapperTest {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
             Destination that = (Destination) o;
             return (id == null ? that.id == null : id.equals(that.id)) &&
                 (data == null ? that.data == null : data.equals(that.data));
@@ -154,5 +152,3 @@ public class UtilsMapperTest {
         }
     }
 }
-
-

@@ -31,6 +31,7 @@ public class ShoppingListItemRequestDtoMapperTest {
         assertEquals(itemId, userShoppingListItem.getShoppingListItem().getId());
         assertEquals(ShoppingListItemStatus.ACTIVE, userShoppingListItem.getStatus());
     }
+
     @Test
     void convertWithNullId() {
         ShoppingListItemRequestDto requestDto = ShoppingListItemRequestDto.builder()
@@ -44,6 +45,7 @@ public class ShoppingListItemRequestDtoMapperTest {
         assertNull(userShoppingListItem.getShoppingListItem().getId());
         assertEquals(ShoppingListItemStatus.ACTIVE, userShoppingListItem.getStatus());
     }
+
     @Test
     void convertWithMinValidId() {
         Long itemId = 1L;
