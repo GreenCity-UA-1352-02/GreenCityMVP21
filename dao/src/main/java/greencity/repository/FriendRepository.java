@@ -2,7 +2,6 @@ package greencity.repository;
 
 import greencity.dto.user.FriendDto;
 import greencity.entity.Friend;
-import greencity.entity.User;
 import greencity.enums.FriendStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
