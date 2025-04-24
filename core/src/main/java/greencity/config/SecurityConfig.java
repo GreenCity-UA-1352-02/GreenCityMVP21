@@ -195,7 +195,9 @@ public class SecurityConfig {
                                 "/habit/assign/{habitAssignId}",
                                 "/habit/tags/search",
                                 "/habit/search",
-                                "/habit/{habitId}/friends/profile-pictures")
+                                "/habit/{habitId}/friends/profile-pictures",
+                                "/friends/{userId}",
+                                "/friends/{userId}")
                         .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                         .requestMatchers(HttpMethod.POST,
                                 "/category",
@@ -217,7 +219,8 @@ public class SecurityConfig {
                                 USER_SHOPPING_LIST,
                                 "/user/{userId}/habit",
                                 "/habit/custom",
-                                "/custom/shopping-list-items/{userId}/{habitId}/custom-shopping-list-items")
+                                "/custom/shopping-list-items/{userId}/{habitId}/custom-shopping-list-items",
+                                "/friends/{userId}/add/{friendId}")
                         .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                         .requestMatchers(HttpMethod.PUT,
                                 "/habit/statistic/{id}",
@@ -251,7 +254,8 @@ public class SecurityConfig {
                                 "/favorite_place/{placeId}",
                                 "/social-networks",
                                 USER_CUSTOM_SHOPPING_LIST_ITEMS,
-                                USER_SHOPPING_LIST + "/user-shopping-list-items")
+                                USER_SHOPPING_LIST + "/user-shopping-list-items",
+                                "/friends/{userId}/remove/{friendId}")
                         .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                         .requestMatchers(HttpMethod.GET,
                                 "/newsSubscriber",
