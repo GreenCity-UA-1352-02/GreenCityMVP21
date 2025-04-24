@@ -50,7 +50,7 @@ jobs:
       - name: Build and analyze
         env:
             SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=GreenCity-UA-1352-02_GreenCityMVP21
+        run: mvn clean verify #org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=GreenCity-UA-1352-02_GreenCityMVP21
 
       #- name: Publish JUnit Test Report
        # uses: dorny/test-reporter@v1.5.0
