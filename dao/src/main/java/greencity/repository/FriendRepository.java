@@ -2,6 +2,8 @@ package greencity.repository;
 
 import greencity.dto.user.FriendDto;
 import greencity.entity.Friend;
+import greencity.entity.User;
+import greencity.enums.FriendStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,4 +21,8 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
     Friend findByUserIdAndFriendId(@Param("userId") Long userId, @Param("friendId") Long friendId);
 
     void delete(Friend friend);
+
+    boolean existsByUser_IdAndFriend_IdAndStatus(Long userId, Long friendId, FriendStatus status);
+
+    List<Friend> findAllByUserId(Long userId);
 }

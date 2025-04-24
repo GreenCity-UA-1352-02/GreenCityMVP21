@@ -9,7 +9,6 @@ public class FriendDtoMapper {
             user.getId(),
             user.getName(),
             user.getEmail(),
-            user.getProfilePicturePath()
-        );
+            user.getProfilePicturePath());
     }
 }

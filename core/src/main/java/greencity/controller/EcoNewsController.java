@@ -75,14 +75,14 @@ public class EcoNewsController {
         @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED,
             content = @Content(schema = @Schema(implementation = EcoNewsGenericDto.class))),
         @ApiResponse(responseCode = "415", description = HttpStatuses.UNSUPPORTED_MEDIA_TYPE)
-        })
+    })
 
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<EcoNewsGenericDto> save(
         @Parameter(description = SwaggerExampleModel.ADD_ECO_NEWS_REQUEST,
             required = true) @RequestPart @ValidEcoNewsDtoRequest AddEcoNewsDtoRequest addEcoNewsDtoRequest,
-        @Parameter(description = "Image of eco news") @ImageValidation
-        @RequestPart(required = false) MultipartFile image,
+        @Parameter(description = "Image of eco news") @ImageValidation @RequestPart(
+            required = false) MultipartFile image,
         @Parameter(hidden = true) Principal principal) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
             ecoNewsService.saveEcoNews(addEcoNewsDtoRequest, image, principal.getName()));
@@ -186,7 +186,7 @@ public class EcoNewsController {
     @ApiLocale
     @GetMapping("/{id}")
     public ResponseEntity<EcoNewsDto> getEcoNewsById(@PathVariable Long id,
-                                                     @Parameter(hidden = true) @ValidLanguage Locale locale) {
+        @Parameter(hidden = true) @ValidLanguage Locale locale) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ecoNewsService.findDtoByIdAndLanguage(id, locale.getLanguage()));
     }
@@ -260,7 +260,7 @@ public class EcoNewsController {
     })
     @DeleteMapping("/{econewsId}")
     public ResponseEntity<Object> delete(@PathVariable Long econewsId,
-                                         @Parameter(hidden = true) @CurrentUser UserVO user) {
+        @Parameter(hidden = true) @CurrentUser UserVO user) {
         ecoNewsService.delete(econewsId, user);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -383,7 +383,7 @@ public class EcoNewsController {
     @Operation(summary = "Check if user liked news")
     @GetMapping("/isLikedByUser")
     public ResponseEntity<Boolean> checkNewsIsLikedByUser(@RequestParam("econewsId") Long econewsId,
-                                                          @Parameter(hidden = true) @CurrentUser UserVO user) {
+        @Parameter(hidden = true) @CurrentUser UserVO user) {
         return ResponseEntity.status(HttpStatus.OK).body(ecoNewsService.checkNewsIsLikedByUser(econewsId, user));
     }
 
@@ -407,4 +407,3 @@ public class EcoNewsController {
             .body(ecoNewsService.getContentAndSourceForEcoNewsById(id));
     }
 }
-
