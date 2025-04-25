@@ -1,9 +1,11 @@
-package greencity.entity;
+package greencity.entity.event;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
-@Entity
+@Entity(name = "EventImage")
 @Table(name = "event_images")
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,7 +19,8 @@ public class EventImage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
+    @NotBlank
+    @Column(nullable = false)
     private String link;
 
     @ManyToOne
