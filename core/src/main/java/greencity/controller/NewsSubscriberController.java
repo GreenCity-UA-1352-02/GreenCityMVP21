@@ -26,39 +26,29 @@ public class NewsSubscriberController {
 
     @PostMapping
     @Operation(
-            summary = "Subscribe to the news",
-            description = "This method allows you to subscribe to the news by providing an email address."
-    )
+        summary = "Subscribe to the news",
+        description = "This method allows you to subscribe to the news by providing an email address.")
     @ApiResponses(
-            value = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = HttpStatuses.OK,
-                            content = {
-                                    @Content(
-                                            mediaType = "application/json",
-                                            schema = @Schema(implementation = NewsSubscriberRequestDto.class)
-                                    )
-                            }
-                    ),
-                    @ApiResponse(
-                            responseCode = "400",
-                            description = HttpStatuses.BAD_REQUEST,
-                            content = {
-                                    @Content(schema = @Schema(hidden = true))
-                            }
-                    ),
-            }
-    )
+        value = {
+            @ApiResponse(
+                responseCode = "200",
+                description = HttpStatuses.OK,
+                content = {
+                    @Content(
+                        mediaType = "application/json",
+                        schema = @Schema(implementation = NewsSubscriberRequestDto.class))
+                }),
+            @ApiResponse(
+                responseCode = "400",
+                description = HttpStatuses.BAD_REQUEST,
+                content = {
+                    @Content(schema = @Schema(hidden = true))
+                }),
+        })
     public ResponseEntity<NewsSubscriberRequestDto> post(
-            @Valid
-            @RequestBody
-            @Parameter(
-                    description = "Email of the subscriber",
-                    required = true
-            )
-            NewsSubscriberRequestDto request
-    ) {
+        @Valid @RequestBody @Parameter(
+            description = "Email of the subscriber",
+            required = true) NewsSubscriberRequestDto request) {
         return ResponseEntity.ok(newsSubscriberService.subscribe(request));
     }
 

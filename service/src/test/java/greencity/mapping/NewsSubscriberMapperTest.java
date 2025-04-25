@@ -16,8 +16,8 @@ class NewsSubscriberMapperTest {
         NewsSubscriberRequestDto newsSubscriberRequestDto = new NewsSubscriberRequestDto(TEST_EMAIL);
 
         NewsSubscriber expected = NewsSubscriber.builder()
-                .email(TEST_EMAIL)
-                .build();
+            .email(TEST_EMAIL)
+            .build();
         var actual = newsSubscriberMapper.convert(newsSubscriberRequestDto);
 
         assertEquals(expected, actual);

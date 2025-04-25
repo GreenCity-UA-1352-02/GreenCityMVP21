@@ -42,27 +42,27 @@ class NewsSubscriberControllerTest {
         localValidatorFactoryBean.afterPropertiesSet();
 
         mockMvc = MockMvcBuilders.standaloneSetup(newsSubscriberController)
-                .setValidator(localValidatorFactoryBean)
-                .build();
+            .setValidator(localValidatorFactoryBean)
+            .build();
     }
 
     @Test
     @SneakyThrows
     void post_ValidInputData_Ok() {
         String json = """
-                {
-                  "email": "%s"
-                }
-                """.formatted(EMAIL);
+            {
+              "email": "%s"
+            }
+            """.formatted(EMAIL);
 
         NewsSubscriberRequestDto response = objectMapper.readValue(json, NewsSubscriberRequestDto.class);
         when(newsSubscriberService.subscribe(any(NewsSubscriberRequestDto.class))).thenReturn(response);
 
         mockMvc.perform(post("/newsSubscriber")
-                        .contentType("application/json")
-                        .content(json))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.email").value(EMAIL));
+            .contentType("application/json")
+            .content(json))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.email").value(EMAIL));
 
         verify(newsSubscriberService, times(1)).subscribe(any(NewsSubscriberRequestDto.class));
     }
@@ -71,15 +71,15 @@ class NewsSubscriberControllerTest {
     @SneakyThrows
     void post_InvalidEmail_BadRequest() {
         String json = """
-                {
-                  "email": "invalid-email"
-                }
-                """;
+            {
+              "email": "invalid-email"
+            }
+            """;
 
         mockMvc.perform(post("/newsSubscriber")
-                        .contentType("application/json")
-                        .content(json))
-                .andExpect(status().isBadRequest());
+            .contentType("application/json")
+            .content(json))
+            .andExpect(status().isBadRequest());
 
         verify(newsSubscriberService, never()).subscribe(any(NewsSubscriberRequestDto.class));
     }
