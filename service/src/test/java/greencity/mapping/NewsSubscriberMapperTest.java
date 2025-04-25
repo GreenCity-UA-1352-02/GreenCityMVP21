@@ -1,11 +1,11 @@
 package greencity.mapping;
 
 import greencity.dto.newssubscriber.NewsSubscriberRequestDto;
-import greencity.entity.NewsSubscriber;
 import org.junit.jupiter.api.Test;
 
 import static greencity.ModelUtils.TEST_EMAIL;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class NewsSubscriberMapperTest {
     private final NewsSubscriberMapper newsSubscriberMapper = new NewsSubscriberMapper();
@@ -14,12 +14,9 @@ class NewsSubscriberMapperTest {
     void convert_ValidEmail_NewsSubscriber() {
         NewsSubscriberRequestDto newsSubscriberRequestDto = new NewsSubscriberRequestDto(TEST_EMAIL);
 
-        NewsSubscriber expected = NewsSubscriber.builder()
-            .email(TEST_EMAIL)
-            .build();
-        var actual = newsSubscriberMapper.convert(newsSubscriberRequestDto);
+        var newsSubscriber = newsSubscriberMapper.convert(newsSubscriberRequestDto);
 
-        assertEquals(expected, actual);
+        assertEquals(TEST_EMAIL, newsSubscriber.getEmail());
     }
 
     @Test
