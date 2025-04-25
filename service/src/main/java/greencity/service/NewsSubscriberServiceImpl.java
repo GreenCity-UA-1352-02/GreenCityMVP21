@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class NewsSubscriberServiceImpl implements NewsSubscriberService {
-
     private final NewsSubscriberRepo newsSubscriberRepo;
     private final ModelMapper modelMapper;
 
@@ -22,5 +21,4 @@ public class NewsSubscriberServiceImpl implements NewsSubscriberService {
         newsSubscriberRepo.save(modelMapper.map(newsSubscriberRequestDto, NewsSubscriber.class));
         return newsSubscriberRequestDto;
     }
-
 }

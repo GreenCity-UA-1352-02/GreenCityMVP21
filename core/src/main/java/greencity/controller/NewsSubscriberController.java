@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/newsSubscriber")
 @RequiredArgsConstructor
 public class NewsSubscriberController {
-
     private final NewsSubscriberService newsSubscriberService;
 
     @PostMapping
@@ -51,5 +50,4 @@ public class NewsSubscriberController {
             required = true) NewsSubscriberRequestDto request) {
         return ResponseEntity.ok(newsSubscriberService.subscribe(request));
     }
-
 }

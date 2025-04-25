@@ -16,7 +16,6 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class NewsSubscriberServiceImplTest {
-
     @Mock
     private NewsSubscriberRepo newsSubscriberRepo;
 

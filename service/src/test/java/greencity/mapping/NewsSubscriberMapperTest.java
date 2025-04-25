@@ -8,7 +8,6 @@ import static greencity.ModelUtils.TEST_EMAIL;
 import static org.junit.jupiter.api.Assertions.*;
 
 class NewsSubscriberMapperTest {
-
     private final NewsSubscriberMapper newsSubscriberMapper = new NewsSubscriberMapper();
 
     @Test

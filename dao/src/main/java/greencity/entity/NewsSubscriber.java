@@ -22,5 +22,4 @@ public class NewsSubscriber {
     @NotBlank
     @Column(name = "email", nullable = false, unique = true)
     private String email;
-
 }

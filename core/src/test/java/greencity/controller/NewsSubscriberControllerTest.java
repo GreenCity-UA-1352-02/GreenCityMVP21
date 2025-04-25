@@ -24,7 +24,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(MockitoExtension.class)
 class NewsSubscriberControllerTest {
-
     @Mock
     private NewsSubscriberService newsSubscriberService;
 
@@ -83,5 +82,4 @@ class NewsSubscriberControllerTest {
 
         verify(newsSubscriberService, never()).subscribe(any(NewsSubscriberRequestDto.class));
     }
-
 }
