@@ -13,7 +13,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
-
 import static greencity.ModelUtils.getObjectMapper;
 import static greencity.TestConst.EMAIL;
 import static org.mockito.ArgumentMatchers.any;
@@ -55,15 +54,16 @@ class NewsSubscriberControllerTest {
             """.formatted(EMAIL);
 
         NewsSubscriberRequestDto response = objectMapper.readValue(json, NewsSubscriberRequestDto.class);
-        when(newsSubscriberService.subscribe(any(NewsSubscriberRequestDto.class))).thenReturn(response);
+        when(newsSubscriberService.subscribe(response)).thenReturn(response);
 
         mockMvc.perform(post("/newsSubscriber")
             .contentType("application/json")
-            .content(json))
+            .content(json)
+            .accept("application/json"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.email").value(EMAIL));
 
-        verify(newsSubscriberService, times(1)).subscribe(any(NewsSubscriberRequestDto.class));
+        verify(newsSubscriberService, times(1)).subscribe(response);
     }
 
     @Test
