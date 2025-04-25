@@ -6,7 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface NewsSubscriberRepo extends JpaRepository<NewsSubscriber, Long> {
-
     /**
      * Method checks if email already exists in the database.
      *
