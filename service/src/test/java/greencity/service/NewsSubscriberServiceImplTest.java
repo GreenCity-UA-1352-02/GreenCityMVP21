@@ -1,6 +1,7 @@
 package greencity.service;
 
 import greencity.dto.newssubscriber.NewsSubscriberRequestDto;
+import greencity.entity.NewsSubscriber;
 import greencity.repository.NewsSubscriberRepo;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,13 +29,19 @@ class NewsSubscriberServiceImplTest {
     @Test
     void subscribe_EmailNotExist_NewsSubscriberRequestDto() {
         NewsSubscriberRequestDto newsSubscriberRequestDto = new NewsSubscriberRequestDto(TEST_EMAIL);
+        NewsSubscriber newsSubscriber = NewsSubscriber.builder()
+                .email(TEST_EMAIL)
+                .build();
 
         when(newsSubscriberRepo.existsByEmail(newsSubscriberRequestDto.email())).thenReturn(false);
+        when(modelMapper.map(newsSubscriberRequestDto, NewsSubscriber.class)).thenReturn(newsSubscriber);
+        when(newsSubscriberRepo.save(newsSubscriber)).thenReturn(newsSubscriber);
 
         assertEquals(newsSubscriberRequestDto, newsSubscriberService.subscribe(newsSubscriberRequestDto));
 
         verify(newsSubscriberRepo, times(1)).existsByEmail(newsSubscriberRequestDto.email());
-        verify(newsSubscriberRepo, times(1)).save(any());
+        verify(modelMapper, times(1)).map(newsSubscriberRequestDto, NewsSubscriber.class);
+        verify(newsSubscriberRepo, times(1)).save(newsSubscriber);
     }
 
     @Test
@@ -47,5 +54,6 @@ class NewsSubscriberServiceImplTest {
 
         verify(newsSubscriberRepo, times(1)).existsByEmail(newsSubscriberRequestDto.email());
         verify(newsSubscriberRepo, never()).save(any());
+        verify(modelMapper, never()).map(any(), any());
     }
 }
