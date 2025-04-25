@@ -30,8 +30,8 @@ class NewsSubscriberServiceImplTest {
     void subscribe_EmailNotExist_NewsSubscriberRequestDto() {
         NewsSubscriberRequestDto newsSubscriberRequestDto = new NewsSubscriberRequestDto(TEST_EMAIL);
         NewsSubscriber newsSubscriber = NewsSubscriber.builder()
-                .email(TEST_EMAIL)
-                .build();
+            .email(TEST_EMAIL)
+            .build();
 
         when(newsSubscriberRepo.existsByEmail(newsSubscriberRequestDto.email())).thenReturn(false);
         when(modelMapper.map(newsSubscriberRequestDto, NewsSubscriber.class)).thenReturn(newsSubscriber);
