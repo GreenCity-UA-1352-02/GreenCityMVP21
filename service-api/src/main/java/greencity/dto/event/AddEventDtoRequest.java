@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Size;
 
 import java.util.List;
+import lombok.Builder;
 
+@Builder
 public record AddEventDtoRequest(
         String title,
         String description,

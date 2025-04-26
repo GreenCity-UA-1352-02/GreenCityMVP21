@@ -32,9 +32,8 @@ public class Event {
     @Column(name = "description", nullable = false, length = 63206)
     private String description;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "event_visability", nullable = false)
-    private EventVisibility visibility;
+    @Column(name = "is_open", nullable = false)
+    private boolean isOpen = true;
 
     @Size(max = 7)
     @OneToMany(mappedBy = "event")
@@ -49,7 +48,7 @@ public class Event {
         name = "event_tags",
         joinColumns = @JoinColumn(name = "event_id"),
         inverseJoinColumns = @JoinColumn(name = "tag_id"))
-    private List<Tag> initiativeTypes;
+    private List<Tag> tags;
 
     @OneToOne(cascade = CascadeType.ALL, optional = false)
     @JoinColumn(name = "main_image_id", nullable = false)

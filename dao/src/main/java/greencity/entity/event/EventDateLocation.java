@@ -31,8 +31,9 @@ public class EventDateLocation {
     @Column(nullable = false)
     private EventType eventType;
 
-    @Column
-    private String offlinePlace;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "address_id")
+    private Address address;
 
     @Column
     private String onlineLink;
