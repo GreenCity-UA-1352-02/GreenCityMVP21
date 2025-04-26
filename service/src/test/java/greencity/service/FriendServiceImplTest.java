@@ -54,8 +54,7 @@ public class FriendServiceImplTest {
         anotherUser.setEmail("friend@example.com");
 
         SecurityContextHolder.getContext().setAuthentication(
-            new UsernamePasswordAuthenticationToken(currentUser.getEmail(), null)
-        );
+            new UsernamePasswordAuthenticationToken(currentUser.getEmail(), null));
     }
 
     @AfterEach
@@ -71,8 +70,7 @@ public class FriendServiceImplTest {
 
         List<FriendDto> friendList = Arrays.asList(
             new FriendDto(2L, "Alice", "alice@example.com", "alice.jpg"),
-            new FriendDto(3L, "Bob", "bob@example.com", "bob.jpg")
-        );
+            new FriendDto(3L, "Bob", "bob@example.com", "bob.jpg"));
 
         when(userRepo.findById(userId)).thenReturn(Optional.of(user));
         when(friendRepo.findAllFriendsByUserId(userId)).thenReturn(friendList);
@@ -276,9 +274,8 @@ public class FriendServiceImplTest {
         when(userRepo.findById(anotherUser.getId())).thenReturn(Optional.of(anotherUser));
         when(friendRepo.findByUserIdAndFriendId(anotherUser.getId(), currentUser.getId())).thenReturn(blocked);
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () ->
-            friendService.addFriend(currentUser.getId(), anotherUser.getId())
-        );
+        RuntimeException exception = assertThrows(RuntimeException.class,
+            () -> friendService.addFriend(currentUser.getId(), anotherUser.getId()));
 
         assertEquals("You have been blocked by this user.", exception.getMessage());
     }
@@ -294,9 +291,8 @@ public class FriendServiceImplTest {
         when(friendRepo.findByUserIdAndFriendId(anotherUser.getId(), currentUser.getId())).thenReturn(null);
         when(friendRepo.findByUserIdAndFriendId(currentUser.getId(), anotherUser.getId())).thenReturn(existing);
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-            friendService.addFriend(currentUser.getId(), anotherUser.getId())
-        );
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+            () -> friendService.addFriend(currentUser.getId(), anotherUser.getId()));
 
         assertEquals("The request already exists or you are already friends.", exception.getMessage());
     }
@@ -352,9 +348,8 @@ public class FriendServiceImplTest {
 
         when(userRepo.findByEmail(currentUser.getEmail())).thenReturn(Optional.of(currentUser));
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () ->
-            friendService.removeFriend(otherUserId, anotherUser.getId())
-        );
+        RuntimeException exception =
+            assertThrows(RuntimeException.class, () -> friendService.removeFriend(otherUserId, anotherUser.getId()));
 
         assertEquals("You can only remove your own friends.", exception.getMessage());
     }
@@ -372,9 +367,8 @@ public class FriendServiceImplTest {
         when(userRepo.findByEmail(currentUser.getEmail())).thenReturn(Optional.of(currentUser));
         when(friendRepo.findByUserIdAndFriendId(userId, friendId)).thenReturn(notFriend);
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () ->
-            friendService.removeFriend(userId, friendId)
-        );
+        RuntimeException exception =
+            assertThrows(RuntimeException.class, () -> friendService.removeFriend(userId, friendId));
 
         assertEquals("You are not friends.", exception.getMessage());
     }
@@ -387,9 +381,8 @@ public class FriendServiceImplTest {
         when(userRepo.findByEmail(currentUser.getEmail())).thenReturn(Optional.of(currentUser));
         when(friendRepo.findByUserIdAndFriendId(userId, friendId)).thenReturn(null);
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () ->
-            friendService.removeFriend(userId, friendId)
-        );
+        RuntimeException exception =
+            assertThrows(RuntimeException.class, () -> friendService.removeFriend(userId, friendId));
 
         assertEquals("You are not friends.", exception.getMessage());
     }
@@ -443,9 +436,8 @@ public class FriendServiceImplTest {
 
         when(userRepo.findByEmail(currentUser.getEmail())).thenReturn(Optional.of(currentUser));
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () ->
-            friendService.confirmFriend(invalidUserId, anotherUser.getId())
-        );
+        RuntimeException exception =
+            assertThrows(RuntimeException.class, () -> friendService.confirmFriend(invalidUserId, anotherUser.getId()));
 
         assertEquals("Only the recipient of the friend request can confirm it.", exception.getMessage());
     }
@@ -458,9 +450,8 @@ public class FriendServiceImplTest {
         when(userRepo.findByEmail(currentUser.getEmail())).thenReturn(Optional.of(currentUser));
         when(friendRepo.findByUserIdAndFriendId(requesterId, userId)).thenReturn(null);
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () ->
-            friendService.confirmFriend(userId, requesterId)
-        );
+        RuntimeException exception =
+            assertThrows(RuntimeException.class, () -> friendService.confirmFriend(userId, requesterId));
 
         assertEquals("Friend request not found or already confirmed.", exception.getMessage());
     }
@@ -472,9 +463,8 @@ public class FriendServiceImplTest {
 
         when(userRepo.findByEmail(currentUser.getEmail())).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () ->
-            friendService.confirmFriend(userId, requesterId)
-        );
+        RuntimeException exception =
+            assertThrows(RuntimeException.class, () -> friendService.confirmFriend(userId, requesterId));
 
         assertEquals("Current user not found.", exception.getMessage());
     }
@@ -522,9 +512,8 @@ public class FriendServiceImplTest {
         when(userRepo.findByEmail(currentUser.getEmail())).thenReturn(Optional.of(currentUser));
         when(friendRepo.findByUserIdAndFriendId(requesterId, userId)).thenReturn(request);
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () ->
-            friendService.confirmFriend(userId, requesterId)
-        );
+        RuntimeException exception =
+            assertThrows(RuntimeException.class, () -> friendService.confirmFriend(userId, requesterId));
 
         assertEquals("Friend request not found or already confirmed.", exception.getMessage());
     }
@@ -701,6 +690,5 @@ public class FriendServiceImplTest {
 
         verify(friendRepo, times(1)).save(any(Friend.class));
     }
-
 
 }

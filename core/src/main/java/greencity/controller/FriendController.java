@@ -40,7 +40,8 @@ public class FriendController {
      * </p>
      *
      * @param userId the ID of the user whose friends are being retrieved.
-     * @return a {@link ResponseEntity} containing a list of {@link FriendDto} objects representing the user's friends.
+     * @return a {@link ResponseEntity} containing a list of {@link FriendDto}
+     *         objects representing the user's friends.
      * @throws RuntimeException if the user with the given ID does not exist.
      * @author [Dmytro Kravchuk].
      */

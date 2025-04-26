@@ -29,8 +29,7 @@ public class FriendControllerTest {
         Long userId = 1L;
         List<FriendDto> friendList = Arrays.asList(
             new FriendDto(2L, "Alice", "alice@example.com", "alice.jpg"),
-            new FriendDto(3L, "Bob", "bob@example.com", "bob.jpg")
-        );
+            new FriendDto(3L, "Bob", "bob@example.com", "bob.jpg"));
 
         when(friendService.getFriends(userId)).thenReturn(friendList);
 
@@ -220,8 +219,7 @@ public class FriendControllerTest {
         Long currentUserId = 1L;
         List<FriendDto> foundFriends = Arrays.asList(
             new FriendDto(2L, "Alice", "alice@example.com", "alice.jpg"),
-            new FriendDto(3L, "Alex", "alex@example.com", "alex.jpg")
-        );
+            new FriendDto(3L, "Alex", "alex@example.com", "alex.jpg"));
 
         when(friendService.searchNewFriends(searchTerm, currentUserId)).thenReturn(foundFriends);
 

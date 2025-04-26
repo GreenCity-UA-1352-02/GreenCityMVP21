@@ -39,7 +39,7 @@ public class FriendServiceImpl implements FriendService {
      * @param userId the ID of the user whose friends are being retrieved.
      * @return a list of {@link FriendDto} objects representing the user's friends.
      * @throws UserNotFoundException if the user with the specified {@code userId}
-     *                                 does not exist.
+     *                               does not exist.
      */
     @Override
     public List<FriendDto> getFriends(Long userId) {
@@ -83,8 +83,8 @@ public class FriendServiceImpl implements FriendService {
     }
 
     /**
-     * Sends a friend request from one user to another.
-     * This method checks the following conditions before sending a friend request:
+     * Sends a friend request from one user to another. This method checks the
+     * following conditions before sending a friend request:
      *
      * <ul>
      * <li>The current authenticated user must match the provided
