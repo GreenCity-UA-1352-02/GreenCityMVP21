@@ -56,6 +56,7 @@ public class EcoNewsServiceImpl implements EcoNewsService {
     private final greencity.rating.RatingCalculation ratingCalculation;
     private final HttpServletRequest httpServletRequest;
     private final EcoNewsSearchRepo ecoNewsSearchRepo;
+    private final NotificationProducerService notificationProducerService;
     private final List<String> languageCode = List.of("en", "ua");
 
     /**
@@ -511,16 +512,35 @@ public class EcoNewsServiceImpl implements EcoNewsService {
      */
     @Override
     public void like(UserVO userVO, Long id) {
-        EcoNewsVO ecoNewsVO = findById(id);
-        if (ecoNewsVO.getUsersDislikedNews().stream().anyMatch(u -> u.getId().equals(userVO.getId()))) {
-            ecoNewsVO.getUsersDislikedNews().removeIf(u -> u.getId().equals(userVO.getId()));
+        EcoNews ecoNews = ecoNewsRepo.findById(id)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.ECO_NEWS_NOT_FOUND_BY_ID + id));
+        User liker = modelMapper.map(userVO, User.class);
+
+        if (ecoNews.getUsersDislikedNews().stream().anyMatch(user -> user.getId().equals(liker.getId()))) {
+            ecoNews.getUsersDislikedNews()
+                .removeIf(user -> user.getId().equals(liker.getId()));
         }
-        if (ecoNewsVO.getUsersLikedNews().stream().anyMatch(u -> u.getId().equals(userVO.getId()))) {
-            ecoNewsVO.getUsersLikedNews().removeIf(u -> u.getId().equals(userVO.getId()));
+
+        boolean alreadyLiked =
+            ecoNews.getUsersLikedNews().stream().anyMatch(user -> user.getId().equals(liker.getId()));
+
+        if (alreadyLiked) {
+            ecoNews.getUsersLikedNews()
+                .removeIf(user -> user.getId().equals(liker.getId()));
         } else {
-            ecoNewsVO.getUsersLikedNews().add(userVO);
+            ecoNews.getUsersLikedNews().add(liker);
+
+            User author = ecoNews.getAuthor();
+            if (!author.getId().equals(liker.getId())) {
+                notificationProducerService.sendLikeNotification(
+                    ecoNews.getId(),
+                    ecoNews.getTitle(),
+                    author.getId(),
+                    liker.getId(),
+                    liker.getName());
+            }
         }
-        ecoNewsRepo.save(modelMapper.map(ecoNewsVO, EcoNews.class));
+        ecoNewsRepo.save(ecoNews);
     }
 
     /**
@@ -531,16 +551,25 @@ public class EcoNewsServiceImpl implements EcoNewsService {
      */
     @Override
     public void dislike(UserVO userVO, Long id) {
-        EcoNewsVO ecoNewsVO = findById(id);
-        if (ecoNewsVO.getUsersLikedNews().stream().anyMatch(user -> user.getId().equals(userVO.getId()))) {
-            ecoNewsVO.getUsersLikedNews().removeIf(u -> u.getId().equals(userVO.getId()));
+        EcoNews ecoNews = ecoNewsRepo.findById(id)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.ECO_NEWS_NOT_FOUND_BY_ID + id));
+        User disliker = modelMapper.map(userVO, User.class);
+
+        if (ecoNews.getUsersLikedNews().stream().anyMatch(user -> user.getId().equals(disliker.getId()))) {
+            ecoNews.getUsersLikedNews()
+                .removeIf(user -> user.getId().equals(disliker.getId()));
         }
-        if (ecoNewsVO.getUsersDislikedNews().stream().anyMatch(user -> user.getId().equals(userVO.getId()))) {
-            ecoNewsVO.getUsersDislikedNews().removeIf(u -> u.getId().equals(userVO.getId()));
+
+        boolean alreadyDisliked =
+            ecoNews.getUsersDislikedNews().stream().anyMatch(user -> user.getId().equals(disliker.getId()));
+
+        if (alreadyDisliked) {
+            ecoNews.getUsersDislikedNews()
+                .removeIf(user -> user.getId().equals(disliker.getId()));
         } else {
-            ecoNewsVO.getUsersDislikedNews().add(userVO);
+            ecoNews.getUsersDislikedNews().add(disliker);
         }
-        ecoNewsRepo.save(modelMapper.map(ecoNewsVO, EcoNews.class));
+        ecoNewsRepo.save(ecoNews);
     }
 
     /**

@@ -38,6 +38,7 @@ public class EcoNewsCommentServiceImpl implements EcoNewsCommentService {
     private final greencity.rating.RatingCalculation ratingCalculation;
     private final HttpServletRequest httpServletRequest;
     private final EcoNewsRepo ecoNewsRepo;
+    private final NotificationProducerService notificationProducerService;
 
     /**
      * Method to save {@link greencity.entity.EcoNewsComment}.
@@ -71,7 +72,20 @@ public class EcoNewsCommentServiceImpl implements EcoNewsCommentService {
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
         CompletableFuture.runAsync(
             () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.ADD_COMMENT, userVO, accessToken));
-        return modelMapper.map(ecoNewsCommentRepo.save(ecoNewsComment), AddEcoNewsCommentDtoResponse.class);
+
+        EcoNewsComment savedComment = ecoNewsCommentRepo.save(ecoNewsComment);
+
+        Long authorId = savedComment.getEcoNews().getAuthor().getId();
+        if (!authorId.equals(userVO.getId())) {
+            notificationProducerService.sendCommentNotification(
+                savedComment.getEcoNews().getId(),
+                savedComment.getEcoNews().getTitle(),
+                authorId,
+                userVO.getId(),
+                userVO.getName());
+        }
+
+        return modelMapper.map(savedComment, AddEcoNewsCommentDtoResponse.class);
     }
 
     /**
