@@ -84,8 +84,6 @@ public class FriendServiceImpl implements FriendService {
 
     /**
      * Sends a friend request from one user to another.
-     *
-     * <p>
      * This method checks the following conditions before sending a friend request:
      *
      * <ul>
