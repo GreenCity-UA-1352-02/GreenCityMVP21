@@ -11,22 +11,10 @@ import org.modelmapper.AbstractConverter;
 public class AddEventDtoRequestMapper extends AbstractConverter<AddEventDtoRequest, Event> {
     @Override
     protected Event convert(AddEventDtoRequest addEventDtoRequest) {
-        List<EventDateLocation> eventDateLocations = addEventDtoRequest.datesLocations().stream()
-            .map(dto -> EventDateLocation.builder()
-                .startTime(dto.startDate())
-                .endTime(dto.finishDate())
-                .address(Address.builder()
-                    .longitude(dto.coordinates().longitude())
-                    .latitude(dto.coordinates().latitude())
-                    .build())
-                .onlineLink(dto.onlineLink())
-                .build())
-            .collect(Collectors.toList());
         return Event.builder()
             .title(addEventDtoRequest.title())
             .description(addEventDtoRequest.description())
             .isOpen(addEventDtoRequest.isOpen())
-            .eventDatesLocations(eventDateLocations)
             .build();
     }
 }
