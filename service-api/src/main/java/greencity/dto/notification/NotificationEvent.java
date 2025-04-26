@@ -1,5 +1,6 @@
 package greencity.dto.notification;
 
+import greencity.enums.NotificationType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +16,8 @@ public class NotificationEvent {
     /**
      * Type of event (COMMENT_CREATED, ARTICLE_LIKED, etc.).
      */
-    private String eventType;
+    //private String eventType;
+    private NotificationType eventType;
 
     /**
      * ID of the user who should receive the notification.
