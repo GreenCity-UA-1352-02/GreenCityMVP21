@@ -2,15 +2,13 @@ package greencity.entity.event;
 
 import greencity.entity.Tag;
 import greencity.entity.User;
-import greencity.enums.EventVisibility;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
-import lombok.*;
-import org.hibernate.proxy.HibernateProxy;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import lombok.*;
+import org.hibernate.proxy.HibernateProxy;
 
 @Entity
 @Table(name = "events")
@@ -52,7 +50,7 @@ public class Event {
 
     @OneToOne(cascade = CascadeType.ALL, optional = false)
     @JoinColumn(name = "main_image_id", nullable = false)
-private EventImage mainImage;
+    private EventImage mainImage;
 
     @OneToMany(
         mappedBy = "event",
@@ -62,17 +60,26 @@ private EventImage mainImage;
 
     @Override
     public final boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || this.getClass() != o.getClass()) return false;
-        Class<?> oEffectiveClass = o instanceof HibernateProxy hp ? hp.getHibernateLazyInitializer().getPersistentClass() : o.getClass();
-        Class<?> thisEffectiveClass = this instanceof HibernateProxy hp ? hp.getHibernateLazyInitializer().getPersistentClass() : this.getClass();
-        if (thisEffectiveClass != oEffectiveClass) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        Class<?> oEffectiveClass =
+            o instanceof HibernateProxy hp ? hp.getHibernateLazyInitializer().getPersistentClass() : o.getClass();
+        Class<?> thisEffectiveClass =
+            this instanceof HibernateProxy hp ? hp.getHibernateLazyInitializer().getPersistentClass() : this.getClass();
+        if (thisEffectiveClass != oEffectiveClass) {
+            return false;
+        }
         Event event = (Event) o;
         return getId() != null && Objects.equals(getId(), event.getId());
     }
 
     @Override
     public final int hashCode() {
-        return this instanceof HibernateProxy hp ? hp.getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
+        return this instanceof HibernateProxy hp ? hp.getHibernateLazyInitializer().getPersistentClass().hashCode() :
+            getClass().hashCode();
     }
 }
