@@ -2,6 +2,7 @@ package greencity.controller;
 
 import greencity.constant.HttpStatuses;
 import greencity.dto.user.FriendDto;
+import greencity.exception.exceptions.UserNotFoundException;
 import greencity.service.FriendService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -31,9 +32,11 @@ public class FriendController {
      * Retrieves a list of friends for the user with the specified {@code userId}.
      *
      * <p>
-     * This method fetches the list of friends for the user identified by the provided {@code userId}.
-     * It uses the {@link FriendService} to fetch the list and returns it as a {@link ResponseEntity}
-     * with an HTTP 200 status, containing a list of {@link FriendDto} objects representing the user's friends.
+     * This method fetches the list of friends for the user identified by the
+     * provided {@code userId}. It uses the {@link FriendService} to fetch the list
+     * and returns it as a {@link ResponseEntity} with an HTTP 200 status,
+     * containing a list of {@link FriendDto} objects representing the user's
+     * friends.
      * </p>
      *
      * @param userId the ID of the user whose friends are being retrieved.
@@ -48,30 +51,39 @@ public class FriendController {
         @ApiResponse(responseCode = "404", description = "User not found.")
     })
     @GetMapping("/{userId}")
-    public ResponseEntity<List<FriendDto>> getFriends(@PathVariable Long userId) {
-        List<FriendDto> friends = friendService.getFriends(userId);
-        return ResponseEntity.ok(friends);
+    public ResponseEntity<?> getFriends(@PathVariable Long userId) {
+        try {
+            List<FriendDto> friends = friendService.getFriends(userId);
+            return ResponseEntity.ok(friends);
+        } catch (UserNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        }
     }
 
     /**
-     * Sends a friend request from the user with the specified {@code userId} to the user with the specified
-     * {@code friendId}.
+     * Sends a friend request from the user with the specified {@code userId} to the
+     * user with the specified {@code friendId}.
      *
      * <p>
-     * This method allows a user to send a friend request to another user. If the request already exists or if the users
-     * are already friends, an
-     * {@link IllegalArgumentException} will be thrown, resulting in a {@link HttpStatus#BAD_REQUEST}. If the user tries
-     * to send a request on behalf
-     * of another user, an {@link IllegalStateException} will be thrown, resulting in a {@link HttpStatus#FORBIDDEN}.
+     * This method allows a user to send a friend request to another user. If the
+     * request already exists or if the users are already friends, an
+     * {@link IllegalArgumentException} will be thrown, resulting in a
+     * {@link HttpStatus#BAD_REQUEST}. If the user tries to send a request on behalf
+     * of another user, an {@link IllegalStateException} will be thrown, resulting
+     * in a {@link HttpStatus#FORBIDDEN}.
      * </p>
      *
      * @param userId   the ID of the user sending the friend request.
      * @param friendId the ID of the user to whom the friend request is being sent.
-     * @return a {@link ResponseEntity} with status {@link HttpStatus#CREATED} if the request is successfully sent,
-     *         {@link HttpStatus#BAD_REQUEST} if the request already exists or the users are already friends,
-     *         or {@link HttpStatus#FORBIDDEN} if the request cannot be sent due to an invalid state.
-     * @throws IllegalArgumentException if the friend request already exists or the users are already friends.
-     * @throws IllegalStateException    if the user tries to send a request on behalf of another user.
+     * @return a {@link ResponseEntity} with status {@link HttpStatus#CREATED} if
+     *         the request is successfully sent, {@link HttpStatus#BAD_REQUEST} if
+     *         the request already exists or the users are already friends, or
+     *         {@link HttpStatus#FORBIDDEN} if the request cannot be sent due to an
+     *         invalid state.
+     * @throws IllegalArgumentException if the friend request already exists or the
+     *                                  users are already friends.
+     * @throws IllegalStateException    if the user tries to send a request on
+     *                                  behalf of another user.
      * @author [Dmytro Kravchuk].
      */
     @Operation(summary = "Send a friend request.")
@@ -200,8 +212,8 @@ public class FriendController {
      *                      filter users.
      * @param currentUserId {@link Long} - the ID of the current user to exclude
      *                      them from the search results and avoid duplicates.
-     * @return a {@link ResponseEntity} containing a list of {@link FriendDto} representing potential new friends
-     *          matching the search query.
+     * @return a {@link ResponseEntity} containing a list of {@link FriendDto}
+     *         representing potential new friends matching the search query.
      * @throws RuntimeException if an error occurs while processing the request.
      * @author [Dmytro Kravchuk].
      */

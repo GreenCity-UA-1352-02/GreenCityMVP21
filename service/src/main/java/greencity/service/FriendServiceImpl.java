@@ -5,9 +5,9 @@ import greencity.entity.Friend;
 import greencity.entity.User;
 import greencity.enums.FriendStatus;
 import greencity.exception.exceptions.BadRequestException;
+import greencity.exception.exceptions.UserNotFoundException;
 import greencity.repository.FriendRepository;
 import greencity.repository.UserRepo;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -31,14 +31,14 @@ public class FriendServiceImpl implements FriendService {
      *
      * <p>
      * This method first checks if the user exists in the database. If the user is
-     * not found, it throws an {@link EntityNotFoundException}. If the user exists,
+     * not found, it throws an {@link UserNotFoundException}. If the user exists,
      * the method retrieves and returns all friends associated with the given
      * {@code userId} from the friend repository.
      * </p>
      *
      * @param userId the ID of the user whose friends are being retrieved.
      * @return a list of {@link FriendDto} objects representing the user's friends.
-     * @throws EntityNotFoundException if the user with the specified {@code userId}
+     * @throws UserNotFoundException if the user with the specified {@code userId}
      *                                 does not exist.
      */
     @Override
@@ -46,7 +46,7 @@ public class FriendServiceImpl implements FriendService {
         Optional<User> user = userRepo.findById(userId);
 
         if (user.isEmpty()) {
-            throw new EntityNotFoundException("User with id " + userId + " not found.");
+            throw new UserNotFoundException("User with id " + userId + " not found.");
         }
         return friendRepo.findAllFriendsByUserId(userId);
     }
@@ -87,6 +87,7 @@ public class FriendServiceImpl implements FriendService {
      *
      * <p>
      * This method checks the following conditions before sending a friend request:
+     *
      * <ul>
      * <li>The current authenticated user must match the provided
      * {@code userId}.</li>

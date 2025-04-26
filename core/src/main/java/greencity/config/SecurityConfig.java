@@ -195,9 +195,8 @@ public class SecurityConfig {
                     "/habit/assign/{habitAssignId}",
                     "/habit/tags/search",
                     "/habit/search",
-                    "/habit/{habitId}/friends/profile-pictures",
                     "/friends/{userId}",
-                    "/friends/{userId}")
+                    "/habit/{habitId}/friends/profile-pictures",
                     "/habit/{habitId}/friends/profile-pictures")
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.POST,
@@ -221,7 +220,7 @@ public class SecurityConfig {
                     "/user/{userId}/habit",
                     "/habit/custom",
                     "/custom/shopping-list-items/{userId}/{habitId}/custom-shopping-list-items",
-                    "/friends/{userId}/add/{friendId}")
+                    "/friends/{userId}/add/{friendId}",
                     "/custom/shopping-list-items/{userId}/{habitId}/custom-shopping-list-items")
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.PUT,
@@ -232,7 +231,7 @@ public class SecurityConfig {
                     HABIT_ASSIGN_ID + "/update-habit-duration",
                     "/habit/assign/{habitAssignId}/updateProgressNotificationHasDisplayed",
                     HABIT_ASSIGN_ID + "/allUserAndCustomList",
-                    "/friends/{userId}/confirm/{requesterId}")
+                    "/friends/{userId}/confirm/{requesterId}",
                     HABIT_ASSIGN_ID + "/allUserAndCustomList")
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.PATCH,
@@ -259,7 +258,7 @@ public class SecurityConfig {
                     "/social-networks",
                     USER_CUSTOM_SHOPPING_LIST_ITEMS,
                     USER_SHOPPING_LIST + "/user-shopping-list-items",
-                    "/friends/{userId}/remove/{friendId}")
+                    "/friends/{userId}/remove/{friendId}",
                     USER_SHOPPING_LIST + "/user-shopping-list-items")
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.GET,
