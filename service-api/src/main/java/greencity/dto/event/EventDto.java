@@ -11,8 +11,6 @@ public record EventDto(
         List<String> additionalImages,
         List<EventDateLocationDto> dates,
         String description,
-        boolean isFavorite,
-        boolean isSubscribed,
         boolean open,
         EventAuthorDto organizer,
         List<TagUaEnDto> tags,
