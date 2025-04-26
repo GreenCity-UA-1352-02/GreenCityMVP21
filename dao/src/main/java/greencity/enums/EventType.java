@@ -1,4 +1,4 @@
-package greencity.entity.event;
+package greencity.enums;
 
 public enum EventType {
     ONLINE,
