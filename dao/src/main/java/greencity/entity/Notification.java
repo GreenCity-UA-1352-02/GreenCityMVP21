@@ -9,6 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Builder
 @Table(name = "notification")
 public class Notification {
     @Id
@@ -27,4 +28,8 @@ public class Notification {
 
     @Column(name = "timestamp", nullable = false)
     private LocalDateTime timestamp;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "payload_id", referencedColumnName = "id")
+    private NotificationPayload payload;
 }
