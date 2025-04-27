@@ -1,8 +1,8 @@
 package greencity.mapping;
 
 import greencity.dto.notification.NotificationEvent;
+import greencity.dto.notification.NotificationPayloadDto;
 import greencity.entity.Notification;
-import java.util.Collections;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +15,13 @@ public class NotificationDtoMapper extends AbstractConverter<Notification, Notif
             .targetUserId(notification.getUserId())
             .source(notification.getSource())
             .timestamp(notification.getTimestamp())
-            .payload(Collections.emptyMap()) // temporarily null
+            .payload(NotificationPayloadDto.builder()
+                .actorId(notification.getPayload().getActorId())
+                .actorName(notification.getPayload().getActorName())
+                .articleId(notification.getPayload().getArticleId())
+                .articleTitle(notification.getPayload().getArticleTitle())
+                .objectType(notification.getPayload().getObjectType())
+                .build())
             .build();
     }
 }
