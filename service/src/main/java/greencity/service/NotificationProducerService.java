@@ -1,10 +1,9 @@
 package greencity.service;
 
 import greencity.dto.notification.NotificationEvent;
+import greencity.dto.notification.NotificationPayloadDto;
 import greencity.enums.NotificationType;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -30,19 +29,20 @@ public class NotificationProducerService {
      * @param commentatorName Name of the user who commented
      */
     public void sendCommentNotification(Long articleId, String articleTitle,
-        Long authorId, Long commentatorId, String commentatorName) {
-        Map<String, Object> payload = new HashMap<>();
-        payload.put("actorId", commentatorId);
-        payload.put("actorName", commentatorName);
-        payload.put("articleId", articleId);
-        payload.put("articleTitle", articleTitle);
-        payload.put("objectType", "ARTICLE");
+                                        Long authorId, Long commentatorId, String commentatorName) {
+        NotificationPayloadDto notificationPayload = NotificationPayloadDto.builder()
+            .actorId(commentatorId)
+            .actorName(commentatorName)
+            .articleId(articleId)
+            .articleTitle(articleTitle)
+            .objectType("ARTICLE")
+            .build();
 
         NotificationEvent event = NotificationEvent.builder()
             .eventType(NotificationType.COMMENT_CREATED)
             .targetUserId(authorId)
             .source(SOURCE)
-            .payload(payload)
+            .payload(notificationPayload)
             .timestamp(LocalDateTime.now())
             .build();
 
@@ -62,19 +62,20 @@ public class NotificationProducerService {
      * @param likerName    Name of the user who liked
      */
     public void sendLikeNotification(Long articleId, String articleTitle,
-        Long authorId, Long likerId, String likerName) {
-        Map<String, Object> payload = new HashMap<>();
-        payload.put("actorId", likerId);
-        payload.put("actorName", likerName);
-        payload.put("articleId", articleId);
-        payload.put("articleTitle", articleTitle);
-        payload.put("objectType", "ARTICLE");
+                                     Long authorId, Long likerId, String likerName) {
+        NotificationPayloadDto notificationPayload = NotificationPayloadDto.builder()
+            .actorId(likerId)
+            .actorName(likerName)
+            .articleId(articleId)
+            .articleTitle(articleTitle)
+            .objectType("ARTICLE")
+            .build();
 
         NotificationEvent event = NotificationEvent.builder()
             .eventType(NotificationType.ARTICLE_LIKED)
             .targetUserId(authorId)
             .source(SOURCE)
-            .payload(payload)
+            .payload(notificationPayload)
             .timestamp(LocalDateTime.now())
             .build();
 
