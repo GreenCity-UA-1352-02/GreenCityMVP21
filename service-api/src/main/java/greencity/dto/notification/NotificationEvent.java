@@ -32,7 +32,7 @@ public class NotificationEvent {
     /**
      * Additional data specific to the event type.
      */
-    private Map<String, Object> payload;
+    private NotificationPayloadDto payload;
 
     /**
      * Timestamp when the event occurred.
