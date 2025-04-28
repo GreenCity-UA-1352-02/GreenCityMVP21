@@ -2,9 +2,8 @@ package greencity.service;
 
 import greencity.dto.event.AddEventDtoRequest;
 import greencity.dto.event.EventDto;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface EventService {
     /**

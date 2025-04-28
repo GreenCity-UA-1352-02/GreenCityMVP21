@@ -66,11 +66,11 @@ public class Event {
         if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
-        Class<?> oEffectiveClass =
+        Class<?> ooEffectiveClass =
             o instanceof HibernateProxy hp ? hp.getHibernateLazyInitializer().getPersistentClass() : o.getClass();
         Class<?> thisEffectiveClass =
             this instanceof HibernateProxy hp ? hp.getHibernateLazyInitializer().getPersistentClass() : this.getClass();
-        if (thisEffectiveClass != oEffectiveClass) {
+        if (thisEffectiveClass != ooEffectiveClass) {
             return false;
         }
         Event event = (Event) o;
