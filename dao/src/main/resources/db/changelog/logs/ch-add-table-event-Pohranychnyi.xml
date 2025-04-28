@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.25.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+    <changeSet id="1745831678060-1" author="Pohranychnyi">
+        <createTable tableName="address">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_address"/>
+            </column>
+            <column name="latitude" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="longitude" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="1745831678060-2" author="Pohranychnyi">
+        <createTable tableName="event_images">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_event_images"/>
+            </column>
+            <column name="link" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="event_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="1745831678060-3" author="Pohranychnyi">
+        <createTable tableName="event_tags">
+            <column name="event_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tag_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="1745831678060-4" author="Pohranychnyi">
+        <createTable tableName="events">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_events"/>
+            </column>
+            <column name="title" type="VARCHAR(70)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(63206)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_open" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="main_image_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="1745831678060-5" author="Pohranychnyi">
+        <createTable tableName="events_dates_locations">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_events_dates_locations"/>
+            </column>
+            <column name="start_time" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="end_time" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="event_type" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="address_id" type="BIGINT"/>
+            <column name="online_link" type="VARCHAR(255)"/>
+            <column name="event_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="1745831678060-6" author="Pohranychnyi">
+        <addUniqueConstraint columnNames="address_id" constraintName="uc_events_dates_locations_address"
+                             tableName="events_dates_locations"/>
+    </changeSet>
+    <changeSet id="1745831678060-7" author="Pohranychnyi">
+        <addUniqueConstraint columnNames="main_image_id" constraintName="uc_events_main_image" tableName="events"/>
+    </changeSet>
+    <changeSet id="1745831678060-8" author="Pohranychnyi">
+        <addForeignKeyConstraint baseColumnNames="address_id" baseTableName="events_dates_locations"
+                                 constraintName="FK_EVENTS_DATES_LOCATIONS_ON_ADDRESS" referencedColumnNames="id"
+                                 referencedTableName="address"/>
+    </changeSet>
+    <changeSet id="1745831678060-9" author="Pohranychnyi">
+        <addForeignKeyConstraint baseColumnNames="event_id" baseTableName="events_dates_locations"
+                                 constraintName="FK_EVENTS_DATES_LOCATIONS_ON_EVENT" referencedColumnNames="id"
+                                 referencedTableName="events"/>
+    </changeSet>
+    <changeSet id="1745831678060-10" author="Pohranychnyi">
+        <addForeignKeyConstraint baseColumnNames="main_image_id" baseTableName="events"
+                                 constraintName="FK_EVENTS_ON_MAIN_IMAGE" referencedColumnNames="id"
+                                 referencedTableName="event_images"/>
+    </changeSet>
+    <changeSet id="1745831678060-11" author="Pohranychnyi">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="events" constraintName="FK_EVENTS_ON_USER"
+                                 referencedColumnNames="id" referencedTableName="users"/>
+    </changeSet>
+    <changeSet id="1745831678060-12" author="Pohranychnyi">
+        <addForeignKeyConstraint baseColumnNames="event_id" baseTableName="event_images"
+                                 constraintName="FK_EVENT_IMAGES_ON_EVENT" referencedColumnNames="id"
+                                 referencedTableName="events"/>
+    </changeSet>
+    <changeSet id="1745831678060-13" author="Pohranychnyi">
+        <addForeignKeyConstraint baseColumnNames="event_id" baseTableName="event_tags"
+                                 constraintName="fk_evetag_on_event" referencedColumnNames="id"
+                                 referencedTableName="events"/>
+    </changeSet>
+    <changeSet id="1745831678060-14" author="Pohranychnyi">
+        <addForeignKeyConstraint baseColumnNames="tag_id" baseTableName="event_tags" constraintName="fk_evetag_on_tag"
+                                 referencedColumnNames="id" referencedTableName="tags"/>
+    </changeSet>
+
+</databaseChangeLog>
