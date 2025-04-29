@@ -17,6 +17,7 @@ public class NotificationDtoRequestMapper extends AbstractConverter<Notification
             .object(notification.getPayload().getArticleTitle())
             .timestamp(notification.getTimestamp()
                 .truncatedTo(ChronoUnit.SECONDS).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+            .status(notification.getStatus().toString())
             .build();
     }
 }
