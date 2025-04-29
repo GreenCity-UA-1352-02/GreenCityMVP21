@@ -1,9 +1,13 @@
 package greencity.controller;
 
+import greencity.annotations.CurrentUser;
 import greencity.constant.HttpStatuses;
+import greencity.dto.notification.NotificationDtoRequest;
 import greencity.dto.notification.NotificationEvent;
+import greencity.dto.user.UserVO;
 import greencity.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -35,8 +39,26 @@ public class NotificationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(notificationService.saveNotification(notificationEvent));
     }
 
+    @Operation(summary = "Get all notifications.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "410", description = HttpStatuses.UNAUTHORIZED),
+    })
     @GetMapping("/")
     public ResponseEntity<List<NotificationEvent>> get() {
         return ResponseEntity.status(HttpStatus.OK).body(notificationService.findAllNotifications());
+    }
+
+    @Operation(summary = "Get all notifications.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+    })
+    @GetMapping("/user")
+    public ResponseEntity<List<NotificationDtoRequest>> getNotificationsForUser(
+        @Parameter(hidden = true) @CurrentUser UserVO userVO) {
+        return ResponseEntity.status(HttpStatus.OK).body(notificationService.findUserNotifications(userVO.getId()));
     }
 }
