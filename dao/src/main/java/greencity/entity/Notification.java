@@ -1,5 +1,6 @@
 package greencity.entity;
 
+import greencity.enums.NotificationStatus;
 import greencity.enums.NotificationType;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -32,4 +33,15 @@ public class Notification {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "payload_id", referencedColumnName = "id")
     private NotificationPayload payload;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private NotificationStatus status = NotificationStatus.UNREAD;
+
+    @PrePersist
+    public void prePersist() {
+        if (status == null) {
+            status = NotificationStatus.UNREAD;
+        }
+    }
 }
