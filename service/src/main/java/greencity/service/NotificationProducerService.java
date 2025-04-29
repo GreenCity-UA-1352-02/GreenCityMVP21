@@ -29,7 +29,7 @@ public class NotificationProducerService {
      * @param commentatorName Name of the user who commented
      */
     public void sendCommentNotification(Long articleId, String articleTitle,
-                                        Long authorId, Long commentatorId, String commentatorName) {
+        Long authorId, Long commentatorId, String commentatorName) {
         NotificationPayloadDto notificationPayload = NotificationPayloadDto.builder()
             .actorId(commentatorId)
             .actorName(commentatorName)
@@ -62,7 +62,7 @@ public class NotificationProducerService {
      * @param likerName    Name of the user who liked
      */
     public void sendLikeNotification(Long articleId, String articleTitle,
-                                     Long authorId, Long likerId, String likerName) {
+        Long authorId, Long likerId, String likerName) {
         NotificationPayloadDto notificationPayload = NotificationPayloadDto.builder()
             .actorId(likerId)
             .actorName(likerName)

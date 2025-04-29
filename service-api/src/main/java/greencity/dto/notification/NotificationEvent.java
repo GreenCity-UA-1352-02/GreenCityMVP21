@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
-import java.util.Map;
 
 @Data
 @Builder
@@ -16,7 +15,6 @@ public class NotificationEvent {
     /**
      * Type of event (COMMENT_CREATED, ARTICLE_LIKED, etc.).
      */
-    //private String eventType;
     private NotificationType eventType;
 
     /**
