@@ -10,6 +10,7 @@ import greencity.mapping.NotificationEventMapper;
 import greencity.repository.NotificationRepo;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,8 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationDtoMapper notificationDtoMapper;
     private final NotificationEventMapper notificationEventMapper;
     private final NotificationDtoRequestMapper notificationDtoRequestMapper;
+
+    private static final Set<String> VALID_SOURCES = Set.of("ALL", "GREENCITY", "PICKUP");
 
     /**
      * Retrieves all notifications from the repository and maps them to notification
@@ -42,8 +45,16 @@ public class NotificationServiceImpl implements NotificationService {
      * @return List of all notification events
      */
     @Override
-    public List<NotificationDtoRequest> findUserNotifications(Long id) {
-        List<Notification> notifications = notificationRepo.findNotificationByUserId(id);
+    public List<NotificationDtoRequest> findUserNotifications(Long id, String filter) {
+        List<Notification> notifications;
+
+        if ("ALL".equalsIgnoreCase(filter)) {
+            notifications = notificationRepo.findNotificationByUserId(id);
+        } else {
+            notifications = notificationRepo.findNotificationByUserId(id).stream()
+                .filter(notification -> notification.getSource().equals(filter.toUpperCase()))
+                .toList();
+        }
 
         notifications.forEach(notification -> {
             notification.setStatus(NotificationStatus.READ);

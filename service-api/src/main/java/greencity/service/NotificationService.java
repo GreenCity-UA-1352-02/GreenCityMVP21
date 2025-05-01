@@ -19,9 +19,9 @@ public interface NotificationService {
      * Retrieves all notifications for specific user.
      *
      * @param id ID of the specific user
-     * @return  List of all notifications for specific user
+     * @return List of all notifications for specific user
      */
-    List<NotificationDtoRequest> findUserNotifications(Long id);
+    List<NotificationDtoRequest> findUserNotifications(Long id, String filter);
 
     /**
      * Retrieves a specific notification event by its ID.

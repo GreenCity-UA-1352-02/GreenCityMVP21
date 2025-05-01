@@ -1,6 +1,7 @@
 package greencity.controller;
 
 import greencity.annotations.CurrentUser;
+import greencity.annotations.ValidSource;
 import greencity.constant.HttpStatuses;
 import greencity.dto.notification.NotificationDtoRequest;
 import greencity.dto.notification.NotificationEvent;
@@ -50,7 +51,7 @@ public class NotificationController {
         return ResponseEntity.status(HttpStatus.OK).body(notificationService.findAllNotifications());
     }
 
-    @Operation(summary = "Get all notifications.")
+    @Operation(summary = "Get all notifications for specific user.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
@@ -58,7 +59,9 @@ public class NotificationController {
     })
     @GetMapping("/user")
     public ResponseEntity<List<NotificationDtoRequest>> getNotificationsForUser(
-        @Parameter(hidden = true) @CurrentUser UserVO userVO) {
-        return ResponseEntity.status(HttpStatus.OK).body(notificationService.findUserNotifications(userVO.getId()));
+        @Parameter(hidden = true) @CurrentUser UserVO userVO,
+        @RequestParam(defaultValue = "ALL") @ValidSource String filter) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(notificationService.findUserNotifications(userVO.getId(), filter));
     }
 }
