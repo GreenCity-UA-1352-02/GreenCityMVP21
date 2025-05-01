@@ -3,6 +3,7 @@ package greencity.service;
 import greencity.dto.notification.NotificationDtoRequest;
 import greencity.dto.notification.NotificationEvent;
 import greencity.entity.Notification;
+import greencity.enums.NotificationStatus;
 import greencity.mapping.NotificationDtoMapper;
 import greencity.mapping.NotificationDtoRequestMapper;
 import greencity.mapping.NotificationEventMapper;
@@ -42,7 +43,15 @@ public class NotificationServiceImpl implements NotificationService {
      */
     @Override
     public List<NotificationDtoRequest> findUserNotifications(Long id) {
-        return notificationRepo.findNotificationByUserId(id).stream()
+        List<Notification> notifications = notificationRepo.findNotificationByUserId(id);
+
+        notifications.forEach(notification -> {
+            notification.setStatus(NotificationStatus.READ);
+        });
+
+        notificationRepo.saveAll(notifications);
+
+        return notifications.stream()
             .map(notificationDtoRequestMapper::convert)
             .toList();
     }
