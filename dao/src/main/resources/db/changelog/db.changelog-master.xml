@@ -180,5 +180,6 @@
     <include file="db/changelog/logs/ch-add-table-notification-payload-Lys.xml"/>
     <include file="db/changelog/logs/ch-add-column-foreign-key-to-notification-table-Lys.xml"/>
     <include file="db/changelog/logs/ch-add-column-status-to-notification-table-Lys.xml"/>
+    <include file="db/changelog/logs/ch-add-column-timestampDeletion-to-notification-table-Lys.xml"/>
 </databaseChangeLog>
 
