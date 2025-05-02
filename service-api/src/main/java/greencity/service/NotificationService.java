@@ -38,4 +38,6 @@ public interface NotificationService {
      * @return Saved notification event
      */
     NotificationEvent saveNotification(NotificationEvent notification);
+
+    void deleteNotification(Long notificationId, Long userId);
 }

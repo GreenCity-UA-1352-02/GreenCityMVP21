@@ -4,6 +4,7 @@ import greencity.dto.notification.NotificationDtoRequest;
 import greencity.dto.notification.NotificationEvent;
 import greencity.entity.Notification;
 import greencity.enums.NotificationStatus;
+import greencity.exception.exceptions.NotificationNotFound;
 import greencity.mapping.NotificationDtoMapper;
 import greencity.mapping.NotificationDtoRequestMapper;
 import greencity.mapping.NotificationEventMapper;
@@ -12,8 +13,10 @@ import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Set;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
@@ -94,5 +97,28 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public NotificationEvent saveNotification(NotificationEvent notification) {
         return notificationDtoMapper.convert(notificationRepo.save(notificationEventMapper.convert(notification)));
+    }
+
+    @Override
+    public void deleteNotification(Long notificationId, Long userId) {
+        log.info("Deleting notification with id: " + notificationId + " and userId: " + userId);
+        List<Notification> notifications = notificationRepo.findNotificationByUserId(userId);
+        log.info("Found " + notifications.size() + " notifications");
+        log.info(notifications.toString());
+
+        boolean found = false;
+        for (Notification notification : notifications) {
+            if (notification.getId().equals(notificationId)) {
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            throw new NotificationNotFound("Notification not found for user");
+        }
+
+        notificationRepo.deleteById(notificationId);
+        log.info("Notification deleted successfully");
     }
 }
