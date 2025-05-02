@@ -1,9 +1,9 @@
 package greencity.service;
 
 import greencity.dto.notification.NotificationEvent;
+import greencity.dto.notification.NotificationPayloadDto;
+import greencity.enums.NotificationType;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -16,6 +16,7 @@ public class NotificationProducerService {
     private final KafkaTemplate<String, NotificationEvent> kafkaTemplate;
     private static final String TOPIC = "notifications.greencity";
     private static final String SOURCE = "GREENCITY";
+    private final NotificationService notificationService;
 
     /**
      * Sends a notification about a comment on an article.
@@ -29,22 +30,24 @@ public class NotificationProducerService {
      */
     public void sendCommentNotification(Long articleId, String articleTitle,
         Long authorId, Long commentatorId, String commentatorName) {
-        Map<String, Object> payload = new HashMap<>();
-        payload.put("actorId", commentatorId);
-        payload.put("actorName", commentatorName);
-        payload.put("articleId", articleId);
-        payload.put("articleTitle", articleTitle);
-        payload.put("objectType", "ARTICLE");
+        NotificationPayloadDto notificationPayload = NotificationPayloadDto.builder()
+            .actorId(commentatorId)
+            .actorName(commentatorName)
+            .articleId(articleId)
+            .articleTitle(articleTitle)
+            .objectType("ARTICLE")
+            .build();
 
         NotificationEvent event = NotificationEvent.builder()
-            .eventType("COMMENT_CREATED")
+            .eventType(NotificationType.COMMENT_CREATED)
             .targetUserId(authorId)
             .source(SOURCE)
-            .payload(payload)
+            .payload(notificationPayload)
             .timestamp(LocalDateTime.now())
             .build();
 
         kafkaTemplate.send(TOPIC, event);
+        notificationService.saveNotification(event);
         log.info("Comment notification sent to Kafka for user {}", authorId);
     }
 
@@ -60,22 +63,24 @@ public class NotificationProducerService {
      */
     public void sendLikeNotification(Long articleId, String articleTitle,
         Long authorId, Long likerId, String likerName) {
-        Map<String, Object> payload = new HashMap<>();
-        payload.put("actorId", likerId);
-        payload.put("actorName", likerName);
-        payload.put("articleId", articleId);
-        payload.put("articleTitle", articleTitle);
-        payload.put("objectType", "ARTICLE");
+        NotificationPayloadDto notificationPayload = NotificationPayloadDto.builder()
+            .actorId(likerId)
+            .actorName(likerName)
+            .articleId(articleId)
+            .articleTitle(articleTitle)
+            .objectType("ARTICLE")
+            .build();
 
         NotificationEvent event = NotificationEvent.builder()
-            .eventType("ARTICLE_LIKED")
+            .eventType(NotificationType.ARTICLE_LIKED)
             .targetUserId(authorId)
             .source(SOURCE)
-            .payload(payload)
+            .payload(notificationPayload)
             .timestamp(LocalDateTime.now())
             .build();
 
         kafkaTemplate.send(TOPIC, event);
+        notificationService.saveNotification(event);
         log.info("Like notification sent to Kafka for user {}", authorId);
     }
 }

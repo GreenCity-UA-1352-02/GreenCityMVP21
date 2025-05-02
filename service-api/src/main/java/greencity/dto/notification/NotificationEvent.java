@@ -1,11 +1,11 @@
 package greencity.dto.notification;
 
+import greencity.enums.NotificationType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
-import java.util.Map;
 
 @Data
 @Builder
@@ -15,7 +15,7 @@ public class NotificationEvent {
     /**
      * Type of event (COMMENT_CREATED, ARTICLE_LIKED, etc.).
      */
-    private String eventType;
+    private NotificationType eventType;
 
     /**
      * ID of the user who should receive the notification.
@@ -30,7 +30,7 @@ public class NotificationEvent {
     /**
      * Additional data specific to the event type.
      */
-    private Map<String, Object> payload;
+    private NotificationPayloadDto payload;
 
     /**
      * Timestamp when the event occurred.
