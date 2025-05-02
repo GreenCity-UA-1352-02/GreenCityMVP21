@@ -34,14 +34,18 @@ public class Event {
     private boolean isOpen = true;
 
     @Size(max = 7)
-    @OneToMany(mappedBy = "event")
+    @OneToMany(
+        mappedBy = "event",
+        cascade = CascadeType.ALL,
+        fetch = FetchType.LAZY,
+        orphanRemoval = true)
     private List<EventDateLocation> eventDatesLocations = new ArrayList<>(7);
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User author;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
         name = "event_tags",
         joinColumns = @JoinColumn(name = "event_id"),
@@ -49,12 +53,13 @@ public class Event {
     private List<Tag> tags;
 
     @OneToOne(cascade = CascadeType.ALL, optional = false)
-    @JoinColumn(name = "main_image_id", nullable = false)
+    @JoinColumn(name = "main_image_id")
     private EventImage mainImage;
 
     @OneToMany(
         mappedBy = "event",
         cascade = CascadeType.ALL,
+        fetch = FetchType.LAZY,
         orphanRemoval = true)
     private List<EventImage> images = new ArrayList<>();
 

@@ -38,7 +38,7 @@ public class EventDateLocation {
     @Column
     private String onlineLink;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "event_id", nullable = false)
     private Event event;
 

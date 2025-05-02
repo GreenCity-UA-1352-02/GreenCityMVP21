@@ -198,6 +198,7 @@ public class SecurityConfig {
                     "/habit/{habitId}/friends/profile-pictures")
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.POST,
+                    "/events/create",
                     "/category",
                     "/econews",
                     "/econews/like",
@@ -280,11 +281,13 @@ public class SecurityConfig {
                     "/user/role",
                     "/user/update/role")
                 .hasAnyRole(ADMIN)
+                .requestMatchers("/error").permitAll()
                 .requestMatchers(HttpMethod.DELETE,
                     "/facts/{factId}",
                     "/comments")
                 .hasAnyRole(ADMIN)
                 .anyRequest().hasAnyRole(ADMIN))
+
             .logout(logout -> logout.logoutUrl("/logout")
                 .logoutRequestMatcher(new AntPathRequestMatcher("/management/logout", "GET"))
                 .clearAuthentication(true)
