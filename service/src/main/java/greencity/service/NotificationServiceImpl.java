@@ -10,8 +10,8 @@ import greencity.mapping.NotificationDtoRequestMapper;
 import greencity.mapping.NotificationEventMapper;
 import greencity.repository.NotificationRepo;
 import jakarta.persistence.EntityNotFoundException;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,8 +24,6 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationDtoMapper notificationDtoMapper;
     private final NotificationEventMapper notificationEventMapper;
     private final NotificationDtoRequestMapper notificationDtoRequestMapper;
-
-    private static final Set<String> VALID_SOURCES = Set.of("ALL", "GREENCITY", "PICKUP");
 
     /**
      * Retrieves all notifications from the repository and maps them to notification
@@ -41,33 +39,45 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     /**
-     * Retrieves all notifications from the repository for user and maps them to notification
-     * request.
+     * Retrieves all notifications for a user based on a filter, updates their status if unread,
+     * and schedules them for deletion or removes them if expired.
      *
-     * @param id ID of the user
-     * @return List of all notification events
+     * <p>If the filter is "ALL", all user notifications are returned. Otherwise, only notifications
+     * with a matching source are included.</p>
+     *
+     * <p>Unread notifications are marked as READ and scheduled for deletion after 5 minutes from the current time.
+     * If a notification is already READ and its deletion timestamp has passed, it is permanently removed.</p>
+     *
+     * @param id     ID of the user
+     * @param filter Filter for notification source (e.g., "EMAIL", "SYSTEM", or "ALL")
+     * @return List of filtered and mapped notification DTOs
      */
     @Override
     public List<NotificationDtoRequest> findUserNotifications(Long id, String filter) {
-        List<Notification> notifications;
+        List<NotificationDtoRequest> notifications;
 
         if ("ALL".equalsIgnoreCase(filter)) {
-            notifications = notificationRepo.findNotificationByUserId(id);
+            notifications = notificationRepo.findNotificationByUserId(id).stream()
+                .map(notificationDtoRequestMapper::convert)
+                .toList();
         } else {
             notifications = notificationRepo.findNotificationByUserId(id).stream()
                 .filter(notification -> notification.getSource().equals(filter.toUpperCase()))
+                .map(notificationDtoRequestMapper::convert)
                 .toList();
         }
-
-        notifications.forEach(notification -> {
-            notification.setStatus(NotificationStatus.READ);
-        });
-
-        notificationRepo.saveAll(notifications);
-
-        return notifications.stream()
-            .map(notificationDtoRequestMapper::convert)
-            .toList();
+        for (Notification notification : notificationRepo.findNotificationByUserId(id)) {
+            if (notification.getStatus() == NotificationStatus.UNREAD) {
+                notification.setStatus(NotificationStatus.READ);
+                notification.setTimestampDeletion(LocalDateTime.now().plusMinutes(5));
+                notificationRepo.save(notification);
+            } else {
+                if (LocalDateTime.now().isAfter(notification.getTimestampDeletion())) {
+                    notificationRepo.delete(notification);
+                }
+            }
+        }
+        return notifications;
     }
 
     /**
@@ -113,11 +123,9 @@ public class NotificationServiceImpl implements NotificationService {
                 break;
             }
         }
-
         if (!found) {
             throw new NotificationNotFound("Notification not found for user");
         }
-
         notificationRepo.deleteById(notificationId);
         log.info("Notification deleted successfully");
     }
