@@ -111,10 +111,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void deleteNotification(Long notificationId, Long userId) {
-        log.info("Deleting notification with id: " + notificationId + " and userId: " + userId);
         List<Notification> notifications = notificationRepo.findNotificationByUserId(userId);
-        log.info("Found " + notifications.size() + " notifications");
-        log.info(notifications.toString());
 
         boolean found = false;
         for (Notification notification : notifications) {
@@ -127,6 +124,5 @@ public class NotificationServiceImpl implements NotificationService {
             throw new NotificationNotFound("Notification not found for user");
         }
         notificationRepo.deleteById(notificationId);
-        log.info("Notification deleted successfully");
     }
 }
