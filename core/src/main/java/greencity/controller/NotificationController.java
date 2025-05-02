@@ -64,4 +64,17 @@ public class NotificationController {
         return ResponseEntity.status(HttpStatus.OK)
             .body(notificationService.findUserNotifications(userVO.getId(), filter));
     }
+
+    @Operation(summary = "Delete notification by id.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+    })
+    @DeleteMapping
+    public ResponseEntity<Object> delete(@Parameter(hidden = true) @CurrentUser UserVO userVO,
+                                         @RequestParam Long id) {
+        notificationService.deleteNotification(id, userVO.getId());
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }
