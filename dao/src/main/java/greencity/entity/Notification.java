@@ -37,6 +37,9 @@ public class Notification {
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private NotificationStatus status = NotificationStatus.UNREAD;
+    
+    @Column(name = "timestamp_deletion")
+    private LocalDateTime timestampDeletion;
 
     @PrePersist
     public void prePersist() {
