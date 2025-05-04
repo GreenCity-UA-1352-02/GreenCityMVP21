@@ -1,14 +1,18 @@
 package greencity.service;
 
+import greencity.dto.notification.NotificationDtoRequest;
 import greencity.dto.notification.NotificationEvent;
 import greencity.entity.Notification;
 import greencity.enums.NotificationType;
+import greencity.exception.exceptions.NotificationNotFound;
 import greencity.mapping.NotificationDtoMapper;
+import greencity.mapping.NotificationDtoRequestMapper;
 import greencity.mapping.NotificationEventMapper;
 import greencity.repository.NotificationRepo;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,6 +36,9 @@ public class NotificationServiceImplTest {
 
     @Mock
     private NotificationEventMapper notificationEventMapper;
+
+    @Mock
+    private NotificationDtoRequestMapper notificationDtoRequestMapper;
 
     private NotificationEvent notificationEvent = NotificationEvent.builder()
         .eventType(NotificationType.COMMENT_CREATED)
@@ -83,17 +90,57 @@ public class NotificationServiceImplTest {
         when(notificationRepo.save(mappedEntity)).thenReturn(savedEntity);
         when(mapper.convert(savedEntity)).thenReturn(mappedBackEvent);
 
-        // Act
         NotificationEvent result = notificationService.saveNotification(notificationToSave);
 
         System.out.println(result);
 
-        // Assert
         assertNotNull(result);
         assertEquals(mappedBackEvent, result);
 
         verify(notificationEventMapper).convert(notificationToSave);
         verify(notificationRepo).save(mappedEntity);
         verify(mapper).convert(savedEntity);
+    }
+
+    @Test
+    void testFindUserNotifications_validFilterAndUser_success() {
+        Long userId = 1L;
+        Notification notification = new Notification();
+        notification.setSource("GREENCITY");
+        NotificationDtoRequest dto = new NotificationDtoRequest();
+
+        when(notificationRepo.findNotificationByUserId(userId)).thenReturn(List.of(notification));
+        when(notificationDtoRequestMapper.convert(notification)).thenReturn(dto);
+        when(notificationRepo.save(any())).thenReturn(notification);
+
+        List<NotificationDtoRequest> result = notificationService.findUserNotifications(userId, "ALL");
+
+        assertEquals(1, result.size());
+        assertEquals(dto, result.get(0));
+        verify(notificationRepo, times(2)).findNotificationByUserId(userId);
+        verify(notificationRepo).save(notification);
+    }
+
+    @Test
+    void deleteNotification_validNotification_success() {
+        Long userId = 1L;
+        Long id = 99L;
+
+        Notification notification = new Notification();
+        notification.setId(id);
+        notification.setUserId(userId);
+
+        when(notificationRepo.findNotificationByUserId(userId)).thenReturn(List.of(notification));
+
+        notificationService.deleteNotification(id, userId);
+
+        verify(notificationRepo).deleteById(id);
+    }
+
+    @Test
+    void deleteNotification_invalidId_notFound() {
+        when(notificationRepo.findNotificationByUserId(1L)).thenReturn(List.of());
+
+        assertThrows(NotificationNotFound.class, () -> notificationService.deleteNotification(1L, 1L));
     }
 }
