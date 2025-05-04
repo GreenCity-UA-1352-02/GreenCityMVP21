@@ -15,4 +15,8 @@ public interface EventService {
      * @return saved event
      */
     EventDto save(AddEventDtoRequest addEventDtoRequest, List<MultipartFile> images, String email);
+
+    EventDto update(EventDto eventDto, List<MultipartFile> images, String name);
+
+    void delete(Long id, String name);
 }

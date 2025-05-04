@@ -52,7 +52,7 @@ public class Event {
         inverseJoinColumns = @JoinColumn(name = "tag_id"))
     private List<Tag> tags;
 
-    @OneToOne(cascade = CascadeType.ALL, optional = false)
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "main_image_id")
     private EventImage mainImage;
 
