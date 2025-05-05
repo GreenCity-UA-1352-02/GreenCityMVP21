@@ -415,6 +415,20 @@ public class EcoNewsServiceImpl implements EcoNewsService {
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
         CompletableFuture
             .runAsync(() -> ratingCalculation.ratingCalculation(RatingCalculationEnum.LIKE_COMMENT, user, accessToken));
+
+        Long commentAuthorId = comment.getUser().getId();
+        if (!commentAuthorId.equals(user.getId())) {
+            Long articleId = comment.getEcoNews().getId();
+            String articleTitle = ecoNewsRepo.findById(articleId).map(EcoNews::getTitle).orElse("Unknown");
+
+            notificationProducerService.sendCommentLikeNotification(
+                articleId,
+                articleTitle,
+                "ARTICLE",
+                commentAuthorId,
+                user.getId(),
+                user.getName());
+        }
     }
 
     /**

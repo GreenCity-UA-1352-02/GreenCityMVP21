@@ -39,17 +39,23 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     /**
-     * Retrieves all notifications for a user based on a filter, updates their status if unread,
-     * and schedules them for deletion or removes them if expired.
+     * Retrieves all notifications for a user based on a filter, updates their
+     * status if unread, and schedules them for deletion or removes them if expired.
      *
-     * <p>If the filter is "ALL", all user notifications are returned. Otherwise, only notifications
-     * with a matching source are included.</p>
+     * <p>
+     * If the filter is "ALL", all user notifications are returned. Otherwise, only
+     * notifications with a matching source are included.
+     * </p>
      *
-     * <p>Unread notifications are marked as READ and scheduled for deletion after 5 minutes from the current time.
-     * If a notification is already READ and its deletion timestamp has passed, it is permanently removed.</p>
+     * <p>
+     * Unread notifications are marked as READ and scheduled for deletion after 5
+     * minutes from the current time. If a notification is already READ and its
+     * deletion timestamp has passed, it is permanently removed.
+     * </p>
      *
      * @param id     ID of the user
-     * @param filter Filter for notification source (e.g., "EMAIL", "SYSTEM", or "ALL")
+     * @param filter Filter for notification source (e.g., "EMAIL", "SYSTEM", or
+     *               "ALL")
      * @return List of filtered and mapped notification DTOs
      */
     @Override

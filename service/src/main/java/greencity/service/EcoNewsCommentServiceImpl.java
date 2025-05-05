@@ -75,14 +75,29 @@ public class EcoNewsCommentServiceImpl implements EcoNewsCommentService {
 
         EcoNewsComment savedComment = ecoNewsCommentRepo.save(ecoNewsComment);
 
-        Long authorId = savedComment.getEcoNews().getAuthor().getId();
-        if (!authorId.equals(userVO.getId())) {
-            notificationProducerService.sendCommentNotification(
-                savedComment.getEcoNews().getId(),
-                savedComment.getEcoNews().getTitle(),
-                authorId,
-                userVO.getId(),
-                userVO.getName());
+        if (addEcoNewsCommentDtoRequest.getParentCommentId() == 0) {
+            Long authorId = savedComment.getEcoNews().getAuthor().getId();
+            if (!authorId.equals(userVO.getId())) {
+                notificationProducerService.sendCommentNotification(
+                    savedComment.getEcoNews().getId(),
+                    savedComment.getEcoNews().getTitle(),
+                    authorId,
+                    userVO.getId(),
+                    userVO.getName());
+            }
+        } else {
+            EcoNewsComment parentComment = savedComment.getParentComment();
+            Long parentCommentAuthorId = parentComment.getUser().getId();
+
+            if (!parentCommentAuthorId.equals(userVO.getId())) {
+                notificationProducerService.sendCommentReplyNotification(
+                    savedComment.getEcoNews().getId(),
+                    savedComment.getEcoNews().getTitle(),
+                    "ARTICLE",
+                    parentCommentAuthorId,
+                    userVO.getId(),
+                    userVO.getName());
+            }
         }
 
         return modelMapper.map(savedComment, AddEcoNewsCommentDtoResponse.class);

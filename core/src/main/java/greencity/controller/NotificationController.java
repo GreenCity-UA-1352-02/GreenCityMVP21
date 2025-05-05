@@ -73,7 +73,7 @@ public class NotificationController {
     })
     @DeleteMapping
     public ResponseEntity<Object> delete(@Parameter(hidden = true) @CurrentUser UserVO userVO,
-                                         @RequestParam Long id) {
+        @RequestParam Long id) {
         notificationService.deleteNotification(id, userVO.getId());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
