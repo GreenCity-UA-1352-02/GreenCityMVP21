@@ -147,6 +147,7 @@ public class EventServiceImpl implements EventService {
         dto.setAdditionalImages(additionalImages);
         dto.setDates(dates);
         dto.setTags(addTagUaEnDtos(event.getTags()));
+        dto.setTitleImage(event.getMainImage().getLink());
         dto.setOrganizer(EventAuthorDto.builder()
             .id(event.getAuthor().getId())
             .name(event.getAuthor().getName())
@@ -185,12 +186,17 @@ public class EventServiceImpl implements EventService {
         if (images == null || images.isEmpty()) {
             return;
         }
-        images.forEach(image -> {
+        for (int i = 0; i < images.size(); i++) {
+            MultipartFile image = images.get(i);
             String link = fileService.upload(image);
-            event.getImages().add(
-                eventImageBuild(link, event)
-            );
-        });
+            EventImage eventImage = eventImageBuild(link, event);
+
+            event.getImages().add(eventImage);
+
+            if (i == 0) {
+                event.setMainImage(eventImage);
+            }
+        }
     }
 
     private static EventImage eventImageBuild(String link, Event event) {
