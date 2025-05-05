@@ -36,7 +36,7 @@ public class EventController {
     @PutMapping(value = "/update", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<EventDto> update(
         @RequestPart EventDto eventDto,
-        @RequestPart(required = false) List<MultipartFile> images,
+        @RequestPart(required = false) @EventImageValidation List<MultipartFile> images,
         Principal principal
     ) {
         return ResponseEntity.status(HttpStatus.OK)

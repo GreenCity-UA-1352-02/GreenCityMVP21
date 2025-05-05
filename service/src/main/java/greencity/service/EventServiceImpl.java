@@ -3,6 +3,7 @@ package greencity.service;
 import greencity.client.RestClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.event.*;
+import greencity.dto.tag.TagUaEnDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.Tag;
 import greencity.entity.User;
@@ -10,15 +11,17 @@ import greencity.entity.event.Address;
 import greencity.entity.event.Event;
 import greencity.entity.event.EventDateLocation;
 import greencity.entity.event.EventImage;
+import greencity.entity.localization.TagTranslation;
 import greencity.enums.EventType;
+import greencity.enums.Role;
 import greencity.enums.TagType;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.TagNotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import greencity.repository.EventRepo;
 import greencity.repository.TagsRepo;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -49,8 +52,7 @@ public class EventServiceImpl implements EventService {
         List<Tag> listTag = tags(addEventDtoRequest);
         event.setTags(listTag);
 
-        UserVO user = restClient.findByEmail(email);
-        User author = modelMapper.map(user, User.class);
+        User author = getUser(email);
         event.setAuthor(author);
 
         addEventImages(images, event);
@@ -63,20 +65,48 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public EventDto update(EventDto eventDto, List<MultipartFile> images, String name) {
-        Event event = modelMapper.map(eventDto, Event.class);
+        Event event =
+            eventRepo.findById(eventDto.getId())
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.WRONG_EVENT_ID));
+        User user = getUser(name);
+
+        if (!event.getAuthor().getEmail().equals(name) || !user.getRole().equals(Role.ROLE_ADMIN)) {
+            throw new UserHasNoPermissionToAccessException(ErrorMessage.USER_HAS_NO_PERMISSION);
+        }
+
+        event.setTitle(eventDto.getTitle());
+        event.setDescription(eventDto.getDescription());
+        event.setOpen(eventDto.isOpen());
+        event.setTags(updateTags(eventDto));
+
 
         eventRepo.save(event);
         return buildResponse(event);
     }
 
+    private List<Tag> updateTags(EventDto eventDto) {
+        List<Tag> tags = tagsRepo.findTagsByNamesAndType(
+            eventDto.getTags().stream()
+                .map(TagUaEnDto::getNameEn)
+                .map(String::toLowerCase)
+                .toList(),
+            TagType.EVENT
+        );
+        if (tags.isEmpty()) {
+            throw new TagNotFoundException(ErrorMessage.TAG_NOT_FOUND);
+        }
+        return tags;
+    }
+
     @Override
     @Transactional
     public void delete(Long id, String name) {
-        System.out.println("Event IDs: " + eventRepo.getAllIds());
         Event event =
             eventRepo.findById(id).orElseThrow(() -> new NotFoundException(ErrorMessage.WRONG_EVENT_ID));
 
-        if (!event.getAuthor().getEmail().equals(name)) {
+        User user = getUser(name);
+
+        if (!event.getAuthor().getEmail().equals(name) || !user.getRole().equals(Role.ROLE_ADMIN)) {
             throw new UserHasNoPermissionToAccessException(ErrorMessage.USER_HAS_NO_PERMISSION);
         }
         if (event.getMainImage() != null) {
@@ -92,7 +122,7 @@ public class EventServiceImpl implements EventService {
     private EventDto buildResponse(Event event) {
         List<String> additionalImages = event.getImages().stream()
             .map(EventImage::getLink)
-            .collect(Collectors.toList());
+            .toList();
 
         List<EventDateLocationDto> dates = event.getEventDatesLocations().stream()
             .map(date -> {
@@ -111,17 +141,44 @@ public class EventServiceImpl implements EventService {
                     .onlineLink(date.getOnlineLink())
                     .build();
             })
-            .collect(Collectors.toList());
+            .toList();
 
         EventDto dto = modelMapper.map(event, EventDto.class);
         dto.setAdditionalImages(additionalImages);
         dto.setDates(dates);
+        dto.setTags(addTagUaEnDtos(event.getTags()));
         dto.setOrganizer(EventAuthorDto.builder()
             .id(event.getAuthor().getId())
             .name(event.getAuthor().getName())
             .organizerRating(event.getAuthor().getRating())
             .build());
         return dto;
+    }
+
+    private List<TagUaEnDto> addTagUaEnDtos(List<Tag> tags) {
+        List<TagUaEnDto> tagUaEnDtos = new ArrayList<>();
+        for (Tag tag : tags) {
+            String nameUa = null;
+            String nameEn = null;
+
+            for (TagTranslation translation : tag.getTagTranslations()) {
+                String langCode = translation.getLanguage().getCode();
+                if ("ua".equals(langCode)) {
+                    nameUa = translation.getName();
+                } else if ("en".equals(langCode)) {
+                    nameEn = translation.getName();
+                }
+            }
+
+            tagUaEnDtos.add(
+                TagUaEnDto.builder()
+                    .id(tag.getId())
+                    .nameUa(nameUa)
+                    .nameEn(nameEn)
+                    .build()
+            );
+        }
+        return tagUaEnDtos;
     }
 
     private void addEventImages(List<MultipartFile> images, Event event) {
@@ -146,8 +203,8 @@ public class EventServiceImpl implements EventService {
     private List<Tag> tags(AddEventDtoRequest addEventDtoRequest) {
         List<String> lowerCaseTagNames = addEventDtoRequest.tags().stream()
             .map(String::toLowerCase)
-            .collect(Collectors.toList());
-        List<Tag> tags = tagsRepo.findTagsByNamesAndType(lowerCaseTagNames, TagType.EVENT);
+            .toList();
+        List<Tag> tags = tagsRepo.findAllByTagTranslations(lowerCaseTagNames, TagType.EVENT);
         if (tags.size() != lowerCaseTagNames.size()) {
             throw new TagNotFoundException(ErrorMessage.SOME_TAGS_NOT_FOUND);
         }
@@ -188,5 +245,10 @@ public class EventServiceImpl implements EventService {
         }
 
         return eventDateLocationBuilder.build();
+    }
+
+    private User getUser(String email) {
+        UserVO user = restClient.findByEmail(email);
+        return modelMapper.map(user, User.class);
     }
 }
