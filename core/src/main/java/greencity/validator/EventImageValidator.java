@@ -12,20 +12,11 @@ public class EventImageValidator implements ConstraintValidator<EventImageValida
 
     @Override
     public boolean isValid(List<MultipartFile> multipartFiles, ConstraintValidatorContext constraintValidatorContext) {
-        long maxSizeBytes = 10L * 1024 * 1024;
         if (multipartFiles == null || multipartFiles.isEmpty() || multipartFiles.size() > 5) {
             return false;
         }
 
-        for (MultipartFile multipartFile : multipartFiles) {
-            if (multipartFile == null || multipartFile.getSize() > maxSizeBytes) {
-                return false;
-            }
-            if (!validType.contains(multipartFile.getContentType())) {
-                return false;
-            }
-        }
-
-        return true;
+        return multipartFiles.stream()
+            .allMatch(file -> file != null && validType.contains(file.getContentType()));
     }
 }
