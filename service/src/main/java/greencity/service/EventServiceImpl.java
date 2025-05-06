@@ -13,11 +13,9 @@ import greencity.entity.event.EventDateLocation;
 import greencity.entity.event.EventImage;
 import greencity.entity.localization.TagTranslation;
 import greencity.enums.EventType;
-import greencity.enums.Role;
 import greencity.enums.TagType;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.TagNotFoundException;
-import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import greencity.repository.EventRepo;
 import greencity.repository.TagsRepo;
 import java.util.ArrayList;
@@ -64,15 +62,9 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public EventDto update(EventDto eventDto, List<MultipartFile> images, String name) {
-        Event event =
-            eventRepo.findById(eventDto.getId())
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.WRONG_EVENT_ID));
-        User user = getUser(name);
-
-        if (!event.getAuthor().getEmail().equals(name) || !user.getRole().equals(Role.ROLE_ADMIN)) {
-            throw new UserHasNoPermissionToAccessException(ErrorMessage.USER_HAS_NO_PERMISSION);
-        }
+    public EventDto update(EventDto eventDto, List<MultipartFile> images) {
+        Event event = eventRepo.findById(eventDto.getId())
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.WRONG_EVENT_ID));
 
         event.setTitle(eventDto.getTitle());
         event.setDescription(eventDto.getDescription());
@@ -100,15 +92,9 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public void delete(Long id, String name) {
-        Event event =
-            eventRepo.findById(id).orElseThrow(() -> new NotFoundException(ErrorMessage.WRONG_EVENT_ID));
+    public void delete(Long id) {
+        Event event = eventRepo.findById(id).orElseThrow(() -> new NotFoundException(ErrorMessage.WRONG_EVENT_ID));
 
-        User user = getUser(name);
-
-        if (!event.getAuthor().getEmail().equals(name) || !user.getRole().equals(Role.ROLE_ADMIN)) {
-            throw new UserHasNoPermissionToAccessException(ErrorMessage.USER_HAS_NO_PERMISSION);
-        }
         if (event.getMainImage() != null) {
             fileService.delete(event.getMainImage().getLink());
         }

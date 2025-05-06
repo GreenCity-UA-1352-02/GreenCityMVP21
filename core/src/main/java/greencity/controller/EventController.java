@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,22 +34,20 @@ public class EventController {
             .body(eventService.save(addEventDtoRequest, images, principal.getName()));
     }
 
+    @PreAuthorize("hasRole('ADMIN') || @eventRepo.existsByIdAndAuthor_Email(#eventDto.id, principal.username)")
     @PutMapping(value = "/update", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<EventDto> update(
         @RequestPart EventDto eventDto,
-        @RequestPart(required = false) @EventImageValidation List<MultipartFile> images,
-        Principal principal
+        @RequestPart(required = false) @EventImageValidation List<MultipartFile> images
     ) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(eventService.update(eventDto, images, principal.getName()));
+            .body(eventService.update(eventDto, images));
     }
 
+    @PreAuthorize("hasRole('ADMIN') || @eventRepo.existsByIdAndAuthor_Email(#id, principal.username)")
     @DeleteMapping(value = "/delete/{eventId}")
-    public ResponseEntity<Object> deleteEvent(
-        @PathVariable("eventId") Long id,
-        Principal principal
-    ) {
-        eventService.delete(id, principal.getName());
+    public ResponseEntity<Object> deleteEvent(@PathVariable("eventId") Long id) {
+        eventService.delete(id);
         return ResponseEntity.ok().build();
     }
 }

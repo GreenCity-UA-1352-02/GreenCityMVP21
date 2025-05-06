@@ -16,7 +16,20 @@ public interface EventService {
      */
     EventDto save(AddEventDtoRequest addEventDtoRequest, List<MultipartFile> images, String email);
 
-    EventDto update(EventDto eventDto, List<MultipartFile> images, String name);
 
-    void delete(Long id, String name);
+    /**
+     * Updates an existing Event.
+     *
+     * @param eventDto the {@link EventDto} object containing updated event details.
+     * @param images a {@link List} of {@link MultipartFile} objects representing updated images for the event.
+     * @return the updated {@link EventDto}.
+     */
+    EventDto update(EventDto eventDto, List<MultipartFile> images);
+
+    /**
+     * Deletes an Event by its unique identifier.
+     *
+     * @param id the unique identifier of the entity to be deleted
+     */
+    void delete(Long id);
 }
