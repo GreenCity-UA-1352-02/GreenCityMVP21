@@ -7,7 +7,7 @@ import java.util.List;
 import lombok.Builder;
 
 @Builder
-public record AddEventDtoRequest(
+public record AddEventRequest(
     @Size(max = 70, message = "Title must be no longer than 70 characters")
     String title,
     @Size(min = 20, max = 63206, message = "Description must be between 20 and 63,206 characters")
