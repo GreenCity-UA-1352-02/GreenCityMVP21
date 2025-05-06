@@ -1,7 +1,7 @@
 package greencity.controller;
 
 import greencity.annotations.EventImageValidation;
-import greencity.dto.event.AddEventDtoRequest;
+import greencity.dto.event.AddEventRequest;
 import greencity.dto.event.EventDto;
 import greencity.service.EventService;
 import java.security.Principal;
@@ -26,12 +26,12 @@ public class EventController {
 
     @PostMapping(value = "/create", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<EventDto> create(
-        @RequestPart @Validated AddEventDtoRequest addEventDtoRequest,
-        @RequestPart(required = false) @EventImageValidation List<MultipartFile> images,
+        @RequestPart @Validated AddEventRequest addEventRequest,
+        @RequestPart @EventImageValidation List<MultipartFile> images,
         Principal principal
     ) {
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(eventService.save(addEventDtoRequest, images, principal.getName()));
+            .body(eventService.save(addEventRequest, images, principal.getName()));
     }
 
     @PreAuthorize("hasRole('ADMIN') || @eventRepo.existsByIdAndAuthor_Email(#eventDto.id, principal.username)")
