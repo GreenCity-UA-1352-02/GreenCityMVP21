@@ -39,15 +39,15 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public EventDto save(AddEventDtoRequest addEventDtoRequest, List<MultipartFile> images, String email) {
-        Event event = modelMapper.map(addEventDtoRequest, Event.class);
+    public EventDto save(AddEventRequest addEventRequest, List<MultipartFile> images, String email) {
+        Event event = modelMapper.map(addEventRequest, Event.class);
 
-        List<EventDateLocation> dates = addEventDtoRequest.datesLocations().stream()
+        List<EventDateLocation> dates = addEventRequest.datesLocations().stream()
             .map(dateLocation -> mapDateLocationDto(dateLocation, event))
             .toList();
         event.setEventDatesLocations(dates);
 
-        List<Tag> listTag = tags(addEventDtoRequest);
+        List<Tag> listTag = tags(addEventRequest);
         event.setTags(listTag);
 
         User author = getUser(email);
@@ -93,8 +93,8 @@ public class EventServiceImpl implements EventService {
         return eventDateLocationBuilder.build();
     }
 
-    private List<Tag> tags(AddEventDtoRequest addEventDtoRequest) {
-        List<String> lowerCaseTagNames = addEventDtoRequest.tags().stream()
+    private List<Tag> tags(AddEventRequest addEventRequest) {
+        List<String> lowerCaseTagNames = addEventRequest.tags().stream()
             .map(String::toLowerCase)
             .toList();
         List<Tag> tags = tagsRepo.findAllByTagTranslations(lowerCaseTagNames, TagType.EVENT);
