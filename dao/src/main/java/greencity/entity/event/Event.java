@@ -34,11 +34,7 @@ public class Event {
     private boolean isOpen = true;
 
     @Size(max = 7)
-    @OneToMany(
-        mappedBy = "event",
-        cascade = CascadeType.ALL,
-        fetch = FetchType.LAZY,
-        orphanRemoval = true)
+    @OneToMany(mappedBy = "event", fetch = FetchType.LAZY)
     private List<EventDateLocation> eventDatesLocations = new ArrayList<>(7);
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -56,11 +52,7 @@ public class Event {
     @JoinColumn(name = "main_image_id")
     private EventImage mainImage;
 
-    @OneToMany(
-        mappedBy = "event",
-        cascade = CascadeType.ALL,
-        fetch = FetchType.LAZY,
-        orphanRemoval = true)
+    @OneToMany(mappedBy = "event", fetch = FetchType.LAZY)
     private List<EventImage> images = new ArrayList<>();
 
     @Override
