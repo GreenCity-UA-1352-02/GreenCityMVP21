@@ -60,49 +60,80 @@ public class EventServiceImpl implements EventService {
         return buildResponse(event);
     }
 
-    @Override
-    @Transactional
-    public EventDto update(EventDto eventDto, List<MultipartFile> images) {
-        Event event = eventRepo.findById(eventDto.getId())
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.WRONG_EVENT_ID));
+    private EventDateLocation mapDateLocationDto(EventDateLocationDto dateLocation, Event event) {
+        EventDateLocation.EventDateLocationBuilder eventDateLocationBuilder = EventDateLocation.builder()
+            .event(event)
+            .startTime(dateLocation.startDate())
+            .endTime(dateLocation.finishDate());
 
-        event.setTitle(eventDto.getTitle());
-        event.setDescription(eventDto.getDescription());
-        event.setOpen(eventDto.isOpen());
-        event.setTags(updateTags(eventDto));
+        boolean isOnline = dateLocation.onlineLink() != null;
+        boolean isOffline = dateLocation.coordinates() != null;
 
+        if (isOnline && isOffline) {
+            eventDateLocationBuilder
+                .address(Address.builder()
+                    .latitude(dateLocation.coordinates().latitude())
+                    .longitude(dateLocation.coordinates().longitude())
+                    .build())
+                .onlineLink(dateLocation.onlineLink())
+                .eventType(EventType.ONLINE_OFFLINE);
+        } else if (isOffline) {
+            eventDateLocationBuilder
+                .address(Address.builder()
+                    .latitude(dateLocation.coordinates().latitude())
+                    .longitude(dateLocation.coordinates().longitude())
+                    .build())
+                .eventType(EventType.OFFLINE);
+        } else if (isOnline) {
+            eventDateLocationBuilder
+                .onlineLink(dateLocation.onlineLink())
+                .eventType(EventType.ONLINE);
+        }
 
-        eventRepo.save(event);
-        return buildResponse(event);
+        return eventDateLocationBuilder.build();
     }
 
-    private List<Tag> updateTags(EventDto eventDto) {
-        List<Tag> tags = tagsRepo.findTagsByNamesAndType(
-            eventDto.getTags().stream()
-                .map(TagUaEnDto::getNameEn)
-                .map(String::toLowerCase)
-                .toList(),
-            TagType.EVENT
-        );
+    private List<Tag> tags(AddEventDtoRequest addEventDtoRequest) {
+        List<String> lowerCaseTagNames = addEventDtoRequest.tags().stream()
+            .map(String::toLowerCase)
+            .toList();
+        List<Tag> tags = tagsRepo.findAllByTagTranslations(lowerCaseTagNames, TagType.EVENT);
+        if (tags.size() != lowerCaseTagNames.size()) {
+            throw new TagNotFoundException(ErrorMessage.SOME_TAGS_NOT_FOUND);
+        }
         if (tags.isEmpty()) {
-            throw new TagNotFoundException(ErrorMessage.TAG_NOT_FOUND);
+            throw new TagNotFoundException(ErrorMessage.TAGS_NOT_FOUND);
         }
         return tags;
     }
 
-    @Override
-    @Transactional
-    public void delete(Long id) {
-        Event event = eventRepo.findById(id).orElseThrow(() -> new NotFoundException(ErrorMessage.WRONG_EVENT_ID));
+    private User getUser(String email) {
+        UserVO user = restClient.findByEmail(email);
+        return modelMapper.map(user, User.class);
+    }
 
-        if (event.getMainImage() != null) {
-            fileService.delete(event.getMainImage().getLink());
+    private void addEventImages(List<MultipartFile> images, Event event) {
+        if (images == null || images.isEmpty()) {
+            return;
         }
-        if (event.getImages() != null && !event.getImages().isEmpty()) {
-            event.getImages()
-                .forEach(image -> fileService.delete(image.getLink()));
+        for (int i = 0; i < images.size(); i++) {
+            MultipartFile image = images.get(i);
+            String link = fileService.upload(image);
+            EventImage eventImage = eventImageBuild(link, event);
+
+            event.getImages().add(eventImage);
+
+            if (i == 0) {
+                event.setMainImage(eventImage);
+            }
         }
-        eventRepo.delete(event);
+    }
+
+    private static EventImage eventImageBuild(String link, Event event) {
+        return EventImage.builder()
+            .link(link)
+            .event(event)
+            .build();
     }
 
     private EventDto buildResponse(Event event) {
@@ -168,79 +199,46 @@ public class EventServiceImpl implements EventService {
         return tagUaEnDtos;
     }
 
-    private void addEventImages(List<MultipartFile> images, Event event) {
-        if (images == null || images.isEmpty()) {
-            return;
-        }
-        for (int i = 0; i < images.size(); i++) {
-            MultipartFile image = images.get(i);
-            String link = fileService.upload(image);
-            EventImage eventImage = eventImageBuild(link, event);
+    @Override
+    @Transactional
+    public EventDto update(EventDto eventDto, List<MultipartFile> images) {
+        Event event = eventRepo.findById(eventDto.getId())
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.WRONG_EVENT_ID));
 
-            event.getImages().add(eventImage);
+        event.setTitle(eventDto.getTitle());
+        event.setDescription(eventDto.getDescription());
+        event.setOpen(eventDto.isOpen());
+        event.setTags(updateTags(eventDto.getTags()));
 
-            if (i == 0) {
-                event.setMainImage(eventImage);
-            }
-        }
+        return buildResponse(eventRepo.save(event));
     }
 
-    private static EventImage eventImageBuild(String link, Event event) {
-        return EventImage.builder()
-            .link(link)
-            .event(event)
-            .build();
-    }
-
-    private List<Tag> tags(AddEventDtoRequest addEventDtoRequest) {
-        List<String> lowerCaseTagNames = addEventDtoRequest.tags().stream()
-            .map(String::toLowerCase)
-            .toList();
-        List<Tag> tags = tagsRepo.findAllByTagTranslations(lowerCaseTagNames, TagType.EVENT);
-        if (tags.size() != lowerCaseTagNames.size()) {
-            throw new TagNotFoundException(ErrorMessage.SOME_TAGS_NOT_FOUND);
-        }
+    private List<Tag> updateTags(List<TagUaEnDto> tagDtos) {
+        List<Tag> tags = tagsRepo.findTagsByNamesAndType(
+            tagDtos.stream()
+                .map(TagUaEnDto::getNameEn)
+                .map(String::toLowerCase)
+                .toList(),
+            TagType.EVENT
+        );
         if (tags.isEmpty()) {
-            throw new TagNotFoundException(ErrorMessage.TAGS_NOT_FOUND);
+            throw new TagNotFoundException(ErrorMessage.TAG_NOT_FOUND);
         }
         return tags;
     }
 
-    private EventDateLocation mapDateLocationDto(EventDateLocationDto dateLocation, Event event) {
-        EventDateLocation.EventDateLocationBuilder eventDateLocationBuilder = EventDateLocation.builder()
-            .event(event)
-            .startTime(dateLocation.startDate())
-            .endTime(dateLocation.finishDate());
+    @Override
+    @Transactional
+    public void delete(Long id) {
+        Event event = eventRepo.findById(id).orElseThrow(() -> new NotFoundException(ErrorMessage.WRONG_EVENT_ID));
 
-        boolean isOnline = dateLocation.onlineLink() != null;
-        boolean isOffline = dateLocation.coordinates() != null;
-
-        if (isOnline && isOffline) {
-            eventDateLocationBuilder
-                .address(Address.builder()
-                    .latitude(dateLocation.coordinates().latitude())
-                    .longitude(dateLocation.coordinates().longitude())
-                    .build())
-                .onlineLink(dateLocation.onlineLink())
-                .eventType(EventType.ONLINE_OFFLINE);
-        } else if (isOffline) {
-            eventDateLocationBuilder
-                .address(Address.builder()
-                    .latitude(dateLocation.coordinates().latitude())
-                    .longitude(dateLocation.coordinates().longitude())
-                    .build())
-                .eventType(EventType.OFFLINE);
-        } else if (isOnline) {
-            eventDateLocationBuilder
-                .onlineLink(dateLocation.onlineLink())
-                .eventType(EventType.ONLINE);
+        if (event.getMainImage() != null) {
+            fileService.delete(event.getMainImage().getLink());
         }
-
-        return eventDateLocationBuilder.build();
-    }
-
-    private User getUser(String email) {
-        UserVO user = restClient.findByEmail(email);
-        return modelMapper.map(user, User.class);
+        if (event.getImages() != null && !event.getImages().isEmpty()) {
+            event.getImages()
+                .forEach(image -> fileService.delete(image.getLink()));
+        }
+        eventRepo.delete(event);
     }
 }
