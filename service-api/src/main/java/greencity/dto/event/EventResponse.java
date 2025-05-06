@@ -13,7 +13,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode
-public class EventDto {
+public class EventResponse {
     private Long id;
     @Size(max = 5)
     private List<String> additionalImages;

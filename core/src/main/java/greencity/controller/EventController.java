@@ -2,7 +2,8 @@ package greencity.controller;
 
 import greencity.annotations.EventImageValidation;
 import greencity.dto.event.AddEventRequest;
-import greencity.dto.event.EventDto;
+import greencity.dto.event.EventResponse;
+import greencity.dto.event.UpdateEventRequest;
 import greencity.service.EventService;
 import java.security.Principal;
 import java.util.List;
@@ -25,7 +26,7 @@ public class EventController {
     private final EventService eventService;
 
     @PostMapping(value = "/create", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<EventDto> create(
+    public ResponseEntity<EventResponse> create(
         @RequestPart @Validated AddEventRequest addEventRequest,
         @RequestPart @EventImageValidation List<MultipartFile> images,
         Principal principal
@@ -34,14 +35,14 @@ public class EventController {
             .body(eventService.save(addEventRequest, images, principal.getName()));
     }
 
-    @PreAuthorize("hasRole('ADMIN') || @eventRepo.existsByIdAndAuthor_Email(#eventDto.id, principal.username)")
+    @PreAuthorize("hasRole('ADMIN') || @eventRepo.existsByIdAndAuthor_Email(#updateEventRequest.id, principal.username)")
     @PutMapping(value = "/update", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<EventDto> update(
-        @RequestPart EventDto eventDto,
+    public ResponseEntity<EventResponse> update(
+        @RequestPart UpdateEventRequest updateEventRequest,
         @RequestPart(required = false) @EventImageValidation List<MultipartFile> images
     ) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(eventService.update(eventDto, images));
+            .body(eventService.update(updateEventRequest, images));
     }
 
     @PreAuthorize("hasRole('ADMIN') || @eventRepo.existsByIdAndAuthor_Email(#id, principal.username)")
