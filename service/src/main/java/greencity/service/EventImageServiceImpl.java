@@ -8,7 +8,7 @@ import greencity.exception.exceptions.NotFoundException;
 import greencity.repository.EventImageRepo;
 import greencity.repository.EventRepo;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -60,13 +60,30 @@ public class EventImageServiceImpl implements EventImageService {
         Event event = eventRepo.findById(eventId)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.WRONG_EVENT_ID));
 
-        Optional.ofNullable(event.getImages()).ifPresent(images -> {
-            images.forEach(image -> {
-                fileService.delete(image.getLink());
-                eventImageRepo.delete(image);
-            });
-            images.clear();
-            eventRepo.save(event);
-        });
+        event.getImages().forEach(this::deleteImage);
+        event.getImages().clear();
+        eventRepo.save(event);
+    }
+
+    private void deleteImage(EventImage image) {
+        fileService.delete(image.getLink());
+        eventImageRepo.delete(image);
+    }
+
+    @Override
+    public void deleteImagesByEventIdExceptMain(Long eventId) {
+        Event event = eventRepo.findById(eventId)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.WRONG_EVENT_ID));
+
+        Long mainImageId = event.getMainImage().getId();
+        event.getImages().stream()
+            .filter(image -> isNotMainImage(image, mainImageId))
+            .forEach(this::deleteImage);
+        event.getImages().removeIf(image -> isNotMainImage(image, mainImageId));
+        eventRepo.save(event);
+    }
+
+    private boolean isNotMainImage(EventImage image, Long mainImageId) {
+        return !Objects.equals(image.getId(), mainImageId);
     }
 }

@@ -29,4 +29,11 @@ public interface EventImageService {
      * @param eventId  the ID of the event
      */
     void deleteImagesByEventId(Long eventId);
+
+    /**
+     * Deletes all images associated with a specific event, except the main image.
+     *
+     * @param eventId the ID of the event whose associated images are to be deleted, excluding the main image
+     */
+    void deleteImagesByEventIdExceptMain(Long eventId);
 }
