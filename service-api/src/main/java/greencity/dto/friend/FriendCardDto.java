@@ -17,7 +17,7 @@ public class FriendCardDto {
     private Boolean isFriend; // Должен быть Boolean, а не boolean
 
     public FriendCardDto(Long id, String name, String city, String profilePicture, Double rating, Long friendCount,
-                         Boolean isFriend) {
+        Boolean isFriend) {
         this.id = id;
         this.name = name;
         this.city = city;

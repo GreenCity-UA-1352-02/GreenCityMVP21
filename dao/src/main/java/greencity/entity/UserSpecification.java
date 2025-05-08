@@ -1,11 +1,9 @@
 package greencity.entity;
 
-
 import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;
 import java.util.ArrayList;
 import java.util.List;
-
 
 public class UserSpecification implements Specification<User> {
     private final Long currentUserId;
@@ -16,7 +14,7 @@ public class UserSpecification implements Specification<User> {
     private final Long friendId;
 
     public UserSpecification(Long currentUserId, String searchTerm, Boolean filterByCity, Boolean filterByMutualFriends,
-                             String city, Long friendId) {
+        String city, Long friendId) {
         this.currentUserId = currentUserId;
         this.searchTerm = searchTerm;
         this.filterByCity = filterByCity;
@@ -66,8 +64,7 @@ public class UserSpecification implements Specification<User> {
             // Главный предикат: root.id входит либо в друзей, либо в друзей друзей
             predicates.add(cb.or(
                 root.get("id").in(myFriendsSubquery),
-                root.get("id").in(friendsOfFriendsSubquery)
-            ));
+                root.get("id").in(friendsOfFriendsSubquery)));
         }
 
         // Фильтрация по FriendId (если нужно)

@@ -69,15 +69,15 @@ public class FriendController {
      * {@code friendId} to the currently authenticated user.
      *
      * <p>
-     * This method allows the recipient of a friend request (authenticated user)
-     * to confirm it. If the request is not found, has already been confirmed,
-     * or cannot be processed, a {@link RuntimeException} will be thrown.
+     * This method allows the recipient of a friend request (authenticated user) to
+     * confirm it. If the request is not found, has already been confirmed, or
+     * cannot be processed, a {@link RuntimeException} will be thrown.
      * </p>
      *
      * @param friendId the ID of the user who sent the friend request.
      * @return a {@link ResponseEntity} with status {@link HttpStatus#OK} if the
-     *         request is successfully confirmed, or {@link HttpStatus#NOT_FOUND}
-     *         if the request cannot be found or has already been confirmed.
+     *         request is successfully confirmed, or {@link HttpStatus#NOT_FOUND} if
+     *         the request cannot be found or has already been confirmed.
      * @author [Dmytro Kravchuk].
      */
     @Operation(summary = "Confirm a friend request from another user.")
@@ -99,8 +99,8 @@ public class FriendController {
      * Метод для блокировки пользователя.
      *
      * @param toBlockId ID пользователя, которого нужно заблокировать.
-     * @return ResponseEntity со статусом 200 (OK) при успешной блокировке,
-     *         или 400 (BAD_REQUEST) в случае ошибки.
+     * @return ResponseEntity со статусом 200 (OK) при успешной блокировке, или 400
+     *         (BAD_REQUEST) в случае ошибки.
      */
     @Operation(summary = "Block a user.")
     @ApiResponses(value = {
@@ -121,18 +121,22 @@ public class FriendController {
     /**
      * Removes a friend from the current user's friend list.
      *
-     * <p>This endpoint allows the currently authenticated user to remove a friend
-     * from their friend list. The method ensures that a valid friendship exists
-     * and that the current user is part of it. If successful, the friendship is removed
-     * in both directions.</p>
+     * <p>
+     * This endpoint allows the currently authenticated user to remove a friend from
+     * their friend list. The method ensures that a valid friendship exists and that
+     * the current user is part of it. If successful, the friendship is removed in
+     * both directions.
+     * </p>
      *
      * @param friendId {@link Long} - ID of the friend to be removed.
      * @return {@link ResponseEntity} with:
-     *     <ul>
+     *         <ul>
      *         <li>204 (NO_CONTENT) if the friendship is successfully removed.</li>
-     *         <li>404 (NOT_FOUND) if the friendship does not exist or is not valid.</li>
-     *     </ul>
-     * @throws RuntimeException if the friendship does not exist or another error occurs during the removal.
+     *         <li>404 (NOT_FOUND) if the friendship does not exist or is not
+     *         valid.</li>
+     *         </ul>
+     * @throws RuntimeException if the friendship does not exist or another error
+     *                          occurs during the removal.
      *
      * @author Dmytro Kravchuk
      */
@@ -154,14 +158,20 @@ public class FriendController {
     /**
      * Method for searching potential new friends for a user.
      *
-     * @param userId                {@link Long} - ID of the user performing the search.
-     * @param searchTerm            {@link String} - optional text query (e.g. name or email) to search for specific
-     *                                            users.
-     * @param filterByCity          {@link Boolean} - optional flag to filter users by city.
-     * @param filterByMutualFriends {@link Boolean} - optional flag to filter users based on mutual friends.
-     * @param city                  {@link String} - optional city name for city-based filtering.
-     * @param friendId              {@link Long} - optional ID of a friend, used to filter by friends-of-friends.
-     * @param pageable              {@link Pageable} - pagination information (page, size, sort).
+     * @param userId                {@link Long} - ID of the user performing the
+     *                              search.
+     * @param searchTerm            {@link String} - optional text query (e.g. name
+     *                              or email) to search for specific users.
+     * @param filterByCity          {@link Boolean} - optional flag to filter users
+     *                              by city.
+     * @param filterByMutualFriends {@link Boolean} - optional flag to filter users
+     *                              based on mutual friends.
+     * @param city                  {@link String} - optional city name for
+     *                              city-based filtering.
+     * @param friendId              {@link Long} - optional ID of a friend, used to
+     *                              filter by friends-of-friends.
+     * @param pageable              {@link Pageable} - pagination information (page,
+     *                              size, sort).
      * @return a paginated list of users matching the search and filter criteria.
      *
      * @author [Dmytro Kravchuk].
@@ -189,19 +199,24 @@ public class FriendController {
     /**
      * Method for declining a friend request sent by another user.
      *
-     * <p>This endpoint is used by the currently authenticated user to reject a pending friend request.
-     * The method verifies that the request exists and has not already been accepted or declined.
-     * If successful, the request is removed from the system or marked as declined.</p>
+     * <p>
+     * This endpoint is used by the currently authenticated user to reject a pending
+     * friend request. The method verifies that the request exists and has not
+     * already been accepted or declined. If successful, the request is removed from
+     * the system or marked as declined.
+     * </p>
      *
      * @param friendId {@link Long} - ID of the user who sent the friend request.
      * @return {@link ResponseEntity} with:
-     *     <ul>
+     *         <ul>
      *         <li>200 (OK) if the friend request was successfully declined.</li>
      *         <li>400 (BAD_REQUEST) if the provided friend ID is invalid.</li>
-     *         <li>404 (NOT_FOUND) if the friend request does not exist or has already been handled.</li>
-     *     </ul>
+     *         <li>404 (NOT_FOUND) if the friend request does not exist or has
+     *         already been handled.</li>
+     *         </ul>
      * @throws IllegalArgumentException if the {@code friendId} is null or invalid.
-     * @throws RuntimeException if the friend request does not exist or another error occurs during the operation.
+     * @throws RuntimeException         if the friend request does not exist or
+     *                                  another error occurs during the operation.
      *
      * @author Dmytro Kravchuk
      */
@@ -226,20 +241,27 @@ public class FriendController {
     /**
      * Method for sending a friend request to another user.
      *
-     * <p>This endpoint allows the currently authenticated user to send a friend request to another user.
-     * The method verifies that the user is not trying to add themselves, that the user is not already friends,
-     * and that no pending request exists. If successful, a friend request is created.</p>
+     * <p>
+     * This endpoint allows the currently authenticated user to send a friend
+     * request to another user. The method verifies that the user is not trying to
+     * add themselves, that the user is not already friends, and that no pending
+     * request exists. If successful, a friend request is created.
+     * </p>
      *
-     * @param friendId {@link Long} - ID of the user to whom the friend request is being sent.
+     * @param friendId {@link Long} - ID of the user to whom the friend request is
+     *                 being sent.
      * @return {@link ResponseEntity} with:
-     *     <ul>
+     *         <ul>
      *         <li>201 (CREATED) if the friend request was successfully sent.</li>
-     *         <li>400 (BAD_REQUEST) if the provided friend ID is invalid or if a friend request already exists.</li>
-     *         <li>500 (INTERNAL_SERVER_ERROR) if an unexpected error occurs during the operation.</li>
-     *     </ul>
-     * @throws IllegalArgumentException if the {@code friendId} is invalid or if the current user
-     *                                  tries to add themselves.
-     * @throws RuntimeException if any other error occurs during the creation of the friend request.
+     *         <li>400 (BAD_REQUEST) if the provided friend ID is invalid or if a
+     *         friend request already exists.</li>
+     *         <li>500 (INTERNAL_SERVER_ERROR) if an unexpected error occurs during
+     *         the operation.</li>
+     *         </ul>
+     * @throws IllegalArgumentException if the {@code friendId} is invalid or if the
+     *                                  current user tries to add themselves.
+     * @throws RuntimeException         if any other error occurs during the
+     *                                  creation of the friend request.
      *
      * @author Dmytro Kravchuk
      */
@@ -267,10 +289,10 @@ public class FriendController {
      *
      * @param friendId the ID of the user to whom the friend request was sent.
      * @return {@link ResponseEntity} with:
-     *     <ul>
+     *         <ul>
      *         <li>204 (NO_CONTENT) if the request was successfully canceled.</li>
      *         <li>404 (NOT_FOUND) if no such friend request exists.</li>
-     *     </ul>
+     *         </ul>
      */
     @Operation(summary = "Cancel a previously sent friend request.")
     @ApiResponses(value = {

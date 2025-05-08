@@ -628,9 +628,10 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Exception handler for {@link PropertyReferenceException}.
-     * This exception is thrown when the requested sort field does not exist in the entity,
-     * typically due to an invalid sort parameter in the request.
+     * Exception handler for {@link PropertyReferenceException}. This exception is
+     * thrown when the requested sort field does not exist in the entity, typically
+     * due to an invalid sort parameter in the request.
+     *
      * @param ex the thrown {@link PropertyReferenceException}.
      * @return a {@link ResponseEntity} with HTTP status 400 and an error message
      *         indicating the invalid sorting field.

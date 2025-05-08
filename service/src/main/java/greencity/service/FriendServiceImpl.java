@@ -46,6 +46,8 @@ public class FriendServiceImpl implements FriendService {
      * @return a list of {@link FriendDto} objects representing the user's friends.
      * @throws UserNotFoundException if the user with the specified {@code userId}
      *                               does not exist.
+     *
+     * @author Dmytro Kravchuk
      */
     @Override
     public List<FriendDto> getFriends(Long userId) {
@@ -87,22 +89,31 @@ public class FriendServiceImpl implements FriendService {
      * Confirms a friend request from the specified requester.
      *
      * <p>
-     * This method is used by the currently authenticated user to confirm a friend request
-     * that was previously sent by another user (the requester). It performs the following actions:
+     * This method is used by the currently authenticated user to confirm a friend
+     * request that was previously sent by another user (the requester). It performs
+     * the following actions:
      * </p>
      * <ul>
-     *   <li>Verifies that the {@code requesterId} is not null.</li>
-     *   <li>Retrieves the currently authenticated user from the security context.</li>
-     *   <li>Finds the friend request where the requester is the sender and the current user is the recipient.</li>
-     *   <li>Checks that the friend request exists and is in the {@code REQUESTED} status.</li>
-     *   <li>Updates the friend request status to {@code FRIEND} to confirm the friendship.</li>
-     *   <li>Creates or updates the reverse friendship entry from the current user to the requester.</li>
+     * <li>Verifies that the {@code requesterId} is not null.</li>
+     * <li>Retrieves the currently authenticated user from the security
+     * context.</li>
+     * <li>Finds the friend request where the requester is the sender and the
+     * current user is the recipient.</li>
+     * <li>Checks that the friend request exists and is in the {@code REQUESTED}
+     * status.</li>
+     * <li>Updates the friend request status to {@code FRIEND} to confirm the
+     * friendship.</li>
+     * <li>Creates or updates the reverse friendship entry from the current user to
+     * the requester.</li>
      * </ul>
      *
      * @param friendId the ID of the user who sent the friend request.
      * @throws IllegalArgumentException if {@code requesterId} is null.
-     * @throws RuntimeException if the current user is not found, or if the friend request
-     *                          is not found or already confirmed.
+     * @throws RuntimeException         if the current user is not found, or if the
+     *                                  friend request is not found or already
+     *                                  confirmed.
+     *
+     * @author Dmytro Kravchuk
      */
     @Override
     @Transactional
@@ -135,6 +146,19 @@ public class FriendServiceImpl implements FriendService {
         friendRepo.save(reverse);
     }
 
+    /**
+     * Searches for potential new friends based on the given search request and pagination settings.
+     * This method applies filters such as search term, city, and mutual friends depending on the provided
+     * {@link FriendSearchRequest}. It constructs a {@code UserSpecification} to query users from the database
+     * and maps the results to {@link FriendCardDto} objects containing user summary data.
+     * If the filter for city is not explicitly set but a city is provided, the filter is disabled by default.
+     * The mutual friends filter is also disabled by default if not specified.
+     * @param request  the search request containing filtering criteria like userId, city, searchTerm, etc.
+     * @param pageable the pagination information (page number, size, sorting)
+     * @return a paginated list of {@code FriendCardDto} with user information and friend status
+     *
+     * @author Dmytro Kravchuk
+     */
     @Override
     public Page<FriendCardDto> searchNewFriends(FriendSearchRequest request, Pageable pageable) {
         if (request.getFilterByCity() == null && request.getCity() != null) {
@@ -150,8 +174,7 @@ public class FriendServiceImpl implements FriendService {
             request.getFilterByCity(),
             request.getFilterByMutualFriends(),
             request.getCity(),
-            request.getFriendId()
-        );
+            request.getFriendId());
 
         Page<User> users = userRepo.findAll(spec, pageable);
 
@@ -167,8 +190,7 @@ public class FriendServiceImpl implements FriendService {
                     user.getProfilePicturePath(),
                     user.getRating(),
                     friendCount,
-                    isFriend
-                );
+                    isFriend);
             })
             .collect(Collectors.toList());
 
@@ -179,21 +201,28 @@ public class FriendServiceImpl implements FriendService {
      * Declines a friend request from the specified user.
      *
      * <p>
-     * This method allows the currently authenticated user to decline a pending friend request.
-     * It performs the following actions:
+     * This method allows the currently authenticated user to decline a pending
+     * friend request. It performs the following actions:
      * </p>
      * <ul>
-     *   <li>Verifies that the {@code friendId} is not null.</li>
-     *   <li>Retrieves the currently authenticated user from the security context.</li>
-     *   <li>Finds the friend request where the sender is {@code friendId} and the current user is the recipient.</li>
-     *   <li>Checks that the request exists and is in the {@code REQUESTED} status.</li>
-     *   <li>Deletes the friend request from the database (the friendship is not created).</li>
+     * <li>Verifies that the {@code friendId} is not null.</li>
+     * <li>Retrieves the currently authenticated user from the security
+     * context.</li>
+     * <li>Finds the friend request where the sender is {@code friendId} and the
+     * current user is the recipient.</li>
+     * <li>Checks that the request exists and is in the {@code REQUESTED}
+     * status.</li>
+     * <li>Deletes the friend request from the database (the friendship is not
+     * created).</li>
      * </ul>
      *
      * @param friendId the ID of the user who sent the friend request.
      * @throws IllegalArgumentException if {@code friendId} is null.
-     * @throws RuntimeException if the current user is not found or the request is not found or not in
-     *                         {@code REQUESTED} status.
+     * @throws RuntimeException         if the current user is not found or the
+     *                                  request is not found or not in
+     *                                  {@code REQUESTED} status.
+     *
+     * @author Dmytro Kravchuk
      */
     @Override
     @Transactional
@@ -216,6 +245,24 @@ public class FriendServiceImpl implements FriendService {
         friendRepo.delete(request);
     }
 
+    /**
+     * Sends a friend request from the specified user to another user.
+     * This method performs the following checks before creating a friend request:
+     * - Ensures the current user is sending the request on their own behalf.
+     * - Validates that both user IDs are not null and are not the same.
+     * - Checks that the users exist in the database.
+     * - Prevents sending a request if the sender has blocked the recipient or vice versa.
+     * - Prevents sending a duplicate friend request if one already exists or has been received.
+     * - Prevents sending a request if users are already friends.
+     * If all checks pass, a new friend request with status {@code REQUESTED} is created and saved.
+     * @param userId   the ID of the user who is sending the friend request
+     * @param friendId the ID of the user who is receiving the friend request
+     * @throws IllegalArgumentException if any of the IDs are null, equal, or users are not found
+     * @throws IllegalStateException    if the current user is not the sender
+     * @throws FriendRequestException   if any blocking or duplicate request conditions are met
+     *
+     * @author Dmytro Kravchuk
+     */
     public void addFriend(Long userId, Long friendId) {
         if (!isCurrentUser(userId)) {
             throw new IllegalStateException("You cannot send friend requests on behalf of another user.");
@@ -229,10 +276,11 @@ public class FriendServiceImpl implements FriendService {
             throw new IllegalArgumentException("You cannot add yourself as a friend.");
         }
 
-        User user = userRepo.findById(userId)
-            .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
+        final User user =
+            userRepo.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found with ID: "
+                + userId));
 
-        User friend = userRepo.findById(friendId)
+        final User friend = userRepo.findById(friendId)
             .orElseThrow(() -> new IllegalArgumentException("Friend not found with ID: " + friendId));
 
         Friend blockByUser = friendRepo.findByUserIdAndFriendId(userId, friendId);
@@ -269,6 +317,16 @@ public class FriendServiceImpl implements FriendService {
         friendRepo.save(friendRequest);
     }
 
+    /**
+     * Retrieves the ID of the currently authenticated user.
+     * This method gets the authenticated user's email from the security context
+     * and searches for a user with that email in the user repository.
+     * If the user is not found, a UsernameNotFoundException is thrown.
+     * @return the ID of the currently authenticated user
+     * @throws UsernameNotFoundException if the user is not found in the repository
+     *
+     * @author Dmytro Kravchuk
+     */
     public Long getCurrentUserId() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepo.findByEmail(email)
@@ -279,13 +337,20 @@ public class FriendServiceImpl implements FriendService {
     /**
      * Cancels a previously sent friend request.
      *
-     * <p>This method allows the currently authenticated user to cancel a friend request
-     * that they have previously sent, provided it has not yet been accepted. If the request
-     * exists and has status {@code REQUESTED}, it will be deleted from the database.</p>
+     * <p>
+     * This method allows the currently authenticated user to cancel a friend
+     * request that they have previously sent, provided it has not yet been
+     * accepted. If the request exists and has status {@code REQUESTED}, it will be
+     * deleted from the database.
+     * </p>
      *
      * @param friendId the ID of the user to whom the friend request was sent.
-     * @throws IllegalStateException if the current user is not the sender of the request.
-     * @throws FriendRequestException if no friend request exists or if the request was already accepted.
+     * @throws IllegalStateException  if the current user is not the sender of the
+     *                                request.
+     * @throws FriendRequestException if no friend request exists or if the request
+     *                                was already accepted.
+     *
+     * @author Dmytro Kravchuk
      */
     public void cancelFriendRequest(Long friendId) {
         Long currentUserId = getCurrentUserId();
@@ -312,7 +377,10 @@ public class FriendServiceImpl implements FriendService {
      *
      * @param toBlockId the ID of the user to be blocked.
      * @throws RuntimeException if either the current user or the user to be blocked
-     *                          is not found, or if any error occurs during the blocking process.
+     *                          is not found, or if any error occurs during the
+     *                          blocking process.
+     *
+     * @author Dmytro Kravchuk
      */
     @Override
     @Transactional

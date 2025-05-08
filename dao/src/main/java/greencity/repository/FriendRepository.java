@@ -2,7 +2,6 @@ package greencity.repository;
 
 import greencity.dto.friend.FriendDto;
 import greencity.entity.Friend;
-import greencity.enums.FriendStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -21,13 +20,10 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
 
     void delete(Friend friend);
 
-    boolean existsByUser_IdAndFriend_IdAndStatus(Long userId, Long friendId, FriendStatus status);
-
-    List<Friend> findAllByUserId(Long userId);
-
     @Query("SELECT COUNT(f) FROM Friend f WHERE f.user.id = :userId AND f.status = 'FRIEND'")
     Long countByUserId(@Param("userId") Long userId);
 
-    @Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM Friend f WHERE f.user.id = :userId AND f.friend.id = :friendId AND f.status = 'FRIEND'")
+    @Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM Friend f WHERE f.user.id = :userId AND "
+        + "f.friend.id = :friendId AND f.status = 'FRIEND'")
     Boolean existsByUserIdAndFriendIdAndStatus(@Param("userId") Long userId, @Param("friendId") Long friendId);
 }
