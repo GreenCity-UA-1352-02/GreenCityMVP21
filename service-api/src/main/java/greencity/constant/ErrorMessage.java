@@ -135,6 +135,7 @@ public final class ErrorMessage {
     public static final String INVALID_DURATION = "The duration for such habit is lower than previously set";
     public static final String WRONG_EVENT_ID = "Wrong event id";
     public static final String SOME_TAGS_NOT_FOUND = "Some tags not found";
+    public static final String WRONG_ADDRESS_ID = "Wrong address id";
 
     private ErrorMessage() {
     }
