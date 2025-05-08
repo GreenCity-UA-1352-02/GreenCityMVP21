@@ -96,6 +96,7 @@ public class EventServiceImpl implements EventService {
         EventImageDto mainImage = eventImageService.uploadImage(image, event.getId());
         EventImage eventImage = mapToEntity(mainImage, event);
         event.setMainImage(eventImage);
+        event.getImages().add(eventImage);
     }
 
     private EventImage mapToEntity(EventImageDto image, Event event) {
@@ -192,7 +193,7 @@ public class EventServiceImpl implements EventService {
         updateDatesLocations(updateEventRequest.datesLocations());
         updateImages(event, images);
 
-        return buildResponse(eventRepo.save(event));
+        return buildResponse(event);
     }
 
     private void updateMainFields(Event event, UpdateEventRequest updateEventRequest) {
@@ -211,7 +212,7 @@ public class EventServiceImpl implements EventService {
 
     private void updateImages(Event event, List<MultipartFile> images) {
         assignMainImage(event, images.removeFirst());
-        eventImageService.deleteImagesByEventId(event.getId());
+        eventImageService.deleteImagesByEventIdExceptMain(event.getId());
         assignAdditionalImages(event, images);
     }
 
