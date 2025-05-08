@@ -60,13 +60,10 @@ public class EventImageServiceImpl implements EventImageService {
         Event event = eventRepo.findById(eventId)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.WRONG_EVENT_ID));
 
-//        long mainImageId = event.getMainImage().getId();
         Optional.ofNullable(event.getImages()).ifPresent(images -> {
             images.forEach(image -> {
-//                if (!image.getId().equals(mainImageId)) {
-                    fileService.delete(image.getLink());
-                    eventImageRepo.delete(image);
-//                }
+                fileService.delete(image.getLink());
+                eventImageRepo.delete(image);
             });
             images.clear();
             eventRepo.save(event);
