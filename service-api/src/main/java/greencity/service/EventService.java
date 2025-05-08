@@ -1,7 +1,8 @@
 package greencity.service;
 
 import greencity.dto.event.AddEventRequest;
-import greencity.dto.event.EventDto;
+import greencity.dto.event.EventResponse;
+import greencity.dto.event.UpdateEventRequest;
 import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,17 +15,17 @@ public interface EventService {
      * @param email              - email of user
      * @return saved event
      */
-    EventDto save(AddEventRequest addEventRequest, List<MultipartFile> images, String email);
+    EventResponse save(AddEventRequest addEventRequest, List<MultipartFile> images, String email);
 
 
     /**
      * Updates an existing Event.
      *
-     * @param eventDto the {@link EventDto} object containing updated event details.
+     * @param updateEventRequest the {@link UpdateEventRequest} object containing updated event details.
      * @param images a {@link List} of {@link MultipartFile} objects representing updated images for the event.
-     * @return the updated {@link EventDto}.
+     * @return the updated {@link EventResponse}.
      */
-    EventDto update(EventDto eventDto, List<MultipartFile> images);
+    EventResponse update(UpdateEventRequest updateEventRequest, List<MultipartFile> images);
 
     /**
      * Deletes an Event by its unique identifier.
