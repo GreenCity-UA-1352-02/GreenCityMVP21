@@ -31,8 +31,7 @@ public class EventDateLocation {
     @Column(nullable = false)
     private EventType eventType;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "address_id")
+    @ManyToOne
     private Address address;
 
     @Column

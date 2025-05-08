@@ -48,8 +48,8 @@ public class Event {
         inverseJoinColumns = @JoinColumn(name = "tag_id"))
     private List<Tag> tags;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "main_image_id")
+    @OneToOne(optional = false)
+    @JoinColumn(nullable = false, unique = true)
     private EventImage mainImage;
 
     @OneToMany(mappedBy = "event", fetch = FetchType.LAZY)
