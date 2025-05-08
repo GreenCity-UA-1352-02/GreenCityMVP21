@@ -12,7 +12,6 @@ import greencity.entity.event.Event;
 import greencity.entity.event.EventDateLocation;
 import greencity.entity.event.EventImage;
 import greencity.entity.localization.TagTranslation;
-import greencity.enums.EventType;
 import greencity.enums.TagType;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.TagNotFoundException;
@@ -36,65 +35,46 @@ public class EventServiceImpl implements EventService {
     private final FileService fileService;
     private final RestClient restClient;
     private final TagsRepo tagsRepo;
+    private final EventDateLocationService eventDateLocationService;
+    private final EventImageService eventImageService;
 
     @Override
     @Transactional
-    public EventDto save(AddEventRequest addEventRequest, List<MultipartFile> images, String email) {
-        Event event = modelMapper.map(addEventRequest, Event.class);
-
-        List<EventDateLocation> dates = addEventRequest.datesLocations().stream()
-            .map(dateLocation -> mapDateLocationDto(dateLocation, event))
-            .toList();
-        event.setEventDatesLocations(dates);
-
-        List<Tag> listTag = tags(addEventRequest);
-        event.setTags(listTag);
-
-        User author = getUser(email);
-        event.setAuthor(author);
-
-        addEventImages(images, event);
-
+    public EventResponse save(AddEventRequest addEventRequest, List<MultipartFile> images, String email) {
+        Event event = prepareEvent(addEventRequest, email);
         eventRepo.save(event);
+
+        assignDatesLocations(event, addEventRequest.datesLocations());
+        assignMainImage(event, images.removeFirst());
+        assignAdditionalImages(event, images);
 
         return buildResponse(event);
     }
 
-    private EventDateLocation mapDateLocationDto(EventDateLocationDto dateLocation, Event event) {
-        EventDateLocation.EventDateLocationBuilder eventDateLocationBuilder = EventDateLocation.builder()
-            .event(event)
-            .startTime(dateLocation.startDate())
-            .endTime(dateLocation.finishDate());
+    private void assignDatesLocations(Event event, List<EventDateLocationDto> dtos) {
+        List<EventDateLocation> datesLocations = dtos.stream()
+            .map(dateLocationDto -> {
+                EventDateLocationDto dateLocation = eventDateLocationService.save(dateLocationDto, event.getId());
+                EventDateLocation eventDateLocation = modelMapper.map(dateLocation, EventDateLocation.class);
+                eventDateLocation.setEvent(event);
 
-        boolean isOnline = dateLocation.onlineLink() != null;
-        boolean isOffline = dateLocation.coordinates() != null;
-
-        if (isOnline && isOffline) {
-            eventDateLocationBuilder
-                .address(Address.builder()
-                    .latitude(dateLocation.coordinates().latitude())
-                    .longitude(dateLocation.coordinates().longitude())
-                    .build())
-                .onlineLink(dateLocation.onlineLink())
-                .eventType(EventType.ONLINE_OFFLINE);
-        } else if (isOffline) {
-            eventDateLocationBuilder
-                .address(Address.builder()
-                    .latitude(dateLocation.coordinates().latitude())
-                    .longitude(dateLocation.coordinates().longitude())
-                    .build())
-                .eventType(EventType.OFFLINE);
-        } else if (isOnline) {
-            eventDateLocationBuilder
-                .onlineLink(dateLocation.onlineLink())
-                .eventType(EventType.ONLINE);
-        }
-
-        return eventDateLocationBuilder.build();
+                eventDateLocation.setAddress(dateLocationDto.coordinates() == null ? null :
+                    modelMapper.map(dateLocationDto.coordinates(), Address.class));
+                return eventDateLocation;
+            })
+            .toList();
+        event.setEventDatesLocations(datesLocations);
     }
 
-    private List<Tag> tags(AddEventRequest addEventRequest) {
-        List<String> lowerCaseTagNames = addEventRequest.tags().stream()
+    private Event prepareEvent(AddEventRequest request, String email) {
+        Event event = modelMapper.map(request, Event.class);
+        event.setTags(parseTags(request.tags()));
+        event.setAuthor(getUser(email));
+        return event;
+    }
+
+    private List<Tag> parseTags(List<String> rawTags) {
+        List<String> lowerCaseTagNames = rawTags.stream()
             .map(String::toLowerCase)
             .toList();
         List<Tag> tags = tagsRepo.findAllByTagTranslations(lowerCaseTagNames, TagType.EVENT);
@@ -111,35 +91,38 @@ public class EventServiceImpl implements EventService {
         UserVO user = restClient.findByEmail(email);
         return modelMapper.map(user, User.class);
     }
-
-    private void addEventImages(List<MultipartFile> images, Event event) {
-        if (images == null || images.isEmpty()) {
-            return;
-        }
-        for (int i = 0; i < images.size(); i++) {
-            MultipartFile image = images.get(i);
-            String link = fileService.upload(image);
-            EventImage eventImage = eventImageBuild(link, event);
-
-            event.getImages().add(eventImage);
-
-            if (i == 0) {
-                event.setMainImage(eventImage);
-            }
-        }
+    
+    private void assignMainImage(Event event, MultipartFile image) {
+        EventImageDto mainImage = eventImageService.uploadImage(image, event.getId());
+        EventImage eventImage = mapToEntity(mainImage, event);
+        event.setMainImage(eventImage);
     }
 
-    private static EventImage eventImageBuild(String link, Event event) {
+    private EventImage mapToEntity(EventImageDto image, Event event) {
         return EventImage.builder()
-            .link(link)
+            .id(image.id())
+            .link(image.link())
             .event(event)
             .build();
     }
 
-    private EventDto buildResponse(Event event) {
-        List<String> additionalImages = event.getImages().stream()
+    private void assignAdditionalImages(Event event, List<MultipartFile> images) {
+        List<EventImageDto> uploaded = eventImageService.uploadImages(images, event.getId());
+
+        List<EventImage> eventImages = uploaded.stream()
+            .map(image -> mapToEntity(image, event))
+            .toList();
+
+        event.setImages(eventImages);
+    }
+
+    private EventResponse buildResponse(Event event) {
+        EventResponse dto = modelMapper.map(event, EventResponse.class);
+
+        List<String> images = event.getImages().stream()
             .map(EventImage::getLink)
             .toList();
+        dto.setAdditionalImages(images);
 
         List<EventDateLocationDto> dates = event.getEventDatesLocations().stream()
             .map(date -> {
@@ -152,6 +135,7 @@ public class EventServiceImpl implements EventService {
                 }
 
                 return EventDateLocationDto.builder()
+                    .id(date.getId())
                     .startDate(date.getStartTime())
                     .finishDate(date.getEndTime())
                     .coordinates(coordinates)
@@ -159,10 +143,8 @@ public class EventServiceImpl implements EventService {
                     .build();
             })
             .toList();
-
-        EventDto dto = modelMapper.map(event, EventDto.class);
-        dto.setAdditionalImages(additionalImages);
         dto.setDates(dates);
+
         dto.setTags(addTagUaEnDtos(event.getTags()));
         dto.setTitleImage(event.getMainImage().getLink());
         dto.setOrganizer(EventAuthorDto.builder()
@@ -201,30 +183,36 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public EventDto update(EventDto eventDto, List<MultipartFile> images) {
-        Event event = eventRepo.findById(eventDto.getId())
+    public EventResponse update(UpdateEventRequest updateEventRequest, List<MultipartFile> images) {
+        Event event = eventRepo.findById(updateEventRequest.id())
             .orElseThrow(() -> new NotFoundException(ErrorMessage.WRONG_EVENT_ID));
 
-        event.setTitle(eventDto.getTitle());
-        event.setDescription(eventDto.getDescription());
-        event.setOpen(eventDto.isOpen());
-        event.setTags(updateTags(eventDto.getTags()));
+        updateMainFields(event, updateEventRequest);
+        updateTags(event, updateEventRequest.tags());
+        updateDatesLocations(updateEventRequest.datesLocations());
+        updateImages(event, images);
 
         return buildResponse(eventRepo.save(event));
     }
 
-    private List<Tag> updateTags(List<TagUaEnDto> tagDtos) {
-        List<Tag> tags = tagsRepo.findTagsByNamesAndType(
-            tagDtos.stream()
-                .map(TagUaEnDto::getNameEn)
-                .map(String::toLowerCase)
-                .toList(),
-            TagType.EVENT
-        );
-        if (tags.isEmpty()) {
-            throw new TagNotFoundException(ErrorMessage.TAG_NOT_FOUND);
-        }
-        return tags;
+    private void updateMainFields(Event event, UpdateEventRequest updateEventRequest) {
+        event.setTitle(updateEventRequest.title());
+        event.setDescription(updateEventRequest.description());
+        event.setOpen(updateEventRequest.isOpen());
+    }
+
+    private void updateTags(Event event, List<String> rawTags) {
+        event.setTags(parseTags(rawTags));
+    }
+
+    private void updateDatesLocations(List<EventDateLocationDto> dtos) {
+        dtos.forEach(eventDateLocationService::update);
+    }
+
+    private void updateImages(Event event, List<MultipartFile> images) {
+        assignMainImage(event, images.removeFirst());
+        eventImageService.deleteImagesByEventId(event.getId());
+        assignAdditionalImages(event, images);
     }
 
     @Override
@@ -232,13 +220,18 @@ public class EventServiceImpl implements EventService {
     public void delete(Long id) {
         Event event = eventRepo.findById(id).orElseThrow(() -> new NotFoundException(ErrorMessage.WRONG_EVENT_ID));
 
-        if (event.getMainImage() != null) {
-            fileService.delete(event.getMainImage().getLink());
-        }
-        if (event.getImages() != null && !event.getImages().isEmpty()) {
-            event.getImages()
-                .forEach(image -> fileService.delete(image.getLink()));
-        }
+        deleteImages(event);
+        deleteDates(event);
         eventRepo.delete(event);
+    }
+
+    private void deleteImages(Event event) {
+        fileService.delete(event.getMainImage().getLink());
+        eventImageService.deleteImagesByEventId(event.getId());
+    }
+
+    private void deleteDates(Event event) {
+        event.getEventDatesLocations().forEach(dateLocation ->
+            eventDateLocationService.delete(dateLocation.getId()));
     }
 }
