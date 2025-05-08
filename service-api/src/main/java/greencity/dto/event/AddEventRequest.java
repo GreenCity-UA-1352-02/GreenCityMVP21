@@ -2,6 +2,7 @@ package greencity.dto.event;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 import lombok.Builder;
@@ -14,7 +15,9 @@ public record AddEventRequest(
     String description,
     @JsonProperty("open")
     boolean isOpen,
+    @NotEmpty
     List<@Valid EventDateLocationDto> datesLocations,
+    @NotEmpty
     List<String> tags
 ) {
 }

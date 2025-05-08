@@ -3,9 +3,8 @@ package greencity.dto.event;
 import lombok.Builder;
 
 @Builder
-public record AddressDto(
+public record EventImageDto(
     Long id,
-    Double latitude,
-    Double longitude
+    String link
 ) {
 }
