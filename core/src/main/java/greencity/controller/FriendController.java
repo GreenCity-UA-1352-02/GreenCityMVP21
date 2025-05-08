@@ -1,7 +1,10 @@
 package greencity.controller;
 
 import greencity.constant.HttpStatuses;
-import greencity.dto.user.FriendDto;
+import greencity.dto.friend.FriendCardDto;
+import greencity.dto.friend.FriendDto;
+import greencity.dto.friend.FriendSearchRequest;
+import greencity.exception.exceptions.FriendRequestException;
 import greencity.exception.exceptions.UserNotFoundException;
 import greencity.service.FriendService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,8 +13,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Positive;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -62,78 +65,30 @@ public class FriendController {
     }
 
     /**
-     * Sends a friend request from the user with the specified {@code userId} to the
-     * user with the specified {@code friendId}.
-     *
-     * <p>
-     * This method allows a user to send a friend request to another user. If the
-     * request already exists or if the users are already friends, an
-     * {@link IllegalArgumentException} will be thrown, resulting in a
-     * {@link HttpStatus#BAD_REQUEST}. If the user tries to send a request on behalf
-     * of another user, an {@link IllegalStateException} will be thrown, resulting
-     * in a {@link HttpStatus#FORBIDDEN}.
-     * </p>
-     *
-     * @param userId   the ID of the user sending the friend request.
-     * @param friendId the ID of the user to whom the friend request is being sent.
-     * @return a {@link ResponseEntity} with status {@link HttpStatus#CREATED} if
-     *         the request is successfully sent, {@link HttpStatus#BAD_REQUEST} if
-     *         the request already exists or the users are already friends, or
-     *         {@link HttpStatus#FORBIDDEN} if the request cannot be sent due to an
-     *         invalid state.
-     * @throws IllegalArgumentException if the friend request already exists or the
-     *                                  users are already friends.
-     * @throws IllegalStateException    if the user tries to send a request on
-     *                                  behalf of another user.
-     * @author [Dmytro Kravchuk].
-     */
-    @Operation(summary = "Send a friend request.")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = "Friend request successfully sent."),
-        @ApiResponse(responseCode = "400", description = "Friend request already exists or users are already friends."),
-        @ApiResponse(responseCode = "403", description = "User cannot send request on behalf of another user.")
-    })
-    @PostMapping("/{userId}/add/{friendId}")
-    public ResponseEntity<?> addFriend(@PathVariable Long userId, @PathVariable Long friendId) {
-        try {
-            friendService.addFriend(userId, friendId);
-            return ResponseEntity.status(HttpStatus.CREATED).build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body("The request already exists or you are already friends.");
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
-        }
-    }
-
-    /**
      * Confirms a friend request sent from the user with the specified
-     * {@code requesterId} to the user with the specified {@code userId}.
+     * {@code friendId} to the currently authenticated user.
      *
      * <p>
-     * This method allows the recipient of a friend request to confirm it. If the
-     * request is not found, has already been confirmed, or cannot be processed for
-     * any other reason, a {@link RuntimeException} will be thrown, resulting in a
-     * {@link HttpStatus#NOT_FOUND} response.
+     * This method allows the recipient of a friend request (authenticated user)
+     * to confirm it. If the request is not found, has already been confirmed,
+     * or cannot be processed, a {@link RuntimeException} will be thrown.
      * </p>
      *
-     * @param userId      the ID of the user who is confirming the friend request.
-     * @param requesterId the ID of the user who sent the friend request.
+     * @param friendId the ID of the user who sent the friend request.
      * @return a {@link ResponseEntity} with status {@link HttpStatus#OK} if the
-     *         request is successfully confirmed, or {@link HttpStatus#NOT_FOUND} if
-     *         the request cannot be found or has already been confirmed.
-     * @throws RuntimeException if the friend request is not found, already
-     *                          confirmed, or cannot be processed.
+     *         request is successfully confirmed, or {@link HttpStatus#NOT_FOUND}
+     *         if the request cannot be found or has already been confirmed.
      * @author [Dmytro Kravchuk].
      */
-    @Operation(summary = "Confirm a friend request.")
+    @Operation(summary = "Confirm a friend request from another user.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Friend request successfully confirmed."),
-        @ApiResponse(responseCode = "404", description = "Friend request not found or already confirmed."),})
-    @PutMapping("/{userId}/confirm/{requesterId}")
-    public ResponseEntity<?> confirmFriend(@PathVariable Long userId, @PathVariable Long requesterId) {
+        @ApiResponse(responseCode = "404", description = "Friend request not found or already confirmed.")
+    })
+    @PatchMapping("/{friendId}/acceptFriend")
+    public ResponseEntity<?> confirmFriend(@PathVariable Long friendId) {
         try {
-            friendService.confirmFriend(userId, requesterId);
+            friendService.confirmFriend(friendId);
             return ResponseEntity.ok().build();
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
@@ -141,34 +96,22 @@ public class FriendController {
     }
 
     /**
-     * Method for blocking a user.
+     * Метод для блокировки пользователя.
      *
-     * <p>
-     * This method allows a user to block another user. If any error occurs during
-     * the blocking process, a {@link RuntimeException} will be thrown, resulting in
-     * a {@link HttpStatus#BAD_REQUEST} response.
-     * </p>
-     *
-     * @param userId    {@link Long} - the ID of the user who wants to block another
-     *                  user.
-     * @param toBlockId {@link Long} - the ID of the user who is to be blocked.
-     * @return {@link ResponseEntity} with {@link HttpStatus#OK} status if the user
-     *         is successfully blocked, or {@link HttpStatus#BAD_REQUEST} if an
-     *         error occurs during the blocking process.
-     * @throws RuntimeException if an error occurs during the blocking process, such
-     *                          as an invalid user or blocking attempt.
-     * @author [Dmytro Kravchuk].
+     * @param toBlockId ID пользователя, которого нужно заблокировать.
+     * @return ResponseEntity со статусом 200 (OK) при успешной блокировке,
+     *         или 400 (BAD_REQUEST) в случае ошибки.
      */
     @Operation(summary = "Block a user.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "User successfully blocked."),
         @ApiResponse(responseCode = "400", description = "Error occurred during user blocking."),
-        @ApiResponse(responseCode = "404", description = "User not found."),
+        @ApiResponse(responseCode = "404", description = "User not found.")
     })
-    @PostMapping("/{userId}/block/{toBlockId}")
-    public ResponseEntity<?> blockUser(@PathVariable Long userId, @PathVariable Long toBlockId) {
+    @PostMapping("/block/{toBlockId}")
+    public ResponseEntity<?> blockUser(@PathVariable Long toBlockId) {
         try {
-            friendService.blockUser(userId, toBlockId);
+            friendService.blockUser(toBlockId);
             return ResponseEntity.ok().build();
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -176,30 +119,32 @@ public class FriendController {
     }
 
     /**
-     * Method for removing a friendship between two users.
+     * Removes a friend from the current user's friend list.
      *
-     * @param userId   {@link Long} - ID of the user who wants to remove a friend.
+     * <p>This endpoint allows the currently authenticated user to remove a friend
+     * from their friend list. The method ensures that a valid friendship exists
+     * and that the current user is part of it. If successful, the friendship is removed
+     * in both directions.</p>
+     *
      * @param friendId {@link Long} - ID of the friend to be removed.
-     * @return {@link ResponseEntity} - response entity with HTTP status code:
-     *         <ul>
+     * @return {@link ResponseEntity} with:
+     *     <ul>
      *         <li>204 (NO_CONTENT) if the friendship is successfully removed.</li>
-     *         <li>404 (NOT_FOUND) if the friendship does not exist or if an error
-     *         occurs during the removal process.</li>
-     *         </ul>
-     * @throws RuntimeException if the friendship does not exist or another error
-     *                          occurs during the removal process.
-     * @author [Dmytro Kravchuk].
+     *         <li>404 (NOT_FOUND) if the friendship does not exist or is not valid.</li>
+     *     </ul>
+     * @throws RuntimeException if the friendship does not exist or another error occurs during the removal.
+     *
+     * @author Dmytro Kravchuk
      */
-    @Operation(summary = "Remove a friendship between two users.")
-    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @Operation(summary = "Remove a friend from the current user's friend list.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "204", description = "Friendship successfully removed."),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
-    @DeleteMapping("/{userId}/remove/{friendId}")
-    public ResponseEntity<?> removeFriend(@PathVariable Long userId, @PathVariable Long friendId) {
+    @DeleteMapping("/{friendId}")
+    public ResponseEntity<?> removeFriend(@PathVariable Long friendId) {
         try {
-            friendService.removeFriend(userId, friendId);
+            friendService.removeFriend(friendId);
             return ResponseEntity.noContent().build();
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
@@ -207,29 +152,138 @@ public class FriendController {
     }
 
     /**
-     * Method for searching new friends by name or email.
+     * Method for searching potential new friends for a user.
      *
-     * @param searchTerm    {@link String} - the search term (name or email) used to
-     *                      filter users.
-     * @param currentUserId {@link Long} - the ID of the current user to exclude
-     *                      them from the search results and avoid duplicates.
-     * @return a {@link ResponseEntity} containing a list of {@link FriendDto}
-     *         representing potential new friends matching the search query.
-     * @throws RuntimeException if an error occurs while processing the request.
+     * @param userId                {@link Long} - ID of the user performing the search.
+     * @param searchTerm            {@link String} - optional text query (e.g. name or email) to search for specific
+     *                                            users.
+     * @param filterByCity          {@link Boolean} - optional flag to filter users by city.
+     * @param filterByMutualFriends {@link Boolean} - optional flag to filter users based on mutual friends.
+     * @param city                  {@link String} - optional city name for city-based filtering.
+     * @param friendId              {@link Long} - optional ID of a friend, used to filter by friends-of-friends.
+     * @param pageable              {@link Pageable} - pagination information (page, size, sort).
+     * @return a paginated list of users matching the search and filter criteria.
+     *
      * @author [Dmytro Kravchuk].
      */
-    @Operation(summary = "Search for new friends.")
+    @Operation(summary = "Search for new potential friends based on filters.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successful search for new friends.",
-            content = @Content(schema = @Schema(implementation = FriendDto.class))),
-        @ApiResponse(responseCode = "400", description = "Bad request."),
-        @ApiResponse(responseCode = "404", description = "User not found."),
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved search results."),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("/search")
-    public ResponseEntity<List<FriendDto>> searchNewFriends(
-        @RequestParam @NotBlank(message = "Search term cannot be empty") String searchTerm,
-        @RequestParam @Positive(message = "User ID must be positive") Long currentUserId) {
-        List<FriendDto> result = friendService.searchNewFriends(searchTerm, currentUserId);
-        return ResponseEntity.ok(result);
+    @GetMapping("/search-new-friends")
+    public Page<FriendCardDto> searchNewFriends(
+        @RequestParam("userId") Long userId,
+        @RequestParam(value = "search", required = false) String searchTerm,
+        @RequestParam(value = "filterByCity", required = false) Boolean filterByCity,
+        @RequestParam(value = "filterByMutualFriends", required = false) Boolean filterByMutualFriends,
+        @RequestParam(value = "city", required = false) String city,
+        @RequestParam(value = "friendId", required = false) Long friendId,
+        Pageable pageable) {
+        FriendSearchRequest request = new FriendSearchRequest(userId, searchTerm, filterByCity,
+            filterByMutualFriends, city, friendId);
+        return friendService.searchNewFriends(request, pageable);
+    }
+
+    /**
+     * Method for declining a friend request sent by another user.
+     *
+     * <p>This endpoint is used by the currently authenticated user to reject a pending friend request.
+     * The method verifies that the request exists and has not already been accepted or declined.
+     * If successful, the request is removed from the system or marked as declined.</p>
+     *
+     * @param friendId {@link Long} - ID of the user who sent the friend request.
+     * @return {@link ResponseEntity} with:
+     *     <ul>
+     *         <li>200 (OK) if the friend request was successfully declined.</li>
+     *         <li>400 (BAD_REQUEST) if the provided friend ID is invalid.</li>
+     *         <li>404 (NOT_FOUND) if the friend request does not exist or has already been handled.</li>
+     *     </ul>
+     * @throws IllegalArgumentException if the {@code friendId} is null or invalid.
+     * @throws RuntimeException if the friend request does not exist or another error occurs during the operation.
+     *
+     * @author Dmytro Kravchuk
+     */
+    @Operation(summary = "Decline a pending friend request from another user.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Friend request declined successfully."),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
+    @DeleteMapping("/{friendId}/declineFriend")
+    public ResponseEntity<String> declineFriend(@PathVariable Long friendId) {
+        try {
+            friendService.declineFriend(friendId);
+            return ResponseEntity.ok("Friend request declined successfully.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Invalid friend ID.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Friend request not found or already handled.");
+        }
+    }
+
+    /**
+     * Method for sending a friend request to another user.
+     *
+     * <p>This endpoint allows the currently authenticated user to send a friend request to another user.
+     * The method verifies that the user is not trying to add themselves, that the user is not already friends,
+     * and that no pending request exists. If successful, a friend request is created.</p>
+     *
+     * @param friendId {@link Long} - ID of the user to whom the friend request is being sent.
+     * @return {@link ResponseEntity} with:
+     *     <ul>
+     *         <li>201 (CREATED) if the friend request was successfully sent.</li>
+     *         <li>400 (BAD_REQUEST) if the provided friend ID is invalid or if a friend request already exists.</li>
+     *         <li>500 (INTERNAL_SERVER_ERROR) if an unexpected error occurs during the operation.</li>
+     *     </ul>
+     * @throws IllegalArgumentException if the {@code friendId} is invalid or if the current user
+     *                                  tries to add themselves.
+     * @throws RuntimeException if any other error occurs during the creation of the friend request.
+     *
+     * @author Dmytro Kravchuk
+     */
+    @Operation(summary = "Send a friend request to another user.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Friend request sent successfully."),
+        @ApiResponse(responseCode = "400", description = "Invalid friend ID or request already exists."),
+        @ApiResponse(responseCode = "500", description = "An unexpected error occurred.")
+    })
+    @PostMapping("/{friendId}")
+    public ResponseEntity<?> addFriend(@PathVariable Long friendId) {
+        try {
+            Long currentUserId = friendService.getCurrentUserId();
+            friendService.addFriend(currentUserId, friendId);
+            return ResponseEntity.status(HttpStatus.CREATED).body("Friend request sent successfully.");
+        } catch (FriendRequestException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred.");
+        }
+    }
+
+    /**
+     * Endpoint to cancel a previously sent friend request.
+     *
+     * @param friendId the ID of the user to whom the friend request was sent.
+     * @return {@link ResponseEntity} with:
+     *     <ul>
+     *         <li>204 (NO_CONTENT) if the request was successfully canceled.</li>
+     *         <li>404 (NOT_FOUND) if no such friend request exists.</li>
+     *     </ul>
+     */
+    @Operation(summary = "Cancel a previously sent friend request.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "Friend request canceled successfully."),
+        @ApiResponse(responseCode = "404", description = "Friend request not found or already processed.")
+    })
+    @DeleteMapping("/requests/{friendId}")
+    public ResponseEntity<?> cancelFriendRequest(@PathVariable Long friendId) {
+        try {
+            friendService.cancelFriendRequest(friendId);
+            return ResponseEntity.noContent().build();
+        } catch (FriendRequestException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 }

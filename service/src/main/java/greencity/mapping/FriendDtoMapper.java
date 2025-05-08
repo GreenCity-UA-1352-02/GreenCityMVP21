@@ -1,6 +1,6 @@
 package greencity.mapping;
 
-import greencity.dto.user.FriendDto;
+import greencity.dto.friend.FriendDto;
 import greencity.entity.User;
 
 public class FriendDtoMapper {
@@ -9,6 +9,7 @@ public class FriendDtoMapper {
             user.getId(),
             user.getName(),
             user.getEmail(),
+            user.getCity(),
             user.getProfilePicturePath());
     }
 }

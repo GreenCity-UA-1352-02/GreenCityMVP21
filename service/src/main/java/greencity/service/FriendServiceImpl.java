@@ -1,19 +1,25 @@
 package greencity.service;
 
-import greencity.dto.user.FriendDto;
+import greencity.dto.friend.FriendCardDto;
+import greencity.dto.friend.FriendDto;
+import greencity.dto.friend.FriendSearchRequest;
 import greencity.entity.Friend;
 import greencity.entity.User;
+import greencity.entity.UserSpecification;
 import greencity.enums.FriendStatus;
-import greencity.exception.exceptions.BadRequestException;
+import greencity.exception.exceptions.FriendRequestException;
 import greencity.exception.exceptions.UserNotFoundException;
 import greencity.repository.FriendRepository;
 import greencity.repository.UserRepo;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -51,89 +57,6 @@ public class FriendServiceImpl implements FriendService {
         return friendRepo.findAllFriendsByUserId(userId);
     }
 
-    /**
-     * Method for searching new friends by name or email, excluding current user's
-     * existing friends and already sent friend requests.
-     *
-     * @param searchTerm    the string to search by (part of name or email).
-     * @param currentUserId the ID of the user who is performing the search.
-     * @return list of users matching the search criteria and not already connected.
-     */
-    @Override
-    public List<FriendDto> searchNewFriends(String searchTerm, Long currentUserId) {
-        List<User> allMatches = userRepo
-            .findByNameContainingIgnoreCaseOrEmailContainingIgnoreCase(searchTerm, searchTerm);
-
-        List<Friend> existingRelations = friendRepo.findAllByUserId(currentUserId);
-
-        Set<Long> excludedIds = existingRelations.stream()
-            .map(friend -> friend.getFriend().getId())
-            .collect(Collectors.toSet());
-
-        excludedIds.add(currentUserId);
-
-        return allMatches.stream()
-            .filter(user -> !excludedIds.contains(user.getId()))
-            .map(user -> new FriendDto(
-                user.getId(),
-                user.getName(),
-                user.getEmail(),
-                user.getProfilePicturePath()))
-            .collect(Collectors.toList());
-    }
-
-    /**
-     * Sends a friend request from one user to another. This method checks the
-     * following conditions before sending a friend request:
-     *
-     * <ul>
-     * <li>The current authenticated user must match the provided
-     * {@code userId}.</li>
-     * <li>A user cannot send a request to themselves.</li>
-     * <li>Both the sender and recipient must exist in the database.</li>
-     * <li>If the recipient has blocked the sender, the request is denied.</li>
-     * <li>If a friend request already exists, or they are already friends, a
-     * request is not sent.</li>
-     * </ul>
-     *
-     * @param userId   the ID of the user sending the friend request.
-     * @param friendId the ID of the user to whom the friend request is being sent.
-     * @throws RuntimeException    if the current user does not match
-     *                             {@code userId}, or if {@code userId} equals
-     *                             {@code friendId}, or if either user is not found,
-     *                             or if the sender is blocked by the recipient.
-     * @throws BadRequestException if a friend request already exists, or they are
-     *                             already friends.
-     */
-    @Override
-    public void addFriend(Long userId, Long friendId) {
-        if (!isCurrentUser(userId)) {
-            throw new IllegalStateException("You cannot send friend requests on behalf of another user.");
-        }
-
-        if (userId.equals(friendId)) {
-            throw new RuntimeException("You cannot add yourself as a friend.");
-        }
-
-        User user = userRepo.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
-        User friend = userRepo.findById(friendId)
-            .orElseThrow(() -> new RuntimeException("Friend not found"));
-
-        Friend blockEntry = friendRepo.findByUserIdAndFriendId(friendId, userId);
-        if (blockEntry != null && blockEntry.getStatus() == FriendStatus.BLOCKED) {
-            throw new RuntimeException("You have been blocked by this user.");
-        }
-
-        Friend existing = friendRepo.findByUserIdAndFriendId(userId, friendId);
-        if (existing == null) {
-            Friend newRequest = new Friend(user, friend, FriendStatus.REQUESTED);
-            friendRepo.save(newRequest);
-        } else {
-            throw new IllegalArgumentException("The request already exists or you are already friends.");
-        }
-    }
-
     private boolean isCurrentUser(Long userId) {
         String currentUserName = SecurityContextHolder.getContext().getAuthentication().getName();
         User currentUser = userRepo.findByEmail(currentUserName)
@@ -141,45 +64,20 @@ public class FriendServiceImpl implements FriendService {
         return currentUser.getId().equals(userId);
     }
 
-    /**
-     * Removes a friend from the current user's friend list.
-     *
-     * <p>
-     * This method ensures that the current authenticated user is attempting to
-     * remove a friend from their own friend list. It first checks if the current
-     * user exists and is the same as the {@code userId} provided. Then, it checks
-     * if a friendship exists between the user and the specified friend. If a valid
-     * friendship exists, it removes both directions of the friendship (from
-     * {@code userId} to {@code friendId} and from {@code friendId} to
-     * {@code userId}).
-     * </p>
-     *
-     * @param userId   the ID of the user who is removing a friend.
-     * @param friendId the ID of the friend to be removed.
-     * @throws RuntimeException if the current user is not found, or if the current
-     *                          user is not the one attempting to remove the friend,
-     *                          or if the users are not friends, or if the
-     *                          friendship has already been removed.
-     */
     @Override
     @Transactional
-    public void removeFriend(Long userId, Long friendId) {
-        String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        User currentUser = userRepo.findByEmail(currentUserEmail)
-            .orElseThrow(() -> new RuntimeException("Current user not found."));
+    public void removeFriend(Long friendId) {
+        Long currentUserId = getCurrentUserId();
 
-        if (!currentUser.getId().equals(userId)) {
-            throw new RuntimeException("You can only remove your own friends.");
-        }
-
-        Friend direct = friendRepo.findByUserIdAndFriendId(userId, friendId);
-        Friend reverse = friendRepo.findByUserIdAndFriendId(friendId, userId);
+        Friend direct = friendRepo.findByUserIdAndFriendId(currentUserId, friendId);
 
         if (direct == null || direct.getStatus() != FriendStatus.FRIEND) {
-            throw new RuntimeException("You are not friends.");
+            throw new RuntimeException("Friendship not found or you are not allowed to remove this friend.");
         }
 
         friendRepo.delete(direct);
+
+        Friend reverse = friendRepo.findByUserIdAndFriendId(friendId, currentUserId);
         if (reverse != null && reverse.getStatus() == FriendStatus.FRIEND) {
             friendRepo.delete(reverse);
         }
@@ -189,32 +87,36 @@ public class FriendServiceImpl implements FriendService {
      * Confirms a friend request from the specified requester.
      *
      * <p>
-     * This method verifies that the current authenticated user is the recipient of
-     * the friend request and that the request is in the "REQUESTED" status. If the
-     * conditions are met, the method changes the status of the request to "FRIEND"
-     * to confirm the friendship. It also updates or creates the reverse friendship
-     * entry for the requester.
+     * This method is used by the currently authenticated user to confirm a friend request
+     * that was previously sent by another user (the requester). It performs the following actions:
      * </p>
+     * <ul>
+     *   <li>Verifies that the {@code requesterId} is not null.</li>
+     *   <li>Retrieves the currently authenticated user from the security context.</li>
+     *   <li>Finds the friend request where the requester is the sender and the current user is the recipient.</li>
+     *   <li>Checks that the friend request exists and is in the {@code REQUESTED} status.</li>
+     *   <li>Updates the friend request status to {@code FRIEND} to confirm the friendship.</li>
+     *   <li>Creates or updates the reverse friendship entry from the current user to the requester.</li>
+     * </ul>
      *
-     * @param userId      the ID of the user confirming the friend request.
-     * @param requesterId the ID of the user who sent the friend request.
-     * @throws RuntimeException if the current user is not found, or if the current
-     *                          user is not the recipient of the friend request, or
-     *                          if the request is not in the "REQUESTED" status, or
-     *                          if the friend request is not found.
+     * @param friendId the ID of the user who sent the friend request.
+     * @throws IllegalArgumentException if {@code requesterId} is null.
+     * @throws RuntimeException if the current user is not found, or if the friend request
+     *                          is not found or already confirmed.
      */
     @Override
     @Transactional
-    public void confirmFriend(Long userId, Long requesterId) {
+    public void confirmFriend(Long friendId) {
+        if (friendId == null) {
+            throw new IllegalArgumentException("RequesterId cannot be null.");
+        }
         String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User currentUser = userRepo.findByEmail(currentUserEmail)
             .orElseThrow(() -> new RuntimeException("Current user not found."));
 
-        if (!currentUser.getId().equals(userId)) {
-            throw new RuntimeException("Only the recipient of the friend request can confirm it.");
-        }
+        Long currentUserId = currentUser.getId();
 
-        Friend request = friendRepo.findByUserIdAndFriendId(requesterId, userId);
+        Friend request = friendRepo.findByUserIdAndFriendId(friendId, currentUserId);
         if (request == null || request.getStatus() != FriendStatus.REQUESTED) {
             throw new RuntimeException("Friend request not found or already confirmed.");
         }
@@ -222,15 +124,179 @@ public class FriendServiceImpl implements FriendService {
         request.setStatus(FriendStatus.FRIEND);
         friendRepo.save(request);
 
-        Friend reverse = friendRepo.findByUserIdAndFriendId(userId, requesterId);
+        Friend reverse = friendRepo.findByUserIdAndFriendId(currentUserId, friendId);
         if (reverse == null) {
             reverse = new Friend(currentUser,
-                userRepo.findById(requesterId).orElseThrow(),
+                userRepo.findById(friendId).orElseThrow(),
                 FriendStatus.FRIEND);
         } else {
             reverse.setStatus(FriendStatus.FRIEND);
         }
         friendRepo.save(reverse);
+    }
+
+    @Override
+    public Page<FriendCardDto> searchNewFriends(FriendSearchRequest request, Pageable pageable) {
+        if (request.getFilterByCity() == null && request.getCity() != null) {
+            request.setFilterByCity(false);
+        }
+        if (request.getFilterByMutualFriends() == null) {
+            request.setFilterByMutualFriends(false);
+        }
+
+        UserSpecification spec = new UserSpecification(
+            request.getUserId(),
+            request.getSearchTerm(),
+            request.getFilterByCity(),
+            request.getFilterByMutualFriends(),
+            request.getCity(),
+            request.getFriendId()
+        );
+
+        Page<User> users = userRepo.findAll(spec, pageable);
+
+        List<FriendCardDto> friendCards = users.getContent().stream()
+            .map(user -> {
+                Long friendCount = friendRepo.countByUserId(user.getId());
+                Boolean isFriend = friendRepo.existsByUserIdAndFriendIdAndStatus(request.getUserId(), user.getId());
+
+                return new FriendCardDto(
+                    user.getId(),
+                    user.getName(),
+                    user.getCity(),
+                    user.getProfilePicturePath(),
+                    user.getRating(),
+                    friendCount,
+                    isFriend
+                );
+            })
+            .collect(Collectors.toList());
+
+        return new PageImpl<>(friendCards, pageable, users.getTotalElements());
+    }
+
+    /**
+     * Declines a friend request from the specified user.
+     *
+     * <p>
+     * This method allows the currently authenticated user to decline a pending friend request.
+     * It performs the following actions:
+     * </p>
+     * <ul>
+     *   <li>Verifies that the {@code friendId} is not null.</li>
+     *   <li>Retrieves the currently authenticated user from the security context.</li>
+     *   <li>Finds the friend request where the sender is {@code friendId} and the current user is the recipient.</li>
+     *   <li>Checks that the request exists and is in the {@code REQUESTED} status.</li>
+     *   <li>Deletes the friend request from the database (the friendship is not created).</li>
+     * </ul>
+     *
+     * @param friendId the ID of the user who sent the friend request.
+     * @throws IllegalArgumentException if {@code friendId} is null.
+     * @throws RuntimeException if the current user is not found or the request is not found or not in
+     *                         {@code REQUESTED} status.
+     */
+    @Override
+    @Transactional
+    public void declineFriend(Long friendId) {
+        if (friendId == null) {
+            throw new IllegalArgumentException("FriendId cannot be null.");
+        }
+
+        String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepo.findByEmail(currentUserEmail)
+            .orElseThrow(() -> new RuntimeException("Current user not found."));
+
+        Long currentUserId = currentUser.getId();
+
+        Friend request = friendRepo.findByUserIdAndFriendId(friendId, currentUserId);
+        if (request == null || request.getStatus() != FriendStatus.REQUESTED) {
+            throw new RuntimeException("Friend request not found or already handled.");
+        }
+
+        friendRepo.delete(request);
+    }
+
+    public void addFriend(Long userId, Long friendId) {
+        if (!isCurrentUser(userId)) {
+            throw new IllegalStateException("You cannot send friend requests on behalf of another user.");
+        }
+
+        if (userId == null || friendId == null) {
+            throw new IllegalArgumentException("User ID and friend ID must not be null.");
+        }
+
+        if (userId.equals(friendId)) {
+            throw new IllegalArgumentException("You cannot add yourself as a friend.");
+        }
+
+        User user = userRepo.findById(userId)
+            .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
+
+        User friend = userRepo.findById(friendId)
+            .orElseThrow(() -> new IllegalArgumentException("Friend not found with ID: " + friendId));
+
+        Friend blockByUser = friendRepo.findByUserIdAndFriendId(userId, friendId);
+        if (blockByUser != null && blockByUser.getStatus() == FriendStatus.BLOCKED) {
+            throw new FriendRequestException("You have blocked this user, and you cannot send a friend request.");
+        }
+
+        Friend blockByFriend = friendRepo.findByUserIdAndFriendId(friendId, userId);
+        if (blockByFriend != null && blockByFriend.getStatus() == FriendStatus.BLOCKED) {
+            throw new FriendRequestException("You cannot send a friend request to this user because "
+                + "they have blocked you.");
+        }
+
+        Friend existingRequest = friendRepo.findByUserIdAndFriendId(userId, friendId);
+        if (existingRequest != null && existingRequest.getStatus() == FriendStatus.REQUESTED) {
+            throw new FriendRequestException("You have already sent a friend request to this user.");
+        }
+
+        Friend reverseRequest = friendRepo.findByUserIdAndFriendId(friendId, userId);
+        if (reverseRequest != null && reverseRequest.getStatus() == FriendStatus.REQUESTED) {
+            throw new FriendRequestException("You have already received a friend request from this user.");
+        }
+
+        if (existingRequest != null && existingRequest.getStatus() == FriendStatus.FRIEND) {
+            throw new FriendRequestException("You are already friends.");
+        }
+
+        Friend friendRequest = new Friend();
+        friendRequest.setUser(user);
+        friendRequest.setFriend(friend);
+        friendRequest.setStatus(FriendStatus.REQUESTED);
+        friendRequest.setCity(friend.getCity());
+
+        friendRepo.save(friendRequest);
+    }
+
+    public Long getCurrentUserId() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepo.findByEmail(email)
+            .orElseThrow(() -> new UsernameNotFoundException("User not found"))
+            .getId();
+    }
+
+    /**
+     * Cancels a previously sent friend request.
+     *
+     * <p>This method allows the currently authenticated user to cancel a friend request
+     * that they have previously sent, provided it has not yet been accepted. If the request
+     * exists and has status {@code REQUESTED}, it will be deleted from the database.</p>
+     *
+     * @param friendId the ID of the user to whom the friend request was sent.
+     * @throws IllegalStateException if the current user is not the sender of the request.
+     * @throws FriendRequestException if no friend request exists or if the request was already accepted.
+     */
+    public void cancelFriendRequest(Long friendId) {
+        Long currentUserId = getCurrentUserId();
+
+        Friend existingRequest = friendRepo.findByUserIdAndFriendId(currentUserId, friendId);
+
+        if (existingRequest == null || existingRequest.getStatus() != FriendStatus.REQUESTED) {
+            throw new FriendRequestException("No pending friend request to cancel.");
+        }
+
+        friendRepo.delete(existingRequest);
     }
 
     /**
@@ -244,25 +310,25 @@ public class FriendServiceImpl implements FriendService {
      * with a "BLOCKED" status, effectively blocking the user.
      * </p>
      *
-     * @param userId    the ID of the user who is performing the block action.
      * @param toBlockId the ID of the user to be blocked.
      * @throws RuntimeException if either the current user or the user to be blocked
-     *                          is not found.
+     *                          is not found, or if any error occurs during the blocking process.
      */
     @Override
     @Transactional
-    public void blockUser(Long userId, Long toBlockId) {
-        User user = userRepo.findById(userId)
+    public void blockUser(Long toBlockId) {
+        Long currentUserId = getCurrentUserId();
+        User user = userRepo.findById(currentUserId)
             .orElseThrow(() -> new RuntimeException("User not found"));
         User toBlock = userRepo.findById(toBlockId)
             .orElseThrow(() -> new RuntimeException("User to block not found"));
 
-        Friend existing = friendRepo.findByUserIdAndFriendId(userId, toBlockId);
+        Friend existing = friendRepo.findByUserIdAndFriendId(currentUserId, toBlockId);
         if (existing != null) {
             friendRepo.delete(existing);
         }
 
-        Friend reverse = friendRepo.findByUserIdAndFriendId(toBlockId, userId);
+        Friend reverse = friendRepo.findByUserIdAndFriendId(toBlockId, currentUserId);
         if (reverse != null) {
             friendRepo.delete(reverse);
         }

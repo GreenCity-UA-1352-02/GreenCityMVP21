@@ -196,6 +196,7 @@ public class SecurityConfig {
                     "/habit/tags/search",
                     "/habit/search",
                     "/friends/{userId}",
+                    "/friends/search-new-friends",
                     "/habit/{habitId}/friends/profile-pictures",
                     "/habit/{habitId}/friends/profile-pictures")
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
@@ -220,7 +221,8 @@ public class SecurityConfig {
                     "/user/{userId}/habit",
                     "/habit/custom",
                     "/custom/shopping-list-items/{userId}/{habitId}/custom-shopping-list-items",
-                    "/friends/{userId}/add/{friendId}",
+                    "/friends/{friendId}",
+                    "/friends/block/{toBlockId}",
                     "/custom/shopping-list-items/{userId}/{habitId}/custom-shopping-list-items")
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.PUT,
@@ -231,7 +233,6 @@ public class SecurityConfig {
                     HABIT_ASSIGN_ID + "/update-habit-duration",
                     "/habit/assign/{habitAssignId}/updateProgressNotificationHasDisplayed",
                     HABIT_ASSIGN_ID + "/allUserAndCustomList",
-                    "/friends/{userId}/confirm/{requesterId}",
                     HABIT_ASSIGN_ID + "/allUserAndCustomList")
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.PATCH,
@@ -246,7 +247,8 @@ public class SecurityConfig {
                     USER_SHOPPING_LIST + "/{shoppingListItemId}/status/{status}",
                     USER_SHOPPING_LIST + "/{userShoppingListItemId}",
                     "/user/profilePicture",
-                    "/user/deleteProfilePicture")
+                    "/user/deleteProfilePicture",
+                    "/friends/{friendId}/acceptFriend")
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.DELETE,
                     ECONEWS_COMMENTS,
@@ -258,7 +260,9 @@ public class SecurityConfig {
                     "/social-networks",
                     USER_CUSTOM_SHOPPING_LIST_ITEMS,
                     USER_SHOPPING_LIST + "/user-shopping-list-items",
-                    "/friends/{userId}/remove/{friendId}",
+                    "/friends/{friendId}",
+                    "/friends/requests/{friendId}",
+                    "/friends/{friendId}/declineFriend",
                     USER_SHOPPING_LIST + "/user-shopping-list-items")
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.GET,

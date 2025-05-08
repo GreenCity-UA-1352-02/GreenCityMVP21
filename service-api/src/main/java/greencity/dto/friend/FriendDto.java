@@ -1,4 +1,4 @@
-package greencity.dto.user;
+package greencity.dto.friend;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,11 +7,12 @@ import lombok.Setter;
 
 @Setter
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class FriendDto {
     private Long id;
     private String name;
     private String email;
     private String profilePicture;
+    private String city;
 }

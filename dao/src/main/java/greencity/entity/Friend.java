@@ -27,9 +27,13 @@ public class Friend {
     @Enumerated(EnumType.STRING)
     private FriendStatus status;
 
+    @Column(name = "city")
+    private String city;
+
     public Friend(User user, User friend, FriendStatus status) {
         this.user = user;
         this.friend = friend;
         this.status = status;
+        this.city = friend.getCity();
     }
 }

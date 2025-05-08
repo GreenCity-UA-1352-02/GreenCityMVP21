@@ -13,6 +13,7 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -624,5 +625,21 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity
             .status(HttpStatus.FORBIDDEN)
             .body(ex.getMessage());
+    }
+
+    /**
+     * Exception handler for {@link PropertyReferenceException}.
+     * This exception is thrown when the requested sort field does not exist in the entity,
+     * typically due to an invalid sort parameter in the request.
+     * @param ex the thrown {@link PropertyReferenceException}.
+     * @return a {@link ResponseEntity} with HTTP status 400 and an error message
+     *         indicating the invalid sorting field.
+     * @author [Dmytro Kravchuk]
+     */
+    @ExceptionHandler(PropertyReferenceException.class)
+    public ResponseEntity<String> handlePropertyReferenceException(PropertyReferenceException ex) {
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body("Invalid sorting field: " + ex.getPropertyName());
     }
 }

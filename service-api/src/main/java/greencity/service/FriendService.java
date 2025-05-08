@@ -1,19 +1,28 @@
 package greencity.service;
 
-import greencity.dto.user.FriendDto;
+import greencity.dto.friend.FriendCardDto;
+import greencity.dto.friend.FriendDto;
+import greencity.dto.friend.FriendSearchRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface FriendService {
     List<FriendDto> getFriends(Long userId);
 
-    // Найти нового друга по имени или имени пользователя
-    List<FriendDto> searchNewFriends(String searchTerm, Long currentUserId);
-
     void addFriend(Long userId, Long friendId);
 
-    void removeFriend(Long userId, Long friendId);
+    void confirmFriend(Long requesterId);
 
-    void confirmFriend(Long userId, Long requesterId);
+    Page<FriendCardDto> searchNewFriends(FriendSearchRequest request, Pageable pageable);
 
-    void blockUser(Long userId, Long toBlockId);
+    void declineFriend(Long friendId);
+
+    Long getCurrentUserId();
+
+    void removeFriend(Long friendId);
+
+    void cancelFriendRequest(Long friendId);
+
+    void blockUser(Long toBlockId);
 }
