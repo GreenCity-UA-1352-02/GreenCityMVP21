@@ -1,13 +1,13 @@
 package greencity.mapping;
 
-import greencity.dto.event.EventDto;
+import greencity.dto.event.EventResponse;
 import greencity.entity.event.Event;
 import org.modelmapper.AbstractConverter;
 
-public class EventDtoMapper extends AbstractConverter<Event, EventDto> {
+public class EventDtoMapper extends AbstractConverter<Event, EventResponse> {
     @Override
-    protected EventDto convert(Event event) {
-        return EventDto.builder()
+    protected EventResponse convert(Event event) {
+        return EventResponse.builder()
             .id(event.getId())
             .description(event.getDescription())
             .open(event.isOpen())
