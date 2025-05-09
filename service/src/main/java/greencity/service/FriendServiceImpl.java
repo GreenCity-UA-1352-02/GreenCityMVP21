@@ -59,6 +59,17 @@ public class FriendServiceImpl implements FriendService {
         return friendRepo.findAllFriendsByUserId(userId);
     }
 
+    /**
+     * Checks whether the provided user ID matches the currently authenticated user.
+     * This method retrieves the current user's email from the security context,
+     * fetches the corresponding user from the database, and compares their ID
+     * with the provided user ID.
+     * @param userId the ID to check against the currently authenticated user
+     * @return true if the provided ID matches the current user's ID; false otherwise
+     * @throws RuntimeException if the current user is not found in the repository
+     *
+     * @author Dmytro Kravchuk
+     */
     private boolean isCurrentUser(Long userId) {
         String currentUserName = SecurityContextHolder.getContext().getAuthentication().getName();
         User currentUser = userRepo.findByEmail(currentUserName)
@@ -66,6 +77,17 @@ public class FriendServiceImpl implements FriendService {
         return currentUser.getId().equals(userId);
     }
 
+    /**
+     * Removes a friendship between the currently authenticated user and the specified friend.
+     * This method first retrieves the current user's ID from the security context, then searches
+     * for a direct friendship record where the current user is the sender. If such a record exists
+     * and the status is FRIEND, it deletes that record. It also checks for and deletes the reverse
+     * friendship record (where the friend is the sender) if it exists and has the status FRIEND.
+     * @param friendId the ID of the user to remove from the current user's friend list
+     * @throws RuntimeException if the friendship does not exist or the current user is not allowed to remove it
+     *
+     * @author Dmytro Kravchuk
+     */
     @Override
     @Transactional
     public void removeFriend(Long friendId) {
@@ -161,6 +183,9 @@ public class FriendServiceImpl implements FriendService {
      */
     @Override
     public Page<FriendCardDto> searchNewFriends(FriendSearchRequest request, Pageable pageable) {
+        if (request.getUserId() == null) {
+            throw new IllegalArgumentException("User ID must not be null");
+        }
         if (request.getFilterByCity() == null && request.getCity() != null) {
             request.setFilterByCity(false);
         }
@@ -264,25 +289,46 @@ public class FriendServiceImpl implements FriendService {
      * @author Dmytro Kravchuk
      */
     public void addFriend(Long userId, Long friendId) {
+        if (userId == null || friendId == null) {
+            throw new IllegalArgumentException("User ID and friend ID must not be null.");
+        }
+        if (userId.equals(friendId)) {
+            throw new IllegalArgumentException("You cannot add yourself as a friend.");
+        }
         if (!isCurrentUser(userId)) {
             throw new IllegalStateException("You cannot send friend requests on behalf of another user.");
         }
 
-        if (userId == null || friendId == null) {
-            throw new IllegalArgumentException("User ID and friend ID must not be null.");
-        }
-
-        if (userId.equals(friendId)) {
-            throw new IllegalArgumentException("You cannot add yourself as a friend.");
-        }
-
-        final User user =
-            userRepo.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found with ID: "
-                + userId));
-
+        User user = userRepo.findById(userId)
+            .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
         final User friend = userRepo.findById(friendId)
             .orElseThrow(() -> new IllegalArgumentException("Friend not found with ID: " + friendId));
 
+        checkIfBlocked(userId, friendId);
+        checkForExistingRequest(userId, friendId);
+        Friend friendRequest = new Friend();
+        friendRequest.setUser(user);
+        friendRequest.setFriend(friend);
+        friendRequest.setStatus(FriendStatus.REQUESTED);
+        friendRequest.setCity(friend.getCity());
+        friendRepo.save(friendRequest);
+    }
+
+    /**
+     * Checks if there is a block relationship between two users.
+     *
+     * <p>
+     * This method verifies if the user identified by {@code userId} has blocked
+     * the user with {@code friendId} or if the reverse block exists.
+     * If either block relationship is found, an exception is thrown.
+     * </p>
+     *
+     * @param userId   the ID of the user initiating the action.
+     * @param friendId the ID of the target user to check.
+     * @throws FriendRequestException if a block exists between the specified users.
+     * @author Dmytro Kravchuk
+     */
+    private void checkIfBlocked(Long userId, Long friendId) {
         Friend blockByUser = friendRepo.findByUserIdAndFriendId(userId, friendId);
         if (blockByUser != null && blockByUser.getStatus() == FriendStatus.BLOCKED) {
             throw new FriendRequestException("You have blocked this user, and you cannot send a friend request.");
@@ -290,31 +336,48 @@ public class FriendServiceImpl implements FriendService {
 
         Friend blockByFriend = friendRepo.findByUserIdAndFriendId(friendId, userId);
         if (blockByFriend != null && blockByFriend.getStatus() == FriendStatus.BLOCKED) {
-            throw new FriendRequestException("You cannot send a friend request to this user because "
-                + "they have blocked you.");
+            throw new FriendRequestException("You cannot send a friend request to this user because they have "
+                + "blocked you.");
         }
+    }
 
+    /**
+     * Checks for the existence of a friend request or current friend relationship between two users.
+     *
+     * <p>
+     * This method performs the following validation steps:
+     * </p>
+     * <ul>
+     * <li>Checks if the current user has already sent a friend request to the target user.</li>
+     * <li>Checks if the current user has received a friend request from the target user.</li>
+     * <li>Checks if the users are already friends.</li>
+     * </ul>
+     *
+     * <p>
+     * If any of the above conditions are met, an appropriate {@link FriendRequestException} is thrown.
+     * </p>
+     *
+     * @param userId   the ID of the user initiating the friend request
+     * @param friendId the ID of the targeted user
+     * @throws FriendRequestException if a friend request already exists in either direction,
+     *                                or if the users are already friends
+     *
+     * @author Dmytro Kravchuk
+     */
+    private void checkForExistingRequest(Long userId, Long friendId) {
         Friend existingRequest = friendRepo.findByUserIdAndFriendId(userId, friendId);
         if (existingRequest != null && existingRequest.getStatus() == FriendStatus.REQUESTED) {
             throw new FriendRequestException("You have already sent a friend request to this user.");
         }
 
         Friend reverseRequest = friendRepo.findByUserIdAndFriendId(friendId, userId);
+
         if (reverseRequest != null && reverseRequest.getStatus() == FriendStatus.REQUESTED) {
             throw new FriendRequestException("You have already received a friend request from this user.");
         }
-
         if (existingRequest != null && existingRequest.getStatus() == FriendStatus.FRIEND) {
             throw new FriendRequestException("You are already friends.");
         }
-
-        Friend friendRequest = new Friend();
-        friendRequest.setUser(user);
-        friendRequest.setFriend(friend);
-        friendRequest.setStatus(FriendStatus.REQUESTED);
-        friendRequest.setCity(friend.getCity());
-
-        friendRepo.save(friendRequest);
     }
 
     /**
@@ -403,5 +466,21 @@ public class FriendServiceImpl implements FriendService {
 
         Friend blocked = new Friend(user, toBlock, FriendStatus.BLOCKED);
         friendRepo.save(blocked);
+    }
+
+    /**
+     * Verifies if the given user ID matches the ID of the currently authenticated user.
+
+     * This method is designed for testing purposes to check the behavior of the private
+     * {@code isCurrentUser} method.
+     * </p>
+     *
+     * @param userId the ID of the user to check against the currently authenticated user.
+     * @return {@code true} if the given user ID matches the current user's ID, {@code false} otherwise.
+     *
+     * @author Dmytro Kravchuk
+     */
+    public boolean checkIfCurrentUser(Long userId) {
+        return isCurrentUser(userId);
     }
 }
