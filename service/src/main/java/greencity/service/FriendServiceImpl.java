@@ -450,9 +450,9 @@ public class FriendServiceImpl implements FriendService {
     public void blockUser(Long toBlockId) {
         Long currentUserId = getCurrentUserId();
         User user = userRepo.findById(currentUserId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+            .orElseThrow(() -> new UserNotFoundException("User not found"));
         User toBlock = userRepo.findById(toBlockId)
-            .orElseThrow(() -> new RuntimeException("User to block not found"));
+            .orElseThrow(() -> new UserNotFoundException("User to block not found"));
 
         Friend existing = friendRepo.findByUserIdAndFriendId(currentUserId, toBlockId);
         if (existing != null) {
@@ -470,14 +470,10 @@ public class FriendServiceImpl implements FriendService {
 
     /**
      * Verifies if the given user ID matches the ID of the currently authenticated user.
-
      * This method is designed for testing purposes to check the behavior of the private
      * {@code isCurrentUser} method.
-     * </p>
-     *
      * @param userId the ID of the user to check against the currently authenticated user.
      * @return {@code true} if the given user ID matches the current user's ID, {@code false} otherwise.
-     *
      * @author Dmytro Kravchuk
      */
     public boolean checkIfCurrentUser(Long userId) {

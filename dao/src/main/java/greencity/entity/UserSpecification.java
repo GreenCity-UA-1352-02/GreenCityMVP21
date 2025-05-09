@@ -28,15 +28,12 @@ public class UserSpecification implements Specification<User> {
         query.distinct(true);
         List<Predicate> predicates = new ArrayList<>();
 
-        // Поиск по имени
         if (searchTerm != null && !searchTerm.isEmpty()) {
             predicates.add(cb.like(cb.lower(root.get("name")), "%" + searchTerm.toLowerCase() + "%"));
         }
 
-        // Исключение текущего пользователя
         predicates.add(cb.notEqual(root.get("id"), currentUserId));
 
-        // Фильтрация по городу
         if (filterByCity != null && filterByCity) {
             Subquery<String> citySubquery = query.subquery(String.class);
             Root<User> currentUser = citySubquery.from(User.class);
@@ -49,25 +46,21 @@ public class UserSpecification implements Specification<User> {
         }
 
         if (filterByMutualFriends != null && filterByMutualFriends) {
-            // Подзапрос: получить ID всех друзей текущего пользователя
             Subquery<Long> myFriendsSubquery = query.subquery(Long.class);
             Root<Friend> myFriendRoot = myFriendsSubquery.from(Friend.class);
             myFriendsSubquery.select(myFriendRoot.get("friend").get("id"))
                 .where(cb.equal(myFriendRoot.get("user").get("id"), currentUserId));
 
-            // Подзапрос: получить ID друзей моих друзей
             Subquery<Long> friendsOfFriendsSubquery = query.subquery(Long.class);
             Root<Friend> fofRoot = friendsOfFriendsSubquery.from(Friend.class);
             friendsOfFriendsSubquery.select(fofRoot.get("friend").get("id"))
                 .where(fofRoot.get("user").get("id").in(myFriendsSubquery));
 
-            // Главный предикат: root.id входит либо в друзей, либо в друзей друзей
             predicates.add(cb.or(
                 root.get("id").in(myFriendsSubquery),
                 root.get("id").in(friendsOfFriendsSubquery)));
         }
 
-        // Фильтрация по FriendId (если нужно)
         if (friendId != null) {
             predicates.add(cb.equal(root.get("id"), friendId));
         }
