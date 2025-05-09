@@ -4,6 +4,7 @@ import greencity.constant.AppConstant;
 import greencity.dto.PageableAdvancedDto;
 import greencity.dto.econews.*;
 import greencity.dto.econewscomment.*;
+import greencity.dto.event.*;
 import greencity.dto.habit.*;
 import greencity.dto.habitfact.*;
 import greencity.dto.language.LanguageDTO;
@@ -17,6 +18,10 @@ import greencity.dto.tag.*;
 import greencity.dto.user.*;
 import greencity.dto.verifyemail.VerifyEmailVO;
 import greencity.entity.*;
+import greencity.entity.event.Address;
+import greencity.entity.event.Event;
+import greencity.entity.event.EventDateLocation;
+import greencity.entity.event.EventImage;
 import greencity.entity.localization.ShoppingListItemTranslation;
 import greencity.entity.localization.TagTranslation;
 import greencity.enums.*;
@@ -46,6 +51,11 @@ public class ModelUtils {
 
     public static Tag getTag() {
         return new Tag(1L, TagType.ECO_NEWS, getTagTranslations(), Collections.emptyList(), Collections.emptySet());
+    }
+
+    public static List<Tag> getEventTags() {
+        return List.of(
+            new Tag(1L, TagType.EVENT, getEventTagTranslations(), Collections.emptyList(), Collections.emptySet()));
     }
 
     public static Tag getHabitTag() {
@@ -383,7 +393,7 @@ public class ModelUtils {
 
     public static List<TagTranslationVO> getTagTranslationsVO() {
         return Arrays.asList(TagTranslationVO.builder().id(1L).name("Новини")
-            .languageVO(LanguageVO.builder().id(1L).code("ua").build()).build(),
+                .languageVO(LanguageVO.builder().id(1L).code("ua").build()).build(),
             TagTranslationVO.builder().id(2L).name("News").languageVO(LanguageVO.builder().id(2L).code("en").build())
                 .build());
     }
@@ -666,6 +676,117 @@ public class ModelUtils {
             .id(2L)
             .text("item")
             .status(ShoppingListItemStatus.INPROGRESS)
+            .build();
+    }
+
+    public static Event getEvent() {
+        return Event.builder()
+            .id(1L)
+            .title("title")
+            .description("Let's talk about Spring Boot")
+            .isOpen(true)
+            .eventDatesLocations(getEventDateLocationAll())
+            .author(getUser())
+            .tags(getEventTags())
+            .mainImage(getEventImages().getFirst())
+            .images(getEventImages())
+            .build();
+    }
+
+    public static List<EventDateLocation> getEventDateLocationAll() {
+        List<EventDateLocation> list = new ArrayList<>();
+        return List.of(EventDateLocation.builder()
+            .id(1L)
+            .startTime(ZonedDateTime.of(2027, 11, 12, 22, 0, 0, 0, ZoneOffset.UTC))
+            .endTime(ZonedDateTime.of(2027, 12, 12, 22, 0, 0, 0, ZoneOffset.UTC))
+            .onlineLink("https://meet.google.com/test")
+            .address(getAddress())
+            .build());
+    }
+
+    public static List<EventDateLocation> getEventDateLocationOffline() {
+        List<EventDateLocation> list = new ArrayList<>();
+        return List.of(EventDateLocation.builder()
+            .id(1L)
+            .startTime(ZonedDateTime.of(2027, 11, 12, 22, 0, 0, 0, ZoneOffset.UTC))
+            .endTime(ZonedDateTime.of(2027, 12, 12, 22, 0, 0, 0, ZoneOffset.UTC))
+            .onlineLink("https://meet.google.com/test")
+            .address(getAddress())
+            .build());
+    }
+
+    public static List<EventDateLocation> getEventDateLocationOnline() {
+        List<EventDateLocation> list = new ArrayList<>();
+        return List.of(EventDateLocation.builder()
+            .id(1L)
+            .startTime(ZonedDateTime.of(2027, 11, 12, 22, 0, 0, 0, ZoneOffset.UTC))
+            .endTime(ZonedDateTime.of(2027, 12, 12, 22, 0, 0, 0, ZoneOffset.UTC))
+            .onlineLink("https://meet.google.com/test")
+            .build());
+    }
+
+    public static EventImage getEventImage() {
+        return EventImage.builder()
+            .id(1L)
+            .link("Link")
+            .build();
+    }
+
+    public static List<EventImage> getEventImages() {
+        List<EventImage> result = new ArrayList<>();
+        result.add(EventImage.builder()
+            .id(1L)
+            .link("Link1")
+            .build());
+        result.add(EventImage.builder()
+            .id(2L)
+            .link("Link2")
+            .build());
+        return result;
+    }
+
+
+    public static EventDateLocationDto getEventDateLocationOnlineDto() {
+        return EventDateLocationDto.builder()
+            .id(1L)
+            .startDate(ZonedDateTime.of(2027, 11, 12, 22, 0, 0, 0, ZoneOffset.UTC))
+            .finishDate(ZonedDateTime.of(2027, 12, 12, 22, 0, 0, 0, ZoneOffset.UTC))
+            .onlineLink("https://meet.google.com/test")
+            .build();
+    }
+
+    public static EventDateLocationDto getEventDateLocationOfflineDto() {
+        return EventDateLocationDto.builder()
+            .id(1L)
+            .startDate(ZonedDateTime.of(2027, 11, 12, 22, 0, 0, 0, ZoneOffset.UTC))
+            .finishDate(ZonedDateTime.of(2027, 12, 12, 22, 0, 0, 0, ZoneOffset.UTC))
+            .coordinates(getAddressDto())
+            .build();
+    }
+
+    public static EventDateLocationDto getEventDateLocationAllDto() {
+        return EventDateLocationDto.builder()
+            .id(1L)
+            .startDate(ZonedDateTime.of(2027, 11, 12, 22, 0, 0, 0, ZoneOffset.UTC))
+            .finishDate(ZonedDateTime.of(2027, 12, 12, 22, 0, 0, 0, ZoneOffset.UTC))
+            .coordinates(getAddressDto())
+            .onlineLink("https://meet.google.com/test")
+            .build();
+    }
+
+    public static AddressDto getAddressDto() {
+        return AddressDto.builder()
+            .id(1L)
+            .latitude(50.4501)
+            .longitude(30.5234)
+            .build();
+    }
+
+    public static Address getAddress() {
+        return Address.builder()
+            .id(1L)
+            .latitude(50.4501)
+            .longitude(30.5234)
             .build();
     }
 }
