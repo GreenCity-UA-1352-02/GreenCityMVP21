@@ -102,7 +102,7 @@ class EventDateLocationServiceImplTest {
     }
 
     @Test
-    void update_OfflineDateLocation_Success() {
+    void update_WasOffline_AndStillOffline_UpdatesAddress_Success() {
         EventDateLocationDto dto = ModelUtils.getEventDateLocationOfflineDto();
         EventDateLocation eventDateLocation =
             ModelUtils.getEventDateLocationOffline().get(0); // get(0) замість getFirst()
@@ -124,7 +124,7 @@ class EventDateLocationServiceImplTest {
     }
 
     @Test
-    void update_WasOnline_Success() {
+    void update_WasOffline_AndBecameOnline_DeletesAddress_Success() {
         EventDateLocationDto dto = ModelUtils.getEventDateLocationOnlineDto();
         EventDateLocation eventDateLocation = ModelUtils.getEventDateLocationOffline().get(0);
 
@@ -144,7 +144,7 @@ class EventDateLocationServiceImplTest {
     }
 
     @Test
-    void update_WasOffline_Success() {
+    void update_WasOnline_AndBecameOffline_CreatesAddress_Success() {
         EventDateLocationDto dto = ModelUtils.getEventDateLocationOfflineDto();
         EventDateLocation eventDateLocation = ModelUtils.getEventDateLocationOnline().get(0);
         AddressDto savedAddressDto = dto.coordinates();
