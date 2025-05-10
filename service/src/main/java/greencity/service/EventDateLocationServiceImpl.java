@@ -75,6 +75,7 @@ public class EventDateLocationServiceImpl implements EventDateLocationService {
         EventDateLocation eventDateLocation = eventDateLocationRepo.findById(eventDateLocationDto.id())
             .orElseThrow(() -> new NotFoundException(ErrorMessage.WRONG_EVENT_ID));
 
+        final EventType previousType = eventDateLocation.getEventType();
         boolean isOnline = eventDateLocationDto.onlineLink() != null;
         boolean isOffline = eventDateLocationDto.coordinates() != null;
 
@@ -83,23 +84,25 @@ public class EventDateLocationServiceImpl implements EventDateLocationService {
         eventDateLocation.setEndTime(eventDateLocationDto.finishDate());
         eventDateLocation.setOnlineLink(isOnline ? eventDateLocationDto.onlineLink() : null);
 
-        updateAddress(eventDateLocationDto, isOffline, eventDateLocation);
+        updateAddress(eventDateLocationDto, previousType, eventDateLocation);
 
         EventDateLocation updatedEventDateLocation = eventDateLocationRepo.save(eventDateLocation);
         return mapToDto(updatedEventDateLocation);
     }
 
-    private void updateAddress(EventDateLocationDto eventDateLocationDto, boolean isOffline,
+    private void updateAddress(EventDateLocationDto eventDateLocationDto,
+                               EventType previousType,
                                EventDateLocation eventDateLocation) {
-        if (isOffline) {
-            if (wasOffline(eventDateLocation)) {
+        EventType newType = eventDateLocation.getEventType();
+        if (newType == EventType.OFFLINE) {
+            if (previousType == EventType.OFFLINE) {
                 addressService.update(eventDateLocation.getAddress().getId(), eventDateLocationDto.coordinates());
             } else {
                 AddressDto savedAddressDto = addressService.save(eventDateLocationDto.coordinates());
                 Address address = modelMapper.map(savedAddressDto, Address.class);
                 eventDateLocation.setAddress(address);
             }
-        } else if (wasOffline(eventDateLocation)) {
+        } else if (previousType == EventType.OFFLINE) {
             addressService.delete(eventDateLocation.getAddress().getId());
             eventDateLocation.setAddress(null);
         }
