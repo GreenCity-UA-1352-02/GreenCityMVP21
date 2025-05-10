@@ -39,6 +39,13 @@ import java.util.*;
 import static greencity.enums.UserStatus.ACTIVATED;
 
 public class ModelUtils {
+    public static final String TITLE = "title";
+    public static final String DESCRIPTION = "Let's talk about Spring Boot";
+    public static final String EVENT_TAG = "Social";
+    public static final ZonedDateTime START_TIME = ZonedDateTime.of(2027, 11, 12, 22, 0, 0, 0, ZoneOffset.UTC);
+    public static final ZonedDateTime END_TIME = ZonedDateTime.of(2027, 12, 12, 22, 0, 0, 0, ZoneOffset.UTC);
+    public static final String ONLINE_LINK = "https://meet.google.com/test";
+    public static final String IMAGE_LINK = "Link";
     public static User TEST_USER = createUser();
     public static User TEST_USER_ROLE_USER = createUserRoleUser();
     public static UserVO TEST_USER_VO = createUserVO();
@@ -85,7 +92,7 @@ public class ModelUtils {
         return Arrays.asList(
             TagTranslation.builder().id(1L).name("Соціальний").language(getLanguageUa()).build(),
             TagTranslation.builder().id(2L).name("Social").language(language).build(),
-            TagTranslation.builder().id(3L).name("Соціальний").language(language).build());
+            TagTranslation.builder().id(3L).name("Соціальний").language(getLanguageFr()).build());
     }
 
     public static TagDto getTagDto() {
@@ -182,6 +189,10 @@ public class ModelUtils {
 
     public static Language getLanguageUa() {
         return new Language(2L, "ua", Collections.emptyList(), Collections.emptyList());
+    }
+
+    public static Language getLanguageFr() {
+        return new Language(1L, "Fr", Collections.emptyList(), Collections.emptyList());
     }
 
     public static EcoNews getEcoNews() {
@@ -679,11 +690,62 @@ public class ModelUtils {
             .build();
     }
 
+    public static AddEventRequest getAddEventRequest() {
+        return AddEventRequest.builder()
+            .title(TITLE)
+            .description(DESCRIPTION)
+            .isOpen(true)
+            .datesLocations(List.of(getEventDateLocationAllDto()))
+            .tags(List.of(EVENT_TAG))
+            .build();
+    }
+
+    public static AddEventRequest getAddEventRequestWithoutTags() {
+        return AddEventRequest.builder()
+            .title(TITLE)
+            .description(DESCRIPTION)
+            .isOpen(true)
+            .datesLocations(List.of(getEventDateLocationAllDto()))
+            .tags(List.of())
+            .build();
+    }
+
+    public static AddEventRequest getAddEventRequestWithoutAddress() {
+        return AddEventRequest.builder()
+            .title(TITLE)
+            .description(DESCRIPTION)
+            .isOpen(true)
+            .datesLocations(List.of(getEventDateLocationOnlineDto()))
+            .tags(List.of(EVENT_TAG))
+            .build();
+    }
+
+    public static UpdateEventRequest getUpdateEventRequest() {
+        return UpdateEventRequest.builder()
+            .id(1L)
+            .title(TITLE)
+            .description(DESCRIPTION)
+            .isOpen(true)
+            .datesLocations(List.of(getEventDateLocationAllDto()))
+            .tags(List.of(EVENT_TAG))
+            .build();
+    }
+
+    public static EventResponse getEventResponse() {
+        return EventResponse.builder()
+            .id(1L)
+            .title(TITLE)
+            .description(DESCRIPTION)
+            .open(true)
+            .titleImage(IMAGE_LINK)
+            .build();
+    }
+
     public static Event getEvent() {
         return Event.builder()
             .id(1L)
-            .title("title")
-            .description("Let's talk about Spring Boot")
+            .title(TITLE)
+            .description(DESCRIPTION)
             .isOpen(true)
             .eventDatesLocations(getEventDateLocationAll())
             .author(getUser())
@@ -697,9 +759,9 @@ public class ModelUtils {
         List<EventDateLocation> list = new ArrayList<>();
         return List.of(EventDateLocation.builder()
             .id(1L)
-            .startTime(ZonedDateTime.of(2027, 11, 12, 22, 0, 0, 0, ZoneOffset.UTC))
-            .endTime(ZonedDateTime.of(2027, 12, 12, 22, 0, 0, 0, ZoneOffset.UTC))
-            .onlineLink("https://meet.google.com/test")
+            .startTime(START_TIME)
+            .endTime(END_TIME)
+            .onlineLink(ONLINE_LINK)
             .address(getAddress())
             .eventType(EventType.ONLINE_OFFLINE)
             .build());
@@ -709,8 +771,8 @@ public class ModelUtils {
         List<EventDateLocation> list = new ArrayList<>();
         return List.of(EventDateLocation.builder()
             .id(1L)
-            .startTime(ZonedDateTime.of(2027, 11, 12, 22, 0, 0, 0, ZoneOffset.UTC))
-            .endTime(ZonedDateTime.of(2027, 12, 12, 22, 0, 0, 0, ZoneOffset.UTC))
+            .startTime(START_TIME)
+            .endTime(END_TIME)
             .eventType(EventType.OFFLINE)
             .address(getAddress())
             .build());
@@ -720,9 +782,9 @@ public class ModelUtils {
         List<EventDateLocation> list = new ArrayList<>();
         return List.of(EventDateLocation.builder()
             .id(1L)
-            .startTime(ZonedDateTime.of(2027, 11, 12, 22, 0, 0, 0, ZoneOffset.UTC))
-            .endTime(ZonedDateTime.of(2027, 12, 12, 22, 0, 0, 0, ZoneOffset.UTC))
-            .onlineLink("https://meet.google.com/test")
+            .startTime(START_TIME)
+            .endTime(END_TIME)
+            .onlineLink(ONLINE_LINK)
             .eventType(EventType.ONLINE)
             .build());
     }
@@ -730,7 +792,7 @@ public class ModelUtils {
     public static EventImage getEventImage() {
         return EventImage.builder()
             .id(1L)
-            .link("Link")
+            .link(IMAGE_LINK)
             .build();
     }
 
@@ -738,11 +800,28 @@ public class ModelUtils {
         List<EventImage> result = new ArrayList<>();
         result.add(EventImage.builder()
             .id(1L)
-            .link("Link1")
+            .link(IMAGE_LINK)
             .build());
         result.add(EventImage.builder()
             .id(2L)
-            .link("Link2")
+            .link(IMAGE_LINK)
+            .build());
+        return result;
+    }
+
+
+    public static EventImageDto getEventImageDto() {
+        return EventImageDto.builder()
+            .id(1L)
+            .link(IMAGE_LINK)
+            .build();
+    }
+
+    public static List<EventImageDto> getEventImageDtos() {
+        List<EventImageDto> result = new ArrayList<>();
+        result.add(EventImageDto.builder()
+            .id(1L)
+            .link(IMAGE_LINK)
             .build());
         return result;
     }
@@ -751,17 +830,17 @@ public class ModelUtils {
     public static EventDateLocationDto getEventDateLocationOnlineDto() {
         return EventDateLocationDto.builder()
             .id(1L)
-            .startDate(ZonedDateTime.of(2027, 11, 12, 22, 0, 0, 0, ZoneOffset.UTC))
-            .finishDate(ZonedDateTime.of(2027, 12, 12, 22, 0, 0, 0, ZoneOffset.UTC))
-            .onlineLink("https://meet.google.com/test")
+            .startDate(START_TIME)
+            .finishDate(END_TIME)
+            .onlineLink(ONLINE_LINK)
             .build();
     }
 
     public static EventDateLocationDto getEventDateLocationOfflineDto() {
         return EventDateLocationDto.builder()
             .id(1L)
-            .startDate(ZonedDateTime.of(2027, 11, 12, 22, 0, 0, 0, ZoneOffset.UTC))
-            .finishDate(ZonedDateTime.of(2027, 12, 12, 22, 0, 0, 0, ZoneOffset.UTC))
+            .startDate(START_TIME)
+            .finishDate(END_TIME)
             .coordinates(getAddressDto())
             .build();
     }
@@ -769,10 +848,10 @@ public class ModelUtils {
     public static EventDateLocationDto getEventDateLocationAllDto() {
         return EventDateLocationDto.builder()
             .id(1L)
-            .startDate(ZonedDateTime.of(2027, 11, 12, 22, 0, 0, 0, ZoneOffset.UTC))
-            .finishDate(ZonedDateTime.of(2027, 12, 12, 22, 0, 0, 0, ZoneOffset.UTC))
+            .startDate(START_TIME)
+            .finishDate(END_TIME)
             .coordinates(getAddressDto())
-            .onlineLink("https://meet.google.com/test")
+            .onlineLink(ONLINE_LINK)
             .build();
     }
 

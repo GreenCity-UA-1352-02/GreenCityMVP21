@@ -1,7 +1,9 @@
 package greencity.dto.event;
 
 import java.util.List;
+import lombok.Builder;
 
+@Builder
 public record UpdateEventRequest(
     long id,
     String title,
