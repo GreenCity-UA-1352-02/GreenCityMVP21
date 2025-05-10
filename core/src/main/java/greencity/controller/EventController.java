@@ -35,7 +35,8 @@ public class EventController {
             .body(eventService.save(addEventRequest, images, principal.getName()));
     }
 
-    @PreAuthorize("hasRole('ADMIN') || @eventRepo.existsByIdAndAuthor_Email(#updateEventRequest.id, principal.username)")
+    @PreAuthorize
+        ("hasRole('ADMIN') || @eventRepo.existsByIdAndAuthor_Email(#updateEventRequest.id, principal.username)")
     @PutMapping(value = "/update", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<EventResponse> update(
         @RequestPart UpdateEventRequest updateEventRequest,
