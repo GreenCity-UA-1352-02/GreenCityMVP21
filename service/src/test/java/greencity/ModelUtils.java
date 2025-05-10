@@ -701,6 +701,7 @@ public class ModelUtils {
             .endTime(ZonedDateTime.of(2027, 12, 12, 22, 0, 0, 0, ZoneOffset.UTC))
             .onlineLink("https://meet.google.com/test")
             .address(getAddress())
+            .eventType(EventType.ONLINE_OFFLINE)
             .build());
     }
 
@@ -710,7 +711,7 @@ public class ModelUtils {
             .id(1L)
             .startTime(ZonedDateTime.of(2027, 11, 12, 22, 0, 0, 0, ZoneOffset.UTC))
             .endTime(ZonedDateTime.of(2027, 12, 12, 22, 0, 0, 0, ZoneOffset.UTC))
-            .onlineLink("https://meet.google.com/test")
+            .eventType(EventType.OFFLINE)
             .address(getAddress())
             .build());
     }
@@ -722,6 +723,7 @@ public class ModelUtils {
             .startTime(ZonedDateTime.of(2027, 11, 12, 22, 0, 0, 0, ZoneOffset.UTC))
             .endTime(ZonedDateTime.of(2027, 12, 12, 22, 0, 0, 0, ZoneOffset.UTC))
             .onlineLink("https://meet.google.com/test")
+            .eventType(EventType.ONLINE)
             .build());
     }
 
