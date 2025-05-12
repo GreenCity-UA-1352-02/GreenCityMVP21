@@ -39,7 +39,7 @@ public class EventController {
         ("hasRole('ADMIN') || @eventRepo.existsByIdAndAuthor_Email(#updateEventRequest.id, principal.username)")
     @PutMapping(value = "/update", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<EventResponse> update(
-        @RequestPart UpdateEventRequest updateEventRequest,
+        @RequestPart @Validated UpdateEventRequest updateEventRequest,
         @RequestPart(required = false) @EventImageValidation List<MultipartFile> images
     ) {
         return ResponseEntity.status(HttpStatus.OK)
