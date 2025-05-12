@@ -13,8 +13,8 @@ public class FriendCardDto {
     private String city;
     private String profilePicture;
     private Double rating;
-    private Long friendCount; // Должен быть Long, а не int
-    private Boolean isFriend; // Должен быть Boolean, а не boolean
+    private Long friendCount;
+    private Boolean isFriend;
 
     public FriendCardDto(Long id, String name, String city, String profilePicture, Double rating, Long friendCount,
         Boolean isFriend) {

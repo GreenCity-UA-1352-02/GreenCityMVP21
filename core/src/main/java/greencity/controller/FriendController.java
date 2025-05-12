@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -96,11 +97,11 @@ public class FriendController {
     }
 
     /**
-     * Метод для блокировки пользователя.
+     * Method to block a user.
      *
-     * @param toBlockId ID пользователя, которого нужно заблокировать.
-     * @return ResponseEntity со статусом 200 (OK) при успешной блокировке, или 400
-     *         (BAD_REQUEST) в случае ошибки.
+     * @param toBlockId ID of the user to be blocked.
+     * @return ResponseEntity with status 200 (OK) if the blocking was successful,
+     *         or 400 (BAD_REQUEST) in case of an error.
      */
     @Operation(summary = "Block a user.")
     @ApiResponses(value = {
@@ -269,16 +270,24 @@ public class FriendController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = "Friend request sent successfully."),
         @ApiResponse(responseCode = "400", description = "Invalid friend ID or request already exists."),
+        @ApiResponse(responseCode = "403", description = "Forbidden. You cannot add yourself as a friend."),
+        @ApiResponse(responseCode = "401", description = "Unauthorized. User is not authenticated."),
         @ApiResponse(responseCode = "500", description = "An unexpected error occurred.")
     })
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/{friendId}")
     public ResponseEntity<?> addFriend(@PathVariable Long friendId) {
         try {
             Long currentUserId = friendService.getCurrentUserId();
+            if (currentUserId.equals(friendId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You cannot add yourself as a friend.");
+            }
             friendService.addFriend(currentUserId, friendId);
             return ResponseEntity.status(HttpStatus.CREATED).body("Friend request sent successfully.");
         } catch (FriendRequestException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred.");
         }
