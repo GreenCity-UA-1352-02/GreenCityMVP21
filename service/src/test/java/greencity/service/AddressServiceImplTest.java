@@ -18,7 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
 @ExtendWith(MockitoExtension.class)
-public class AddressServiceImplTest {
+class AddressServiceImplTest {
 
     @Mock
     private AddressRepo addressRepo;
@@ -101,7 +101,7 @@ public class AddressServiceImplTest {
         when(addressRepo.findById(999L)).thenReturn(Optional.empty());
 
         NotFoundException ex = assertThrows(NotFoundException.class,
-            () -> addressService.update(999L, addressDto));
+            () -> addressService.delete(999L));
 
         assertEquals(ErrorMessage.WRONG_ADDRESS_ID, ex.getMessage());
         verify(addressRepo).findById(999L);

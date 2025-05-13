@@ -94,7 +94,8 @@ public class EventDateLocationServiceImpl implements EventDateLocationService {
                                EventType previousType,
                                EventDateLocation eventDateLocation) {
         EventType newType = eventDateLocation.getEventType();
-        if (newType == EventType.OFFLINE) {
+        boolean addressRequired = newType != EventType.ONLINE;
+        if (addressRequired) {
             if (previousType == EventType.OFFLINE) {
                 addressService.update(eventDateLocation.getAddress().getId(), eventDateLocationDto.coordinates());
             } else {
@@ -102,7 +103,7 @@ public class EventDateLocationServiceImpl implements EventDateLocationService {
                 Address address = modelMapper.map(savedAddressDto, Address.class);
                 eventDateLocation.setAddress(address);
             }
-        } else if (previousType == EventType.OFFLINE) {
+        } else if (previousType != EventType.ONLINE) {
             addressService.delete(eventDateLocation.getAddress().getId());
             eventDateLocation.setAddress(null);
         }

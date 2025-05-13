@@ -46,6 +46,7 @@ public class ModelUtils {
     public static final ZonedDateTime END_TIME = ZonedDateTime.of(2027, 12, 12, 22, 0, 0, 0, ZoneOffset.UTC);
     public static final String ONLINE_LINK = "https://meet.google.com/test";
     public static final String IMAGE_LINK = "Link";
+    public static final String IMAGE_LINK2 = "Link2";
     public static User TEST_USER = createUser();
     public static User TEST_USER_ROLE_USER = createUserRoleUser();
     public static UserVO TEST_USER_VO = createUserVO();
@@ -192,7 +193,7 @@ public class ModelUtils {
     }
 
     public static Language getLanguageFr() {
-        return new Language(1L, "Fr", Collections.emptyList(), Collections.emptyList());
+        return new Language(3L, "Fr", Collections.emptyList(), Collections.emptyList());
     }
 
     public static EcoNews getEcoNews() {
@@ -804,7 +805,7 @@ public class ModelUtils {
             .build());
         result.add(EventImage.builder()
             .id(2L)
-            .link(IMAGE_LINK)
+            .link(IMAGE_LINK2)
             .build());
         return result;
     }
