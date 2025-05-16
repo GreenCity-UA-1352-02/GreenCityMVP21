@@ -1,5 +1,6 @@
 package greencity.entity;
 
+import greencity.enums.FriendStatus;
 import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;
 import java.util.ArrayList;
@@ -28,43 +29,64 @@ public class UserSpecification implements Specification<User> {
         query.distinct(true);
         List<Predicate> predicates = new ArrayList<>();
 
+        predicates.add(cb.notEqual(root.get("id"), currentUserId));
+
         if (searchTerm != null && !searchTerm.isEmpty()) {
             predicates.add(cb.like(cb.lower(root.get("name")), "%" + searchTerm.toLowerCase() + "%"));
         }
 
-        predicates.add(cb.notEqual(root.get("id"), currentUserId));
-
         if (filterByCity != null && filterByCity) {
-            Subquery<String> citySubquery = query.subquery(String.class);
-            Root<User> currentUser = citySubquery.from(User.class);
-            citySubquery.select(currentUser.get("city"));
-            citySubquery.where(cb.equal(currentUser.get("id"), currentUserId));
-
-            predicates.add(cb.equal(cb.lower(root.get("city")), cb.lower(citySubquery)));
+            predicates.add(createCityEqualityPredicate(query, cb, root));
         } else if (city != null && !city.isEmpty()) {
             predicates.add(cb.equal(cb.lower(root.get("city")), city.toLowerCase()));
         }
 
         if (filterByMutualFriends != null && filterByMutualFriends) {
-            Subquery<Long> myFriendsSubquery = query.subquery(Long.class);
-            Root<Friend> myFriendRoot = myFriendsSubquery.from(Friend.class);
-            myFriendsSubquery.select(myFriendRoot.get("friend").get("id"))
-                .where(cb.equal(myFriendRoot.get("user").get("id"), currentUserId));
-
-            Subquery<Long> friendsOfFriendsSubquery = query.subquery(Long.class);
-            Root<Friend> fofRoot = friendsOfFriendsSubquery.from(Friend.class);
-            friendsOfFriendsSubquery.select(fofRoot.get("friend").get("id"))
-                .where(fofRoot.get("user").get("id").in(myFriendsSubquery));
-
-            predicates.add(cb.or(
-                root.get("id").in(myFriendsSubquery),
-                root.get("id").in(friendsOfFriendsSubquery)));
+            predicates.add(createFilterByMutualFriendsPredicate(query, cb, root));
         }
 
         if (friendId != null) {
             predicates.add(cb.equal(root.get("id"), friendId));
         }
 
+        predicates.add(cb.not(root.get("id").in(createExistingFriendsSubquery(query, cb))));
+
         return cb.and(predicates.toArray(new Predicate[0]));
+    }
+
+    private Predicate createCityEqualityPredicate(CriteriaQuery<?> query, CriteriaBuilder cb, Root<User> root) {
+        Subquery<String> citySubquery = query.subquery(String.class);
+        Root<User> currentUser = citySubquery.from(User.class);
+        citySubquery.select(currentUser.get("city"))
+            .where(cb.equal(currentUser.get("id"), currentUserId));
+        return cb.equal(cb.lower(root.get("city")), cb.lower(citySubquery));
+    }
+
+    private Predicate createFilterByMutualFriendsPredicate(CriteriaQuery<?> query, CriteriaBuilder cb,
+                                                           Root<User> root) {
+        Subquery<Long> myFriendsSubquery = createFriendsSubquery(query, cb, currentUserId);
+
+        Subquery<Long> friendsOfFriendsSubquery = query.subquery(Long.class);
+        Root<Friend> fofRoot = friendsOfFriendsSubquery.from(Friend.class);
+        friendsOfFriendsSubquery.select(fofRoot.get("friend").get("id"))
+            .where(cb.and(
+                fofRoot.get("user").get("id").in(myFriendsSubquery),
+                cb.equal(fofRoot.get("status"), FriendStatus.FRIEND)
+            ));
+
+        return root.get("id").in(friendsOfFriendsSubquery);
+    }
+
+    private Subquery<Long> createExistingFriendsSubquery(CriteriaQuery<?> query, CriteriaBuilder cb) {
+        return createFriendsSubquery(query, cb, currentUserId);
+    }
+
+    private Subquery<Long> createFriendsSubquery(CriteriaQuery<?> query, CriteriaBuilder cb, Long userId) {
+        Subquery<Long> friendsSubquery = query.subquery(Long.class);
+        Root<Friend> friendRoot = friendsSubquery.from(Friend.class);
+        friendsSubquery.select(friendRoot.get("friend").get("id"))
+            .where(cb.equal(friendRoot.get("user").get("id"), userId),
+                cb.equal(friendRoot.get("status"), FriendStatus.FRIEND));
+        return friendsSubquery;
     }
 }
