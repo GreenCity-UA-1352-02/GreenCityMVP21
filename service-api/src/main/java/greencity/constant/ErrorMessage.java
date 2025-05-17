@@ -136,6 +136,7 @@ public final class ErrorMessage {
     public static final String WRONG_EVENT_ID = "Wrong event id";
     public static final String SOME_TAGS_NOT_FOUND = "Some tags not found";
     public static final String WRONG_ADDRESS_ID = "Wrong address id";
+    public static final String EVENT_NOT_FOUND = "Event not found";
 
     private ErrorMessage() {
     }
