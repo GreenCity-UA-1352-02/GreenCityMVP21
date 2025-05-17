@@ -625,4 +625,18 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
             .status(HttpStatus.FORBIDDEN)
             .body(ex.getMessage());
     }
+
+    /**
+     * Exception handler for {@link OwnLikeError}.
+     * Handles the case when a user tries to react (like/dislike) to their own event.
+     * @param ex the thrown {@link OwnLikeError}.
+     * @return a {@link ResponseEntity} with HTTP status 400 and error message in the body.
+     * @author [Dmytro Kravchuk]
+     */
+    @ExceptionHandler(OwnLikeError.class)
+    public ResponseEntity<String> handleOwnLikeError(OwnLikeError ex) {
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(ex.getMessage());
+    }
 }

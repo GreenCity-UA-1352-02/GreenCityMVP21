@@ -195,6 +195,8 @@ public class SecurityConfig {
                     "/habit/assign/{habitAssignId}",
                     "/habit/tags/search",
                     "/habit/search",
+                    "/events/reactions/{eventId}/likes",
+                    "/events/reactions/{eventId}/dislikes",
                     "/habit/{habitId}/friends/profile-pictures")
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.POST,
@@ -218,6 +220,8 @@ public class SecurityConfig {
                     USER_SHOPPING_LIST,
                     "/user/{userId}/habit",
                     "/habit/custom",
+                    "/events/reactions/{eventId}/like",
+                    "/events/reactions/{eventId}/dislike",
                     "/custom/shopping-list-items/{userId}/{habitId}/custom-shopping-list-items")
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.PUT,
