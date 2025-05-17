@@ -96,7 +96,6 @@ public class EventServiceImpl implements EventService {
         EventImageDto mainImage = eventImageService.uploadImage(image, event.getId());
         EventImage eventImage = mapToEntity(mainImage, event);
         event.setMainImage(eventImage);
-        //added this check by Dmytro Kravchuk, because he couldn't create new event
         if (event.getImages() == null) {
             event.setImages(new ArrayList<>());
         }

@@ -639,4 +639,12 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
             .status(HttpStatus.BAD_REQUEST)
             .body(ex.getMessage());
     }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<String> handleEntityNotFound(EntityNotFoundException ex) {
+        return ResponseEntity
+            .status(HttpStatus.NOT_FOUND)
+            .body("Event not found");
+    }
+
 }

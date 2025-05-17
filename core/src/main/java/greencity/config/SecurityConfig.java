@@ -220,8 +220,6 @@ public class SecurityConfig {
                     USER_SHOPPING_LIST,
                     "/user/{userId}/habit",
                     "/habit/custom",
-                    "/events/reactions/{eventId}/like",
-                    "/events/reactions/{eventId}/dislike",
                     "/custom/shopping-list-items/{userId}/{habitId}/custom-shopping-list-items")
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.PUT,
@@ -231,7 +229,9 @@ public class SecurityConfig {
                     "/user/profile",
                     HABIT_ASSIGN_ID + "/update-habit-duration",
                     "/habit/assign/{habitAssignId}/updateProgressNotificationHasDisplayed",
-                    HABIT_ASSIGN_ID + "/allUserAndCustomList")
+                    HABIT_ASSIGN_ID + "/allUserAndCustomList",
+                    "/events/reactions/{eventId}/like",
+                    "/events/reactions/{eventId}/dislike")
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.PATCH,
                     ECONEWS_COMMENTS,
