@@ -226,6 +226,14 @@ public class EventServiceImpl implements EventService {
         eventRepo.delete(event);
     }
 
+    @Override
+    public EventVO findById(Long id) {
+        Event event = eventRepo
+            .findById(id)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND + id));
+        return modelMapper.map(event, EventVO.class);
+    }
+
     private void deleteImages(Event event) {
         fileService.delete(event.getMainImage().getLink());
         eventImageService.deleteImagesByEventId(event.getId());
@@ -235,4 +243,6 @@ public class EventServiceImpl implements EventService {
         event.getEventDatesLocations().forEach(dateLocation ->
             eventDateLocationService.delete(dateLocation.getId()));
     }
+
+
 }
