@@ -640,11 +640,20 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
             .body(ex.getMessage());
     }
 
+    /**
+     * Handles {@link greencity.exception.exceptions.EntityNotFoundException} exceptions
+     * that are thrown when an entity, such as an event, is not found in the database.
+     *
+     * @param ex the exception instance containing the details of the error.
+     * @return a {@link ResponseEntity} with HTTP status 404 (Not Found) and a message indicating
+     *         that the event was not found.
+     *
+     * @author [Dmytro Kravchuk]
+     */
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<String> handleEntityNotFound(EntityNotFoundException ex) {
         return ResponseEntity
             .status(HttpStatus.NOT_FOUND)
             .body("Event not found");
     }
-
 }
