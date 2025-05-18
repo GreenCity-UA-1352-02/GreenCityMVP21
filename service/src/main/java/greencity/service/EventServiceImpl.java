@@ -91,7 +91,7 @@ public class EventServiceImpl implements EventService {
         UserVO user = restClient.findByEmail(email);
         return modelMapper.map(user, User.class);
     }
-    
+
     private void assignMainImage(Event event, MultipartFile image) {
         EventImageDto mainImage = eventImageService.uploadImage(image, event.getId());
         EventImage eventImage = mapToEntity(mainImage, event);
@@ -243,6 +243,4 @@ public class EventServiceImpl implements EventService {
         event.getEventDatesLocations().forEach(dateLocation ->
             eventDateLocationService.delete(dateLocation.getId()));
     }
-
-
 }

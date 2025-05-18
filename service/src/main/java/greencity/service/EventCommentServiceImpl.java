@@ -12,7 +12,6 @@ import greencity.entity.event.Event;
 import greencity.entity.event.EventComment;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.repository.EventCommentRepository;
-import greencity.repository.EventRepo;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.concurrent.CompletableFuture;
 import lombok.AllArgsConstructor;

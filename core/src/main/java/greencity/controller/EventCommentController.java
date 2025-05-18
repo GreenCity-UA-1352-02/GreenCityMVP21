@@ -2,7 +2,6 @@ package greencity.controller;
 
 import greencity.annotations.CurrentUser;
 import greencity.constant.HttpStatuses;
-import greencity.dto.econewscomment.AddEcoNewsCommentDtoResponse;
 import greencity.dto.eventcomment.AddEventCommentDtoRequest;
 import greencity.dto.eventcomment.AddEventCommentDtoResponse;
 import greencity.dto.user.UserVO;
@@ -23,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @Validated
 @AllArgsConstructor
 @RestController
-@RequestMapping("event/comments")
+@RequestMapping("events/comments")
 public class EventCommentController {
     private final EventCommentService eventCommentService;
 
@@ -39,8 +38,8 @@ public class EventCommentController {
     })
     @PostMapping("{eventId}")
     public ResponseEntity<AddEventCommentDtoResponse> save(@PathVariable Long eventId,
-        @Valid @RequestBody AddEventCommentDtoRequest request,
-        @Parameter(hidden = true) @CurrentUser UserVO user) {
+                                                           @Valid @RequestBody AddEventCommentDtoRequest request,
+                                                           @Parameter(hidden = true) @CurrentUser UserVO user) {
         return ResponseEntity
             .status(HttpStatus.CREATED)
             .body(eventCommentService.save(eventId, request, user));
