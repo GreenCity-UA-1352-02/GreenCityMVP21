@@ -150,7 +150,8 @@ public class SecurityConfig {
                     "/user/emailNotifications",
                     "/user/activatedUsersAmount",
                     "/user/{userId}/habit/assign",
-                    "/token")
+                    "/token",
+                    "/events/search")
                 .permitAll()
                 .requestMatchers(HttpMethod.POST,
                     "/ownSecurity/signUp",
