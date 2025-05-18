@@ -15,6 +15,7 @@ import greencity.entity.localization.TagTranslation;
 import greencity.enums.TagType;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.TagNotFoundException;
+import greencity.mapping.EventSearchResponseMapper;
 import greencity.repository.EventRepo;
 import greencity.repository.TagsRepo;
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ public class EventServiceImpl implements EventService {
     private final TagsRepo tagsRepo;
     private final EventDateLocationService eventDateLocationService;
     private final EventImageService eventImageService;
+    private final EventSearchResponseMapper eventSearchResponseMapper;
 
     @Override
     @Transactional
@@ -96,6 +98,10 @@ public class EventServiceImpl implements EventService {
         EventImageDto mainImage = eventImageService.uploadImage(image, event.getId());
         EventImage eventImage = mapToEntity(mainImage, event);
         event.setMainImage(eventImage);
+        if (event.getImages() == null) {
+            event.setImages(new ArrayList<>());
+        }
+
         event.getImages().add(eventImage);
     }
 
@@ -234,5 +240,19 @@ public class EventServiceImpl implements EventService {
     private void deleteDates(Event event) {
         event.getEventDatesLocations().forEach(dateLocation ->
             eventDateLocationService.delete(dateLocation.getId()));
+    }
+
+    @Override
+    public List<EventSearchDto> searchByTitle(String searchQuery) {
+        if (searchQuery.equalsIgnoreCase("all")) {
+            return eventRepo.findAll().stream()
+                .map(eventSearchResponseMapper::convert)
+                .toList();
+        } else {
+            return eventRepo.findAll().stream()
+                .map(eventSearchResponseMapper::convert)
+                .filter(eventResponse -> eventResponse.getTitle().toLowerCase().contains(searchQuery.toLowerCase()))
+                .toList();
+        }
     }
 }
