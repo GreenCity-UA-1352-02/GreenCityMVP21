@@ -1,21 +1,16 @@
 package greencity.dto.eventcomment;
 
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import lombok.Builder;
+import lombok.*;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public record AddEventCommentDtoResponse(
-    @NotNull
-    @Min(1)
-    Long id,
-    @NotEmpty
-    String text,
-    @NotEmpty
-    EventCommentAuthorDto author,
-    @NotEmpty
-    LocalDateTime modifiedDate
-){
+public class AddEventCommentDtoResponse {
+    private Long id;
+    private String text;
+    private EventCommentAuthorDto author;
+    private LocalDateTime modifiedDate;
 }
