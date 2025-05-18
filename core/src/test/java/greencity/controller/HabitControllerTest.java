@@ -80,8 +80,8 @@ public class HabitControllerTest {
         when(habitService.getByIdAndLanguageCode(id, locale.getLanguage())).thenReturn(habitDto);
 
         mockMvc.perform(get("/habit/{id}", id)
-                .header(HttpHeaders.ACCEPT_LANGUAGE, locale.toLanguageTag())
-                .accept(MediaType.APPLICATION_JSON))
+            .header(HttpHeaders.ACCEPT_LANGUAGE, locale.toLanguageTag())
+            .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(id))
             .andExpect(jsonPath("$.defaultDuration").value(21));
@@ -94,8 +94,8 @@ public class HabitControllerTest {
     public void getHabitById_InvalidHabitId_BadRequest() throws Exception {
 
         mockMvc.perform(get("/habit/invalid-id")
-                .header(HttpHeaders.ACCEPT_LANGUAGE, Locale.ENGLISH.toLanguageTag())
-                .accept(MediaType.APPLICATION_JSON))
+            .header(HttpHeaders.ACCEPT_LANGUAGE, Locale.ENGLISH.toLanguageTag())
+            .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest());
 
         verify(habitService, times(0)).getByIdAndLanguageCode(anyLong(), anyString());
@@ -117,8 +117,7 @@ public class HabitControllerTest {
                 .id(2L).habitTranslation(HabitTranslationDto.builder().name("Habit 2").build())
                 .defaultDuration(14)
                 .habitAssignStatus(HabitAssignStatus.ACQUIRED)
-                .build()
-        );
+                .build());
 
         PageableDto<HabitDto> dto = new PageableDto<>(habits, habits.size(), 1, 1);
 
@@ -126,11 +125,11 @@ public class HabitControllerTest {
             .thenReturn(dto);
 
         mockMvc.perform(get("/habit")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer test_token")
-                .header(HttpHeaders.ACCEPT_LANGUAGE, locale.toLanguageTag())
-                .param("page", String.valueOf(pageable.getPageNumber()))
-                .param("size", String.valueOf(pageable.getPageSize()))
-                .accept(MediaType.APPLICATION_JSON))
+            .header(HttpHeaders.AUTHORIZATION, "Bearer test_token")
+            .header(HttpHeaders.ACCEPT_LANGUAGE, locale.toLanguageTag())
+            .param("page", String.valueOf(pageable.getPageNumber()))
+            .param("size", String.valueOf(pageable.getPageSize()))
+            .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.totalPages").value(1))
             .andExpect(jsonPath("$.totalElements").value(2))
@@ -157,15 +156,14 @@ public class HabitControllerTest {
             ShoppingListItemDto.builder()
                 .id(2L)
                 .text("Item 2")
-                .build()
-        );
+                .build());
 
         when(habitService.getShoppingListForHabit(habitId, locale.getLanguage()))
             .thenReturn(items);
 
         mockMvc.perform(get("/habit/{id}/shopping-list", habitId)
-                .header(HttpHeaders.ACCEPT_LANGUAGE, locale.toLanguageTag())
-                .accept(MediaType.APPLICATION_JSON))
+            .header(HttpHeaders.ACCEPT_LANGUAGE, locale.toLanguageTag())
+            .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.length()").value(2))
             .andExpect(jsonPath("$[0].id").value(1))
@@ -182,8 +180,8 @@ public class HabitControllerTest {
         Locale locale = Locale.ENGLISH;
 
         mockMvc.perform(get("/habit/{id}/shopping-list", "invalidId")
-                .header(HttpHeaders.ACCEPT_LANGUAGE, locale.toLanguageTag())
-                .accept(MediaType.APPLICATION_JSON))
+            .header(HttpHeaders.ACCEPT_LANGUAGE, locale.toLanguageTag())
+            .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest());
 
         verify(habitService, times(0)).getShoppingListForHabit(anyLong(), anyString());
@@ -203,8 +201,7 @@ public class HabitControllerTest {
             HabitDto.builder()
                 .id(2L).habitTranslation(HabitTranslationDto.builder().name("Habit Health").build())
                 .defaultDuration(14)
-                .build()
-        );
+                .build());
 
         PageableDto<HabitDto> pageableDto = new PageableDto<>(habits, habits.size(), 0, 1);
 
@@ -212,11 +209,11 @@ public class HabitControllerTest {
             .thenReturn(pageableDto);
 
         mockMvc.perform(get("/habit/tags/search")
-                .param("tags", "eco", "health")
-                .param("page", "0")
-                .param("size", "10")
-                .header(HttpHeaders.ACCEPT_LANGUAGE, locale.toLanguageTag())
-                .accept(MediaType.APPLICATION_JSON))
+            .param("tags", "eco", "health")
+            .param("page", "0")
+            .param("size", "10")
+            .header(HttpHeaders.ACCEPT_LANGUAGE, locale.toLanguageTag())
+            .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.totalElements").value(2))
             .andExpect(jsonPath("$.page").isArray())
@@ -232,10 +229,10 @@ public class HabitControllerTest {
     @Test
     public void getAllByTagsAndLanguageCode_WithoutTags_BadRequest() throws Exception {
         mockMvc.perform(get("/habit/tags/search")
-                .param("page", "0")
-                .param("size", "10")
-                .header(HttpHeaders.ACCEPT_LANGUAGE, Locale.ENGLISH.toLanguageTag())
-                .accept(MediaType.APPLICATION_JSON))
+            .param("page", "0")
+            .param("size", "10")
+            .header(HttpHeaders.ACCEPT_LANGUAGE, Locale.ENGLISH.toLanguageTag())
+            .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest());
 
         verify(habitService, times(0)).getAllByTagsAndLanguageCode(any(), any(), any());
@@ -252,8 +249,7 @@ public class HabitControllerTest {
                 .habitTranslation(HabitTranslationDto.builder().name("Habit 1").build())
                 .defaultDuration(21)
                 .habitAssignStatus(HabitAssignStatus.INPROGRESS)
-                .build()
-        );
+                .build());
 
         PageableDto<HabitDto> pageableDto = new PageableDto<>(habits, 1, 1, 1);
 
@@ -267,12 +263,12 @@ public class HabitControllerTest {
             .thenReturn(pageableDto);
 
         mockMvc.perform(get("/habit/search")
-                .param("tags", "eco")
-                .param("page", "0")
-                .param("size", "10")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer test_token")
-                .header(HttpHeaders.ACCEPT_LANGUAGE, locale.toLanguageTag())
-                .accept(MediaType.APPLICATION_JSON))
+            .param("tags", "eco")
+            .param("page", "0")
+            .param("size", "10")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer test_token")
+            .header(HttpHeaders.ACCEPT_LANGUAGE, locale.toLanguageTag())
+            .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.totalPages").value(1))
             .andExpect(jsonPath("$.totalElements").value(1))
@@ -287,8 +283,7 @@ public class HabitControllerTest {
                 eq(Optional.of(List.of("eco"))),
                 eq(Optional.empty()),
                 eq(Optional.empty()),
-                eq(locale.getLanguage())
-            );
+                eq(locale.getLanguage()));
     }
 
     @Test
@@ -316,8 +311,8 @@ public class HabitControllerTest {
         when(tagsService.findAllHabitsTags(locale.getLanguage())).thenReturn(tags);
 
         mockMvc.perform(get("/habit/tags")
-                .header(HttpHeaders.ACCEPT_LANGUAGE, locale.toLanguageTag())
-                .accept(MediaType.APPLICATION_JSON))
+            .header(HttpHeaders.ACCEPT_LANGUAGE, locale.toLanguageTag())
+            .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.length()").value(3))
             .andExpect(jsonPath("$[0]").value("eco"))
@@ -338,15 +333,13 @@ public class HabitControllerTest {
                     .languageCode("en")
                     .name("Test Habit")
                     .description("Test Description")
-                    .build()
-            ))
+                    .build()))
             .image("test-image.jpg")
             .customShoppingListItemDto(Collections.singletonList(
                 CustomShoppingListItemResponseDto.builder()
                     .id(1L)
                     .text("Test Item")
-                    .build()
-            ))
+                    .build()))
             .tagIds(new HashSet<>(Collections.singletonList(1L)))
             .build();
 
@@ -354,8 +347,7 @@ public class HabitControllerTest {
             "image",
             "test-image.jpg",
             MediaType.IMAGE_JPEG_VALUE,
-            "test image content".getBytes()
-        );
+            "test image content".getBytes());
 
         Principal principal = mock(Principal.class);
         when(principal.getName()).thenReturn("testUser");
@@ -370,15 +362,13 @@ public class HabitControllerTest {
                 CustomShoppingListItemResponseDto.builder()
                     .id(1L)
                     .text("Test Item")
-                    .build()
-            ))
+                    .build()))
             .habitTranslations(Collections.singletonList(
                 HabitTranslationDto.builder()
                     .languageCode("en")
                     .name("Test Habit")
                     .description("Test Description")
-                    .build()
-            ))
+                    .build()))
             .tagIds(new HashSet<>(Collections.singletonList(1L)))
             .build();
 
@@ -396,15 +386,16 @@ public class HabitControllerTest {
     @Test
     public void addCustomHabit_InvalidParamsProvided_BadRequest() throws Exception {
         mockMvc.perform(multipart("/habit/custom")
-                .param("complexity", "")
-                .param("tagIds", "")
-                .with(request -> {
-                    request.setMethod("POST");
-                    return request;
-                }))
+            .param("complexity", "")
+            .param("tagIds", "")
+            .with(request -> {
+                request.setMethod("POST");
+                return request;
+            }))
             .andExpect(status().isBadRequest());
 
-        verify(habitService, times(0)).addCustomHabit(any(AddCustomHabitDtoRequest.class), any(MultipartFile.class), anyString());
+        verify(habitService, times(0)).addCustomHabit(any(AddCustomHabitDtoRequest.class), any(MultipartFile.class),
+            anyString());
     }
 
     @Test
@@ -413,15 +404,14 @@ public class HabitControllerTest {
 
         List<UserProfilePictureDto> profilePictures = Arrays.asList(
             UserProfilePictureDto.builder().id(456L).name("Friend One").profilePicturePath("friend1_pic.jpg").build(),
-            UserProfilePictureDto.builder().id(789L).name("Friend Two").profilePicturePath("friend2_pic.png").build()
-        );
+            UserProfilePictureDto.builder().id(789L).name("Friend Two").profilePicturePath("friend2_pic.png").build());
 
         when(habitService.getFriendsAssignedToHabitProfilePictures(habitId, null))
             .thenReturn(profilePictures);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/habit/{habitId}/friends/profile-pictures", habitId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.length()").value(2))
@@ -438,8 +428,8 @@ public class HabitControllerTest {
     @Test
     public void getFriendsAssignedToHabitProfilePictures_InvalidHabitId_BadRequest() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/habit/{habitId}/friends/profile-pictures", "invalid-id")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest());
 
         verify(habitService, never()).getFriendsAssignedToHabitProfilePictures(anyLong(), any());

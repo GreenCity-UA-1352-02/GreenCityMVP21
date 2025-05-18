@@ -67,6 +67,7 @@ public class EcoNewsController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED,
             content = @Content(schema = @Schema(implementation = EcoNewsGenericDto.class))),
+        @ApiResponse(responseCode = "415", description = HttpStatuses.UNSUPPORTED_MEDIA_TYPE),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
     })
@@ -74,8 +75,8 @@ public class EcoNewsController {
     public ResponseEntity<EcoNewsGenericDto> save(
         @Parameter(description = SwaggerExampleModel.ADD_ECO_NEWS_REQUEST,
             required = true) @RequestPart @ValidEcoNewsDtoRequest AddEcoNewsDtoRequest addEcoNewsDtoRequest,
-        @Parameter(description = "Image of eco news") @ImageValidation @RequestPart(
-            required = false) MultipartFile image,
+        @Parameter(description = "Image of eco news") @ImageValidation
+        @RequestPart(required = false) MultipartFile image,
         @Parameter(hidden = true) Principal principal) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
             ecoNewsService.saveEcoNews(addEcoNewsDtoRequest, image, principal.getName()));
