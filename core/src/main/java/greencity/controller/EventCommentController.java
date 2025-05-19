@@ -27,7 +27,14 @@ import org.springframework.web.bind.annotation.*;
 public class EventCommentController {
     private final EventCommentService eventCommentService;
 
-
+    /**
+     * Method to create comment.
+     *
+     * @param eventId id of the event
+     * @param request dto for comment
+     * @param user user that add comment
+     * @return dto {@link AddEventCommentDtoResponse}
+     */
     @Operation(summary = "Add comment.")
     @ResponseStatus(value = HttpStatus.CREATED)
     @ApiResponses(value = {
@@ -46,14 +53,38 @@ public class EventCommentController {
             .body(eventCommentService.save(eventId, request, user));
     }
 
+    /**
+     * Method to update comment.
+     *
+     * @param id id of the comment
+     * @param text text to update comment
+     */
+    @Operation(summary = "Update comment.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
     @PatchMapping("")
     public ResponseEntity<Void> update(Long id, @RequestParam @NotBlank String text,
-                       @Parameter(hidden = true) @CurrentUser UserVO user) {
+                                       @Parameter(hidden = true) @CurrentUser UserVO user) {
         eventCommentService.update(text, id, user);
         return ResponseEntity.ok().build();
     }
 
-
+    /**
+     * Method to mark comment as deleted.
+     *
+     * @param id id of the comment
+     */
+    @Operation(summary = "Mark comment as deleted.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
     @DeleteMapping("")
     public ResponseEntity<Object> delete(Long id, @Parameter(hidden = true) @CurrentUser UserVO user) {
         eventCommentService.deleteById(id, user);
