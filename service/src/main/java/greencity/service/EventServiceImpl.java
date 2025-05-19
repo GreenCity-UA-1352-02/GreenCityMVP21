@@ -243,6 +243,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional
     public List<EventSearchDto> searchByTitle(String searchQuery) {
         if (searchQuery.equalsIgnoreCase("all")) {
             return eventRepo.findAll().stream()
