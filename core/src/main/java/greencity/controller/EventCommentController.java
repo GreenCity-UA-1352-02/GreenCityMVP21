@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,5 +44,19 @@ public class EventCommentController {
         return ResponseEntity
             .status(HttpStatus.CREATED)
             .body(eventCommentService.save(eventId, request, user));
+    }
+
+    @PatchMapping("")
+    public ResponseEntity<Void> update(Long id, @RequestParam @NotBlank String text,
+                       @Parameter(hidden = true) @CurrentUser UserVO user) {
+        eventCommentService.update(text, id, user);
+        return ResponseEntity.ok().build();
+    }
+
+
+    @DeleteMapping("")
+    public ResponseEntity<Object> delete(Long id, @Parameter(hidden = true) @CurrentUser UserVO user) {
+        eventCommentService.deleteById(id, user);
+        return ResponseEntity.ok().build();
     }
 }
