@@ -6,14 +6,13 @@ import greencity.constant.ErrorMessage;
 import greencity.dto.eventcomment.AddEventCommentDtoRequest;
 import greencity.dto.eventcomment.AddEventCommentDtoResponse;
 import greencity.dto.user.UserVO;
-import greencity.entity.User;
-import greencity.entity.event.Event;
 import greencity.entity.event.EventComment;
 import greencity.enums.Role;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.repository.EventCommentRepository;
 import greencity.repository.EventRepo;
+import greencity.repository.UserRepo;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.concurrent.CompletableFuture;
 import lombok.AllArgsConstructor;
@@ -27,26 +26,22 @@ public class EventCommentServiceImpl implements EventCommentService {
     private EventCommentRepository eventCommentRepo;
     private EventRepo eventRepo;
     private ModelMapper modelMapper;
+    private UserRepo userRepo;
     private final greencity.rating.RatingCalculation ratingCalculation;
     private final HttpServletRequest httpServletRequest;
 
     @Override
+    @Transactional
     public AddEventCommentDtoResponse save(Long eventId, AddEventCommentDtoRequest comment, UserVO user) {
-        Event event = eventRepo
-            .findById(eventId)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND + eventId));
         EventComment eventComment = modelMapper.map(comment, EventComment.class);
-        eventComment.setUser(modelMapper.map(user, User.class));
-        eventComment.setEvent(event);
-        if (comment.parentCommentId() != 0) {
-            EventComment parentComment =
-                eventCommentRepo.findById(comment.parentCommentId()).orElseThrow(
-                    () -> new BadRequestException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
-            if (parentComment.getParentComment() == null) {
-                eventComment.setParentComment(parentComment);
-            } else {
+        eventComment.setUser(userRepo.getReferenceById(user.getId()));
+        eventComment.setEvent(eventRepo.getReferenceById(eventId));
+        if (comment.parentCommentId() != null) {
+            boolean parentIsTopLevel = eventCommentRepo.existsByIdAndParentCommentIsNull(comment.parentCommentId());
+            if (!parentIsTopLevel) {
                 throw new BadRequestException(ErrorMessage.CANNOT_REPLY_THE_REPLY);
             }
+            eventComment.setParentComment(eventCommentRepo.getReferenceById(comment.parentCommentId()));
         }
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
         CompletableFuture.runAsync(
@@ -68,6 +63,7 @@ public class EventCommentServiceImpl implements EventCommentService {
     }
 
     @Override
+    @Transactional
     public void deleteById(Long id, UserVO user) {
         EventComment comment = eventCommentRepo.findById(id)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION + id));

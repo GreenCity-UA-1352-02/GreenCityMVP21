@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface EventCommentRepository extends JpaRepository<EventComment, Long> {
+    boolean existsByIdAndParentCommentIsNull(Long id);
 }

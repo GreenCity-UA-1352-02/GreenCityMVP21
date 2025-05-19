@@ -2,15 +2,15 @@ package greencity.mapping;
 
 import greencity.dto.eventcomment.AddEventCommentDtoResponse;
 import greencity.dto.eventcomment.EventCommentAuthorDto;
-import greencity.entity.EcoNewsComment;
 import greencity.entity.User;
+import greencity.entity.event.EventComment;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AddEventCommentDtoResponseMapper extends AbstractConverter<EcoNewsComment, AddEventCommentDtoResponse> {
+public class AddEventCommentDtoResponseMapper extends AbstractConverter<EventComment, AddEventCommentDtoResponse> {
     @Override
-    protected AddEventCommentDtoResponse convert(EcoNewsComment ecoNewsComment) {
+    protected AddEventCommentDtoResponse convert(EventComment ecoNewsComment) {
         User user = ecoNewsComment.getUser();
         return AddEventCommentDtoResponse.builder()
             .id(ecoNewsComment.getId())
