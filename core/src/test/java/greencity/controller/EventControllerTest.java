@@ -5,15 +5,16 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import greencity.ModelUtils;
 import greencity.dto.event.EventResponse;
+import greencity.dto.event.EventSearchDto;
 import greencity.service.EventService;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
+import java.time.ZonedDateTime;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,6 +25,8 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
 class EventControllerTest {
@@ -338,5 +341,33 @@ class EventControllerTest {
             .andExpect(status().isOk());
 
         verify(eventService).delete(eventId);
+    }
+
+    @Test
+    void search_shouldReturnOk_whenEventsExist() throws Exception{
+        String searchQuery = "ALL";
+
+        List<EventSearchDto> mockEvents = List.of(
+            new EventSearchDto(3L, "Spring Boot Workshop", "Let's talk about Spring Boot in detail.",
+                "Bohdan", ZonedDateTime.parse("2026-06-01T10:00:00Z"), ZonedDateTime.parse("2026-07-01T10:00:00Z")),
+            new EventSearchDto(4L, "Invalid Event", "Too old event afsssssssssssssssssssssssssssssssssssssss",
+                "Test", ZonedDateTime.parse("2026-08-01T10:00:00Z"), ZonedDateTime.parse("2026-08-02T10:00:00Z"))
+        );
+
+        when(eventService.searchByTitle(searchQuery)).thenReturn(mockEvents);
+
+        mockMvc.perform(get("/events/search")
+                .param("searchQuery", searchQuery)
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].id").value(3))
+            .andExpect(jsonPath("$[0].title").value("Spring Boot Workshop"))
+            .andExpect(jsonPath("$[0].organizer").value("Bohdan"))
+            .andExpect(jsonPath("$[1].id").value(4))
+            .andExpect(jsonPath("$[1].title").value("Invalid Event"))
+            .andExpect(jsonPath("$[1].organizer").value("Test"))
+            .andReturn();
+
+        verify(eventService).searchByTitle(searchQuery);
     }
 }
