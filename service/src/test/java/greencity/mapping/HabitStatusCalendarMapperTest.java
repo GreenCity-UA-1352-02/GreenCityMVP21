@@ -1,6 +1,5 @@
 package greencity.mapping;
 
-
 import greencity.dto.habit.HabitAssignVO;
 import greencity.dto.habitstatuscalendar.HabitStatusCalendarVO;
 import greencity.entity.HabitStatusCalendar;
@@ -19,12 +18,12 @@ class HabitStatusCalendarMapperTest {
     @Test
     void convert_SuccessfulMapping() {
         HabitStatusCalendarVO habitStatusCalendarVO = HabitStatusCalendarVO.builder()
+            .id(1L)
+            .enrollDate(LocalDate.now())
+            .habitAssignVO(HabitAssignVO.builder()
                 .id(1L)
-                .enrollDate(LocalDate.now())
-                .habitAssignVO(HabitAssignVO.builder()
-                        .id(1L)
-                        .build())
-                .build();
+                .build())
+            .build();
 
         HabitStatusCalendar dto = mapper.convert(habitStatusCalendarVO);
 
@@ -37,9 +36,9 @@ class HabitStatusCalendarMapperTest {
     @Test
     void convert_NullHabitAssignVO_ThrowNullPointerException() {
         HabitStatusCalendarVO habitStatusCalendarVO = HabitStatusCalendarVO.builder()
-                .id(1L)
-                .enrollDate(LocalDate.now())
-                .build();
+            .id(1L)
+            .enrollDate(LocalDate.now())
+            .build();
 
         assertThrows(NullPointerException.class, () -> mapper.convert(habitStatusCalendarVO));
     }

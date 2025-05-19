@@ -56,11 +56,9 @@ class EventServiceImplTest {
     @InjectMocks
     private EventServiceImpl eventService;
 
-
     private User user;
     private UserVO userVO;
     private Event event;
-
 
     @BeforeEach
     void setUp() {
@@ -153,8 +151,7 @@ class EventServiceImplTest {
 
         TagNotFoundException exception = assertThrows(
             TagNotFoundException.class,
-            () -> eventService.save(request, images, user.getEmail())
-        );
+            () -> eventService.save(request, images, user.getEmail()));
 
         assertEquals(ErrorMessage.TAGS_NOT_FOUND, exception.getMessage());
     }

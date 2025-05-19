@@ -1,6 +1,5 @@
 package greencity.controller;
 
-
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -48,7 +47,6 @@ class EventControllerTest {
         objectMapper.registerModule(new JavaTimeModule());
         mockMvc = MockMvcBuilders.standaloneSetup(eventController).build();
     }
-
 
     @Test
     void create_shouldReturnCreated() throws Exception {
@@ -118,22 +116,20 @@ class EventControllerTest {
             "addEventRequest",
             "",
             "application/json",
-            requestJson.getBytes(StandardCharsets.UTF_8)
-        );
+            requestJson.getBytes(StandardCharsets.UTF_8));
 
         MockMultipartFile image = new MockMultipartFile(
             "images",
             "image.jpg",
             "image/jpeg",
-            "fake-image-content".getBytes()
-        );
+            "fake-image-content".getBytes());
 
         mockMvc.perform(multipart("/events/create")
-                .file(json)
-                .file(image)
-                .principal(principal)
-                .contentType(MediaType.MULTIPART_FORM_DATA)
-                .accept(MediaType.APPLICATION_JSON))
+            .file(json)
+            .file(image)
+            .principal(principal)
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.title").value("Spring Boot Workshop"))
             .andExpect(jsonPath("$.description").value("Let's talk about Spring Boot in detail."))
@@ -167,18 +163,16 @@ class EventControllerTest {
             """;
 
         MockMultipartFile json = new MockMultipartFile(
-            "addEventRequest", "", "application/json", invalidJson.getBytes()
-        );
+            "addEventRequest", "", "application/json", invalidJson.getBytes());
 
         MockMultipartFile image = new MockMultipartFile(
-            "images", "image.jpg", "image/jpeg", "fake-image-content".getBytes()
-        );
+            "images", "image.jpg", "image/jpeg", "fake-image-content".getBytes());
 
         mockMvc.perform(multipart("/events/create")
-                .file(json)
-                .file(image)
-                .principal(principal)
-                .contentType(MediaType.MULTIPART_FORM_DATA))
+            .file(json)
+            .file(image)
+            .principal(principal)
+            .contentType(MediaType.MULTIPART_FORM_DATA))
             .andExpect(status().isBadRequest());
     }
 
@@ -207,18 +201,16 @@ class EventControllerTest {
             """;
 
         MockMultipartFile json = new MockMultipartFile(
-            "addEventRequest", "", "application/json", validJson.getBytes()
-        );
+            "addEventRequest", "", "application/json", validJson.getBytes());
 
         MockMultipartFile invalidImage = new MockMultipartFile(
-            "images", "malicious.exe", "application/octet-stream", "bad-content".getBytes()
-        );
+            "images", "malicious.exe", "application/octet-stream", "bad-content".getBytes());
 
         mockMvc.perform(multipart("/events/create")
-                .file(json)
-                .file(invalidImage)
-                .principal(principal)
-                .contentType(MediaType.MULTIPART_FORM_DATA))
+            .file(json)
+            .file(invalidImage)
+            .principal(principal)
+            .contentType(MediaType.MULTIPART_FORM_DATA))
             .andExpect(status().isBadRequest());
     }
 
@@ -282,19 +274,17 @@ class EventControllerTest {
         when(eventService.update(any(), any())).thenReturn(response);
 
         MockMultipartFile json = new MockMultipartFile(
-            "updateEventRequest", "", "application/json", updateJson.getBytes()
-        );
-
+            "updateEventRequest", "", "application/json", updateJson.getBytes());
 
         mockMvc.perform(multipart("/events/update")
-                .file(json)
-                .principal(principal)
-                .contentType(MediaType.MULTIPART_FORM_DATA)
-                .accept(MediaType.APPLICATION_JSON)
-                .with(request -> {
-                    request.setMethod("PUT");
-                    return request;
-                }))
+            .file(json)
+            .principal(principal)
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .accept(MediaType.APPLICATION_JSON)
+            .with(request -> {
+                request.setMethod("PUT");
+                return request;
+            }))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.title").value("Updated Event"))
             .andExpect(jsonPath("$.description").value("Updated description for event"));
@@ -315,18 +305,17 @@ class EventControllerTest {
             """;
 
         MockMultipartFile json = new MockMultipartFile(
-            "updateEventRequest", "", "application/json", invalidJson.getBytes()
-        );
+            "updateEventRequest", "", "application/json", invalidJson.getBytes());
 
         mockMvc.perform(multipart("/events/update")
-                .file(json)
-                .principal(principal)
-                .contentType(MediaType.MULTIPART_FORM_DATA)
-                .accept(MediaType.APPLICATION_JSON)
-                .with(request -> {
-                    request.setMethod("PUT");
-                    return request;
-                }))
+            .file(json)
+            .principal(principal)
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .accept(MediaType.APPLICATION_JSON)
+            .with(request -> {
+                request.setMethod("PUT");
+                return request;
+            }))
             .andExpect(status().isBadRequest());
     }
 
@@ -337,28 +326,27 @@ class EventControllerTest {
         doNothing().when(eventService).delete(eventId);
 
         mockMvc.perform(delete("/events/delete/{eventId}", eventId)
-                .principal(principal))
+            .principal(principal))
             .andExpect(status().isOk());
 
         verify(eventService).delete(eventId);
     }
 
     @Test
-    void search_shouldReturnOk_whenEventsExist() throws Exception{
+    void search_shouldReturnOk_whenEventsExist() throws Exception {
         String searchQuery = "ALL";
 
         List<EventSearchDto> mockEvents = List.of(
             new EventSearchDto(3L, "Spring Boot Workshop", "Let's talk about Spring Boot in detail.",
                 "Bohdan", ZonedDateTime.parse("2026-06-01T10:00:00Z"), ZonedDateTime.parse("2026-07-01T10:00:00Z")),
             new EventSearchDto(4L, "Invalid Event", "Too old event afsssssssssssssssssssssssssssssssssssssss",
-                "Test", ZonedDateTime.parse("2026-08-01T10:00:00Z"), ZonedDateTime.parse("2026-08-02T10:00:00Z"))
-        );
+                "Test", ZonedDateTime.parse("2026-08-01T10:00:00Z"), ZonedDateTime.parse("2026-08-02T10:00:00Z")));
 
         when(eventService.searchByTitle(searchQuery)).thenReturn(mockEvents);
 
         mockMvc.perform(get("/events/search")
-                .param("searchQuery", searchQuery)
-                .accept(MediaType.APPLICATION_JSON))
+            .param("searchQuery", searchQuery)
+            .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].id").value(3))
             .andExpect(jsonPath("$[0].title").value("Spring Boot Workshop"))

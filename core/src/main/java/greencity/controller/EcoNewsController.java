@@ -75,8 +75,8 @@ public class EcoNewsController {
     public ResponseEntity<EcoNewsGenericDto> save(
         @Parameter(description = SwaggerExampleModel.ADD_ECO_NEWS_REQUEST,
             required = true) @RequestPart @ValidEcoNewsDtoRequest AddEcoNewsDtoRequest addEcoNewsDtoRequest,
-        @Parameter(description = "Image of eco news") @ImageValidation
-        @RequestPart(required = false) MultipartFile image,
+        @Parameter(description = "Image of eco news") @ImageValidation @RequestPart(
+            required = false) MultipartFile image,
         @Parameter(hidden = true) Principal principal) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
             ecoNewsService.saveEcoNews(addEcoNewsDtoRequest, image, principal.getName()));

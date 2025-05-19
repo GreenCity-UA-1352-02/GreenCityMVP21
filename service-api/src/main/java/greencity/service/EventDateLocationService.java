@@ -7,7 +7,7 @@ public interface EventDateLocationService {
      * Saves an event date location.
      *
      * @param eventDateLocationDto the event date location to save
-     * @param eventId the id of the event to save the date location for
+     * @param eventId              the id of the event to save the date location for
      * @return the saved event date location
      */
     EventDateLocationDto save(EventDateLocationDto eventDateLocationDto, long eventId);

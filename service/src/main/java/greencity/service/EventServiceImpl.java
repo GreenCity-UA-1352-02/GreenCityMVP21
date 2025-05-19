@@ -60,8 +60,8 @@ public class EventServiceImpl implements EventService {
                 EventDateLocation eventDateLocation = modelMapper.map(dateLocation, EventDateLocation.class);
                 eventDateLocation.setEvent(event);
 
-                eventDateLocation.setAddress(dateLocationDto.coordinates() == null ? null :
-                    modelMapper.map(dateLocationDto.coordinates(), Address.class));
+                eventDateLocation.setAddress(dateLocationDto.coordinates() == null ? null
+                    : modelMapper.map(dateLocationDto.coordinates(), Address.class));
                 return eventDateLocation;
             })
             .toList();
@@ -93,7 +93,7 @@ public class EventServiceImpl implements EventService {
         UserVO user = restClient.findByEmail(email);
         return modelMapper.map(user, User.class);
     }
-    
+
     private void assignMainImage(Event event, MultipartFile image) {
         EventImageDto mainImage = eventImageService.uploadImage(image, event.getId());
         EventImage eventImage = mapToEntity(mainImage, event);
@@ -182,8 +182,7 @@ public class EventServiceImpl implements EventService {
                     .id(tag.getId())
                     .nameUa(nameUa)
                     .nameEn(nameEn)
-                    .build()
-            );
+                    .build());
         }
         return tagUaEnDtos;
     }
@@ -238,8 +237,7 @@ public class EventServiceImpl implements EventService {
     }
 
     private void deleteDates(Event event) {
-        event.getEventDatesLocations().forEach(dateLocation ->
-            eventDateLocationService.delete(dateLocation.getId()));
+        event.getEventDatesLocations().forEach(dateLocation -> eventDateLocationService.delete(dateLocation.getId()));
     }
 
     @Override

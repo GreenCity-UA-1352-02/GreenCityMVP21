@@ -405,7 +405,7 @@ public class ModelUtils {
 
     public static List<TagTranslationVO> getTagTranslationsVO() {
         return Arrays.asList(TagTranslationVO.builder().id(1L).name("Новини")
-                .languageVO(LanguageVO.builder().id(1L).code("ua").build()).build(),
+            .languageVO(LanguageVO.builder().id(1L).code("ua").build()).build(),
             TagTranslationVO.builder().id(2L).name("News").languageVO(LanguageVO.builder().id(2L).code("en").build())
                 .build());
     }
@@ -810,7 +810,6 @@ public class ModelUtils {
         return result;
     }
 
-
     public static EventImageDto getEventImageDto() {
         return EventImageDto.builder()
             .id(1L)
@@ -826,7 +825,6 @@ public class ModelUtils {
             .build());
         return result;
     }
-
 
     public static EventDateLocationDto getEventDateLocationOnlineDto() {
         return EventDateLocationDto.builder()

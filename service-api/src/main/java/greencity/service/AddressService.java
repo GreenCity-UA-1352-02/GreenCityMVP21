@@ -14,7 +14,7 @@ public interface AddressService {
     /**
      * Updates an address.
      *
-     * @param id the id of the address to update
+     * @param id         the id of the address to update
      * @param addressDto the updated address data
      * @return the updated address
      */

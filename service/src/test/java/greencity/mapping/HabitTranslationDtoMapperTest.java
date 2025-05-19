@@ -10,7 +10,6 @@ import static greencity.ModelUtils.getLanguage;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-
 class HabitTranslationDtoMapperTest {
 
     HabitTranslationDtoMapper mapper = new HabitTranslationDtoMapper();
@@ -18,12 +17,12 @@ class HabitTranslationDtoMapperTest {
     @Test
     void convert_SuccessMapping() {
         HabitTranslation habitTranslation = HabitTranslation.builder()
-                .id(1L)
-                .name("Name")
-                .description("Description")
-                .habitItem("HabitItem")
-                .language(getLanguage())
-                .build();
+            .id(1L)
+            .name("Name")
+            .description("Description")
+            .habitItem("HabitItem")
+            .language(getLanguage())
+            .build();
         HabitTranslationDto dto = mapper.convert(habitTranslation);
 
         assertThat(dto).isNotNull();
@@ -33,23 +32,22 @@ class HabitTranslationDtoMapperTest {
         assertEquals(dto.getLanguageCode(), habitTranslation.getLanguage().getCode());
     }
 
-
     @Test
     void convert_MapAllToDto() {
         HabitTranslation habitTranslation = HabitTranslation.builder()
-                .id(1L)
-                .name("Name")
-                .description("Description")
-                .habitItem("HabitItem")
-                .language(getLanguage())
-                .build();
+            .id(1L)
+            .name("Name")
+            .description("Description")
+            .habitItem("HabitItem")
+            .language(getLanguage())
+            .build();
         HabitTranslation habitTranslation2 = HabitTranslation.builder()
-                .id(2L)
-                .name("Name2")
-                .description("Description2")
-                .habitItem("HabitItem2")
-                .language(getLanguage())
-                .build();
+            .id(2L)
+            .name("Name2")
+            .description("Description2")
+            .habitItem("HabitItem2")
+            .language(getLanguage())
+            .build();
         List<HabitTranslation> translationList = List.of(habitTranslation, habitTranslation2);
 
         List<HabitTranslationDto> dtoList = mapper.mapAllToList(translationList);

@@ -10,17 +10,11 @@ import lombok.Builder;
 
 @Builder
 public record AddEventRequest(
-    @NotBlank(message = "Title is required")
-    @Size(max = 70, message = "Title must be no longer than 70 characters")
-    String title,
-    @NotBlank(message = "Description is required")
-    @Size(min = 20, max = 63206, message = "Description must be between 20 and 63,206 characters")
-    String description,
-    @JsonProperty("open")
-    boolean isOpen,
-    @NotEmpty
-    List<@Valid EventDateLocationDto> datesLocations,
-    @NotEmpty
-    List<String> tags
-) {
+    @NotBlank(message = "Title is required") @Size(max = 70,
+        message = "Title must be no longer than 70 characters") String title,
+    @NotBlank(message = "Description is required") @Size(min = 20, max = 63206,
+        message = "Description must be between 20 and 63,206 characters") String description,
+    @JsonProperty("open") boolean isOpen,
+    @NotEmpty List<@Valid EventDateLocationDto> datesLocations,
+    @NotEmpty List<String> tags) {
 }

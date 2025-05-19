@@ -11,6 +11,5 @@ public record EventDateLocationDto(
     ZonedDateTime startDate,
     ZonedDateTime finishDate,
     AddressDto coordinates,
-    String onlineLink
-) {
+    String onlineLink) {
 }

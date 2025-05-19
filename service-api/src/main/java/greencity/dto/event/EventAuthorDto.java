@@ -4,8 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record EventAuthorDto(
-        Long id,
-        String name,
-        Double organizerRating
-) {
+    Long id,
+    String name,
+    Double organizerRating) {
 }
