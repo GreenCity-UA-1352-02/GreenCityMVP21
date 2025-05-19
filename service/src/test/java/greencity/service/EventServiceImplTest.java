@@ -7,10 +7,7 @@ import static org.mockito.Mockito.*;
 import greencity.ModelUtils;
 import greencity.client.RestClient;
 import greencity.constant.ErrorMessage;
-import greencity.dto.event.AddEventRequest;
-import greencity.dto.event.EventImageDto;
-import greencity.dto.event.EventResponse;
-import greencity.dto.event.UpdateEventRequest;
+import greencity.dto.event.*;
 import greencity.dto.user.UserVO;
 import greencity.entity.Tag;
 import greencity.entity.User;
@@ -20,6 +17,7 @@ import greencity.entity.event.EventDateLocation;
 import greencity.enums.TagType;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.TagNotFoundException;
+import greencity.mapping.EventSearchResponseMapper;
 import greencity.repository.EventRepo;
 import greencity.repository.TagsRepo;
 import java.util.ArrayList;
@@ -52,6 +50,8 @@ class EventServiceImplTest {
     private EventDateLocationService eventDateLocationService;
     @Mock
     private EventImageService eventImageService;
+    @Mock
+    private EventSearchResponseMapper eventSearchResponseMapper;
 
     @InjectMocks
     private EventServiceImpl eventService;
@@ -202,4 +202,88 @@ class EventServiceImplTest {
         verify(eventRepo).delete(event);
     }
 
+    @Test
+    void searchByTitle_whenQueryIsAll_returnsAllMappedEvents() {
+        Event event1 = Event.builder()
+            .title("Title 1")
+            .build();
+        Event event2 = Event.builder()
+            .title("Title 2")
+            .build();
+
+        List<Event> events = List.of(event1, event2);
+
+        EventSearchDto dto1 = EventSearchDto.builder()
+            .title("Title 1")
+            .build();
+        EventSearchDto dto2 = EventSearchDto.builder()
+            .title("Title 2")
+            .build();
+
+        when(eventRepo.findAll()).thenReturn(events);
+        when(eventSearchResponseMapper.convert(event1)).thenReturn(dto1);
+        when(eventSearchResponseMapper.convert(event2)).thenReturn(dto2);
+
+        List<EventSearchDto> result = eventService.searchByTitle("all");
+
+        assertEquals(2, result.size());
+        assertTrue(result.contains(dto1));
+        assertTrue(result.contains(dto2));
+    }
+
+    @Test
+    void searchByTitle_whenQueryMatchesSomeTitles_returnsFilteredMappedEvents() {
+        Event event1 = Event.builder()
+            .title("Title Hello")
+            .build();
+        Event event2 = Event.builder()
+            .title("Title World")
+            .build();
+
+        List<Event> events = List.of(event1, event2);
+
+        EventSearchDto dto1 = EventSearchDto.builder()
+            .title("Title Hello")
+            .build();
+        EventSearchDto dto2 = EventSearchDto.builder()
+            .title("Title World")
+            .build();
+
+        when(eventRepo.findAll()).thenReturn(events);
+        when(eventSearchResponseMapper.convert(event1)).thenReturn(dto1);
+        when(eventSearchResponseMapper.convert(event2)).thenReturn(dto2);
+
+        List<EventSearchDto> result = eventService.searchByTitle("hello");
+
+        assertEquals(1, result.size());
+        assertEquals("Title Hello", result.get(0).getTitle());
+        assertFalse(result.contains(dto2));
+    }
+
+    @Test
+    void searchByTitle_whenQueryMatchesNothing_returnsEmptyList() {
+        Event event1 = Event.builder()
+            .title("Title Hello")
+            .build();
+        Event event2 = Event.builder()
+            .title("Title World")
+            .build();
+
+        List<Event> events = List.of(event1, event2);
+
+        EventSearchDto dto1 = EventSearchDto.builder()
+            .title("Title Hello")
+            .build();
+        EventSearchDto dto2 = EventSearchDto.builder()
+            .title("Title World")
+            .build();
+
+        when(eventRepo.findAll()).thenReturn(events);
+        when(eventSearchResponseMapper.convert(event1)).thenReturn(dto1);
+        when(eventSearchResponseMapper.convert(event2)).thenReturn(dto2);
+
+        List<EventSearchDto> result = eventService.searchByTitle("good");
+
+        assertEquals(0, result.size());
+    }
 }
