@@ -248,9 +248,8 @@ public class EventServiceImpl implements EventService {
                 .map(eventSearchResponseMapper::convert)
                 .toList();
         } else {
-            return eventRepo.findAll().stream()
+            return eventRepo.findByTitleContainingIgnoreCase(searchQuery).stream()
                 .map(eventSearchResponseMapper::convert)
-                .filter(eventResponse -> eventResponse.getTitle().toLowerCase().contains(searchQuery.toLowerCase()))
                 .toList();
         }
     }
