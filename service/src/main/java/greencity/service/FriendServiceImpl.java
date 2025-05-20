@@ -8,6 +8,7 @@ import greencity.entity.User;
 import greencity.entity.UserSpecification;
 import greencity.enums.FriendStatus;
 import greencity.exception.exceptions.FriendRequestException;
+import greencity.exception.exceptions.FriendshipNotFoundException;
 import greencity.exception.exceptions.UserNotFoundException;
 import greencity.repository.FriendRepository;
 import greencity.repository.UserRepo;
@@ -96,7 +97,7 @@ public class FriendServiceImpl implements FriendService {
         Friend direct = friendRepo.findByUserIdAndFriendId(currentUserId, friendId);
 
         if (direct == null || direct.getStatus() != FriendStatus.FRIEND) {
-            throw new RuntimeException("Friendship not found or you are not allowed to remove this friend.");
+            throw new FriendshipNotFoundException("Friendship not found or you are not allowed to remove this friend.");
         }
 
         friendRepo.delete(direct);

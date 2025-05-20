@@ -3,7 +3,9 @@ package greencity.controller;
 import greencity.dto.friend.FriendCardDto;
 import greencity.dto.friend.FriendDto;
 import greencity.dto.friend.FriendSearchRequest;
+import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.FriendRequestException;
+import greencity.exception.exceptions.FriendshipNotFoundException;
 import greencity.exception.exceptions.UserNotFoundException;
 import greencity.service.FriendService;
 import org.junit.jupiter.api.Test;
@@ -205,7 +207,7 @@ public class FriendControllerTest {
         Long friendId = 2L;
         String errorMessage = "Friend request not found or already confirmed.";
 
-        doThrow(new RuntimeException(errorMessage)).when(friendService).confirmFriend(friendId);
+        doThrow(new FriendshipNotFoundException(errorMessage)).when(friendService).confirmFriend(friendId);
 
         ResponseEntity<?> response = friendController.confirmFriend(friendId);
 
@@ -234,7 +236,7 @@ public class FriendControllerTest {
         Long toBlockId = 2L;
         String errorMessage = "Cannot block user due to some issue.";
 
-        doThrow(new RuntimeException(errorMessage)).when(friendService).blockUser(toBlockId);
+        doThrow(new BadRequestException(errorMessage)).when(friendService).blockUser(toBlockId);
 
         ResponseEntity<?> response = friendController.blockUser(toBlockId);
 
@@ -262,14 +264,73 @@ public class FriendControllerTest {
     @Test
     void removeFriend_whenFriendNotFound_NotFound() {
         Long friendId = 2L;
-        String errorMessage = "Friendship not found.";
+        String errorMessage = "Friendship not found or you are not allowed to remove this friend.";
 
-        doThrow(new RuntimeException(errorMessage)).when(friendService).removeFriend(friendId);
+        doThrow(new FriendshipNotFoundException(errorMessage)).when(friendService).removeFriend(friendId);
 
         ResponseEntity<?> response = friendController.removeFriend(friendId);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+
         assertThat(response.getBody()).isEqualTo(errorMessage);
+
+        verify(friendService, times(1)).removeFriend(friendId);
+    }
+
+    @Test
+    void removeFriend_whenBadRequestException_BadRequest() {
+        Long friendId = 3L;
+        String errorMessage = "Invalid request data.";
+
+        doThrow(new BadRequestException(errorMessage)).when(friendService).removeFriend(friendId);
+
+        ResponseEntity<?> response = friendController.removeFriend(friendId);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isEqualTo(errorMessage);
+
+        verify(friendService, times(1)).removeFriend(friendId);
+    }
+
+    @Test
+    void removeFriend_whenUnexpectedException_InternalServerError() {
+        Long friendId = 4L;
+
+        doThrow(new RuntimeException("Unexpected error")).when(friendService).removeFriend(friendId);
+
+        ResponseEntity<?> response = friendController.removeFriend(friendId);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(response.getBody()).isEqualTo("An unexpected error occurred");
+
+        verify(friendService, times(1)).removeFriend(friendId);
+    }
+
+    @Test
+    void someMethod_whenBadRequestExceptionThrown_returnsBadRequest() {
+        Long friendId = 123L;
+        String errorMessage = "Invalid request data";
+
+        doThrow(new BadRequestException(errorMessage)).when(friendService).removeFriend(friendId);
+
+        ResponseEntity<?> response = friendController.removeFriend(friendId);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isEqualTo(errorMessage);
+
+        verify(friendService, times(1)).removeFriend(friendId);
+    }
+
+    @Test
+    void removeFriend_whenUnexpectedExceptionThrown_returnsInternalServerError() {
+        Long friendId = 123L;
+
+        doThrow(new RuntimeException("Some unexpected error")).when(friendService).removeFriend(friendId);
+
+        ResponseEntity<?> response = friendController.removeFriend(friendId);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(response.getBody()).isEqualTo("An unexpected error occurred");
 
         verify(friendService, times(1)).removeFriend(friendId);
     }
@@ -416,5 +477,63 @@ public class FriendControllerTest {
         assertThat(response.getBody()).isEqualTo("Friend request not found or already handled.");
 
         verify(friendService, times(1)).declineFriend(friendId);
+    }
+
+    @Test
+    void blockUser_whenFriendshipNotFoundExceptionThrown_returnsNotFound() {
+        Long toBlockId = 10L;
+        String errorMessage = "User not found";
+
+        doThrow(new FriendshipNotFoundException(errorMessage)).when(friendService).blockUser(toBlockId);
+
+        ResponseEntity<?> response = friendController.blockUser(toBlockId);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isEqualTo(errorMessage);
+
+        verify(friendService, times(1)).blockUser(toBlockId);
+    }
+
+    @Test
+    void blockUser_whenUnexpectedExceptionThrown_returnsInternalServerError() {
+        Long toBlockId = 10L;
+
+        doThrow(new RuntimeException("Unexpected error")).when(friendService).blockUser(toBlockId);
+
+        ResponseEntity<?> response = friendController.blockUser(toBlockId);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(response.getBody()).isEqualTo("An unexpected error occurred");
+
+        verify(friendService, times(1)).blockUser(toBlockId);
+    }
+
+    @Test
+    void confirmFriend_whenBadRequestExceptionThrown_returnsBadRequest() {
+        Long friendId = 2L;
+        String errorMessage = "Invalid friend request";
+
+        doThrow(new BadRequestException(errorMessage)).when(friendService).confirmFriend(friendId);
+
+        ResponseEntity<?> response = friendController.confirmFriend(friendId);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isEqualTo(errorMessage);
+
+        verify(friendService, times(1)).confirmFriend(friendId);
+    }
+
+    @Test
+    void confirmFriend_whenUnexpectedExceptionThrown_returnsInternalServerError() {
+        Long friendId = 3L;
+
+        doThrow(new RuntimeException("Unexpected error")).when(friendService).confirmFriend(friendId);
+
+        ResponseEntity<?> response = friendController.confirmFriend(friendId);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(response.getBody()).isEqualTo("An unexpected error occurred");
+
+        verify(friendService, times(1)).confirmFriend(friendId);
     }
 }

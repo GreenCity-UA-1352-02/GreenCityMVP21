@@ -4,7 +4,9 @@ import greencity.constant.HttpStatuses;
 import greencity.dto.friend.FriendCardDto;
 import greencity.dto.friend.FriendDto;
 import greencity.dto.friend.FriendSearchRequest;
+import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.FriendRequestException;
+import greencity.exception.exceptions.FriendshipNotFoundException;
 import greencity.exception.exceptions.UserNotFoundException;
 import greencity.service.FriendService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -91,8 +93,12 @@ public class FriendController {
         try {
             friendService.confirmFriend(friendId);
             return ResponseEntity.ok().build();
-        } catch (RuntimeException e) {
+        } catch (FriendshipNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (BadRequestException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred");
         }
     }
 
@@ -114,8 +120,12 @@ public class FriendController {
         try {
             friendService.blockUser(toBlockId);
             return ResponseEntity.ok().build();
-        } catch (RuntimeException e) {
+        } catch (FriendshipNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (BadRequestException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred");
         }
     }
 
@@ -151,8 +161,12 @@ public class FriendController {
         try {
             friendService.removeFriend(friendId);
             return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
+        } catch (FriendshipNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (BadRequestException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred");
         }
     }
 
