@@ -18,7 +18,7 @@ public class EventVO {
     private String title;
     private String description;
     @Builder.Default
-    private boolean isOpen = true;
+    private boolean open = true;
     @Builder.Default
     private List<EventDateLocationDto> dateLocations = new ArrayList<>();
     private EventImageDto titleImage;

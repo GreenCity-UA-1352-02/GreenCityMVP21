@@ -7,13 +7,13 @@ import greencity.dto.eventcomment.AddEventCommentDtoRequest;
 import greencity.dto.eventcomment.AddEventCommentDtoResponse;
 import greencity.dto.user.UserVO;
 import greencity.entity.event.EventComment;
-import greencity.enums.Role;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.repository.EventCommentRepository;
 import greencity.repository.EventRepo;
 import greencity.repository.UserRepo;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -41,7 +41,11 @@ public class EventCommentServiceImpl implements EventCommentService {
             if (!parentIsTopLevel) {
                 throw new BadRequestException(ErrorMessage.CANNOT_REPLY_THE_REPLY);
             }
-            eventComment.setParentComment(eventCommentRepo.getReferenceById(comment.parentCommentId()));
+            EventComment parent = eventCommentRepo.getReferenceById(comment.parentCommentId());
+            if (!parent.getEvent().getId().equals(eventId)) {
+                throw new BadRequestException(ErrorMessage.PARENT_COMMENT_NOT_FROM_EVENT);
+            }
+            eventComment.setParentComment(parent);
         }
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
         CompletableFuture.runAsync(
@@ -67,9 +71,6 @@ public class EventCommentServiceImpl implements EventCommentService {
     public void deleteById(Long id, UserVO user) {
         EventComment comment = eventCommentRepo.findById(id)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION + id));
-        if (user.getRole() != Role.ROLE_ADMIN && !user.getId().equals(comment.getUser().getId())) {
-            throw new BadRequestException(ErrorMessage.NOT_A_CURRENT_USER);
-        }
         if (comment.getComments() != null) {
             comment.getComments().forEach(c -> c.setDeleted(true));
         }
@@ -79,5 +80,16 @@ public class EventCommentServiceImpl implements EventCommentService {
             () -> ratingCalculation
                 .ratingCalculation(RatingCalculationEnum.DELETE_COMMENT, user, accessToken));
         eventCommentRepo.save(comment);
+    }
+
+    @Override
+    public boolean isCommentOwner(Long commentId, String username) {
+        Optional<EventComment> commentOpt = eventCommentRepo.findById(commentId);
+        if (commentOpt.isEmpty()) {
+            return false;
+        }
+        EventComment comment = commentOpt.get();
+        String currentUserEmail = username;
+        return comment.getUser().getEmail().equals(currentUserEmail);
     }
 }

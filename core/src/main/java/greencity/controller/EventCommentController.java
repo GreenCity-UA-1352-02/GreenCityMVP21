@@ -17,6 +17,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,7 +33,7 @@ public class EventCommentController {
      *
      * @param eventId id of the event
      * @param request dto for comment
-     * @param user user that add comment
+     * @param user    user that add comment
      * @return dto {@link AddEventCommentDtoResponse}
      */
     @Operation(summary = "Add comment.")
@@ -56,7 +57,7 @@ public class EventCommentController {
     /**
      * Method to update comment.
      *
-     * @param id id of the comment
+     * @param id   id of the comment
      * @param text text to update comment
      */
     @Operation(summary = "Update comment.")
@@ -86,9 +87,10 @@ public class EventCommentController {
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @eventCommentServiceImpl.isCommentOwner(#id, authentication.name)")
     @DeleteMapping("")
-    public ResponseEntity<Object> delete(@RequestParam Long id, @Parameter(hidden = true) @CurrentUser UserVO user) {
+    public ResponseEntity<Void> delete(@RequestParam Long id, @Parameter(hidden = true) @CurrentUser UserVO user) {
         eventCommentService.deleteById(id, user);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }

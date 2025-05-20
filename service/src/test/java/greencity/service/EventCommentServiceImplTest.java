@@ -56,7 +56,6 @@ class EventCommentServiceImplTest {
 
     @Test
     void save_shouldSaveCommentWithoutParent() {
-        // given
         Long eventId = 1L;
         UserVO user = ModelUtils.getUserVO();
         User userEntity = ModelUtils.getUser();
@@ -78,10 +77,8 @@ class EventCommentServiceImplTest {
         when(modelMapper.map(savedComment, AddEventCommentDtoResponse.class)).thenReturn(responseDto);
         when(httpServletRequest.getHeader("Authorization")).thenReturn("Bearer token");
 
-        // when
         AddEventCommentDtoResponse result = eventCommentService.save(eventId, request, user);
 
-        // then
         assertEquals(responseDto, result);
         verify(eventCommentRepo).save(eventComment);
         verify(ratingCalculation).ratingCalculation(RatingCalculationEnum.ADD_COMMENT, user, "Bearer token");
@@ -89,7 +86,6 @@ class EventCommentServiceImplTest {
 
     @Test
     void save_shouldSaveReplyToTopLevelComment() {
-        // given
         Long eventId = 1L;
         Long parentCommentId = 10L;
         UserVO user = ModelUtils.getUserVO();
@@ -102,7 +98,14 @@ class EventCommentServiceImplTest {
             .build();
 
         EventComment eventComment = new EventComment();
+
+
+        Event parentEvent = new Event();
+        parentEvent.setId(eventId);
+
         EventComment parentComment = new EventComment();
+        parentComment.setEvent(parentEvent);
+
         EventComment savedComment = new EventComment();
         AddEventCommentDtoResponse responseDto = new AddEventCommentDtoResponse();
 
@@ -115,10 +118,8 @@ class EventCommentServiceImplTest {
         when(modelMapper.map(savedComment, AddEventCommentDtoResponse.class)).thenReturn(responseDto);
         when(httpServletRequest.getHeader("Authorization")).thenReturn("Bearer token");
 
-        // when
         AddEventCommentDtoResponse result = eventCommentService.save(eventId, request, user);
 
-        // then
         assertEquals(responseDto, result);
         verify(eventCommentRepo).save(eventComment);
         verify(eventCommentRepo).getReferenceById(parentCommentId);
@@ -129,7 +130,6 @@ class EventCommentServiceImplTest {
 
     @Test
     void save_shouldThrowExceptionWhenReplyToNestedComment() {
-        // given
         Long eventId = 1L;
         Long parentCommentId = 20L;
         UserVO user = ModelUtils.getUserVO();
@@ -144,13 +144,43 @@ class EventCommentServiceImplTest {
         when(modelMapper.map(request, EventComment.class)).thenReturn(eventComment);
         when(userRepo.getReferenceById(user.getId())).thenReturn(new User());
         when(eventRepo.getReferenceById(eventId)).thenReturn(new Event());
-        when(eventCommentRepo.existsByIdAndParentCommentIsNull(parentCommentId)).thenReturn(false); // <-- головне
+        when(eventCommentRepo.existsByIdAndParentCommentIsNull(parentCommentId)).thenReturn(false);
 
-        // when + then
         BadRequestException ex = assertThrows(BadRequestException.class,
             () -> eventCommentService.save(eventId, request, user));
 
         assertEquals(ErrorMessage.CANNOT_REPLY_THE_REPLY, ex.getMessage());
+        verify(eventCommentRepo, never()).save(any());
+        verify(ratingCalculation, never()).ratingCalculation(any(), any(), any());
+    }
+
+    @Test
+    void save_shouldThrowExceptionWhenParentCommentFromDifferentEvent() {
+        // given
+        Long eventId = 1L;
+        Long parentCommentId = 10L;
+        UserVO user = ModelUtils.getUserVO();
+
+        AddEventCommentDtoRequest request = AddEventCommentDtoRequest.builder()
+            .text("Reply to parent from different event")
+            .parentCommentId(parentCommentId)
+            .build();
+
+        EventComment eventComment = new EventComment();
+        EventComment parentComment = new EventComment();
+        parentComment.setEvent(new Event());
+        parentComment.getEvent().setId(999L);
+
+        when(modelMapper.map(request, EventComment.class)).thenReturn(eventComment);
+        when(userRepo.getReferenceById(user.getId())).thenReturn(new User());
+        when(eventRepo.getReferenceById(eventId)).thenReturn(new Event());
+        when(eventCommentRepo.existsByIdAndParentCommentIsNull(parentCommentId)).thenReturn(true);
+        when(eventCommentRepo.getReferenceById(parentCommentId)).thenReturn(parentComment);
+
+        BadRequestException ex = assertThrows(BadRequestException.class,
+            () -> eventCommentService.save(eventId, request, user));
+
+        assertEquals(ErrorMessage.PARENT_COMMENT_NOT_FROM_EVENT, ex.getMessage());
         verify(eventCommentRepo, never()).save(any());
         verify(ratingCalculation, never()).ratingCalculation(any(), any(), any());
     }
@@ -267,33 +297,6 @@ class EventCommentServiceImplTest {
         assertTrue(reply.isDeleted());
         verify(eventCommentRepo).save(comment);
         verify(ratingCalculation).ratingCalculation(RatingCalculationEnum.DELETE_COMMENT, user, "Bearer token");
-    }
-
-    @Test
-    void deleteById_shouldThrowBadRequestIfUserIsNotAdminOrOwner() {
-        Long commentId = 1L;
-        UserVO user = ModelUtils.getUserVO();
-        user.setId(99L);
-
-        User userEntity = ModelUtils.getUser();
-
-        EventComment reply = new EventComment();
-        reply.setDeleted(false);
-
-        EventComment comment = EventComment.builder()
-            .id(commentId)
-            .user(userEntity)
-            .deleted(false)
-            .comments(List.of(reply))
-            .build();
-
-        when(eventCommentRepo.findById(commentId)).thenReturn(Optional.ofNullable(comment));
-
-        BadRequestException ex = assertThrows(BadRequestException.class,
-            () -> eventCommentService.deleteById(commentId, user));
-
-        assertEquals(ErrorMessage.NOT_A_CURRENT_USER, ex.getMessage());
-        verify(eventCommentRepo, never()).save(any());
     }
 
     @Test

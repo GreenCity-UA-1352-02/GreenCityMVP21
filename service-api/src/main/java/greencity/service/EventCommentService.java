@@ -20,7 +20,7 @@ public interface EventCommentService {
      * Method to change the existing comment.
      *
      * @param text new text of the comment
-     * @param id id of the comment that user wants to change
+     * @param id   id of the comment that user wants to change
      * @param user current user {@link  UserVO} that want to change comment
      */
     void update(@NotBlank String text, Long id, UserVO user);
@@ -28,8 +28,10 @@ public interface EventCommentService {
     /**
      * Method to mark comment ad deleted.
      *
-     * @param id id of the comment
+     * @param id   id of the comment
      * @param user current user {@link  UserVO} that want to delete comment
      */
     void deleteById(Long id, UserVO user);
+
+    boolean isCommentOwner(Long id, String username);
 }

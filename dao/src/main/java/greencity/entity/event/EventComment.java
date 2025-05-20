@@ -15,7 +15,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Table(name = "event_comment")
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
+@EqualsAndHashCode(exclude = {"parentComment", "comments", "user", "event", "text"})
 @Getter
 @Setter
 @Builder
@@ -37,11 +37,11 @@ public class EventComment {
     @Column(name = "modified_date", nullable = false)
     private LocalDateTime modifiedDate;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_comment_id")
     private EventComment parentComment;
 
-    @OneToMany(mappedBy = "parentComment", cascade = {CascadeType.ALL})
+    @OneToMany(mappedBy = "parentComment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<EventComment> comments = new ArrayList<>();
 
     @ManyToOne

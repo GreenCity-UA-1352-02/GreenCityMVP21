@@ -1,6 +1,6 @@
 package greencity.controller;
 
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -21,6 +21,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -95,7 +96,7 @@ class EventCommentControllerTest {
 
         mockMvc.perform(delete(EVENT_COMMENT_CONTROLLER_LINK + "?id=1")
                 .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
+            .andExpect(status().isNoContent());
 
         verify(userService).findByEmail("test@gmail.com");
         verify(eventCommentService).deleteById(1L, userVO);
@@ -117,6 +118,39 @@ class EventCommentControllerTest {
         mockMvc.perform(delete(EVENT_COMMENT_CONTROLLER_LINK + "?id=1")
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void deleteComment_AsAdmin_ShouldAllow() throws Exception {
+        Long commentId = 1L;
+        mockMvc.perform(delete("/events/comments")
+                .param("id", commentId.toString()))
+            .andExpect(status().isNoContent()); // або .isOk(), залежить від реалізації
+    }
+
+    @Test
+    @WithMockUser(username = "ownerUser")
+    void deleteComment_AsOwner_ShouldAllow() throws Exception {
+        Long commentId = 1L;
+        when(eventCommentService.isCommentOwner(eq(commentId), any()))
+            .thenReturn(true);
+
+        mockMvc.perform(delete("/events/comments")
+                .param("id", commentId.toString()))
+            .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @WithMockUser(username = "randomUser")
+    void deleteComment_AsNotOwner_ShouldDeny() throws Exception {
+        Long commentId = 1L;
+        when(eventCommentService.isCommentOwner(eq(commentId), any()))
+            .thenReturn(false);
+
+        mockMvc.perform(delete("/events/comments")
+                .param("id", commentId.toString()))
+            .andExpect(status().isForbidden());
     }
 
     @Test
