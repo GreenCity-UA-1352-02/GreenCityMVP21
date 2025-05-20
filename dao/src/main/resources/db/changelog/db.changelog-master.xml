@@ -179,5 +179,6 @@
     <include file="db/changelog/logs/ch-add-table-event-Pohranychnyi.xml"/>
     <include file="db/changelog/logs/ch-change-column-constraint-main-image-Pohranychyi.xml"/>
     <include file="db/changelog/logs/ch-add-event-comment-Pohranychnyi.xml"/>
+    <include file="db/changelog/logs/ch-news-subscribers-makandrii.xml"/>
 </databaseChangeLog>
 

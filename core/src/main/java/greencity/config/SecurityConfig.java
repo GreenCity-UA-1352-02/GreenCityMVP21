@@ -157,7 +157,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST,
                     "/ownSecurity/signUp",
                     "/ownSecurity/signIn",
-                    "/ownSecurity/changePassword")
+                    "/ownSecurity/changePassword",
+                    "/newsSubscriber")
                 .permitAll()
                 .requestMatchers(HttpMethod.GET,
                     "/achievements",
@@ -216,7 +217,6 @@ public class SecurityConfig {
                     "/habit/assign/{habitAssignId}/enroll/**",
                     "/habit/assign/{habitAssignId}/unenroll/{date}",
                     "/habit/statistic/{habitId}",
-                    "/newsSubscriber",
                     USER_CUSTOM_SHOPPING_LIST_ITEMS,
                     USER_SHOPPING_LIST,
                     "/user/{userId}/habit",
@@ -260,7 +260,6 @@ public class SecurityConfig {
                     USER_SHOPPING_LIST + "/user-shopping-list-items")
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.GET,
-                    "/newsSubscriber",
                     "/comments",
                     "/comments/{id}",
                     "/user/all",
