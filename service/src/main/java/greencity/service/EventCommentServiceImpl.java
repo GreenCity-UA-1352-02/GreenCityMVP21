@@ -67,7 +67,7 @@ public class EventCommentServiceImpl implements EventCommentService {
     public void deleteById(Long id, UserVO user) {
         EventComment comment = eventCommentRepo.findById(id)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION + id));
-        if (user.getRole() != Role.ROLE_ADMIN || !user.getId().equals(comment.getUser().getId())) {
+        if (user.getRole() != Role.ROLE_ADMIN && !user.getId().equals(comment.getUser().getId())) {
             throw new BadRequestException(ErrorMessage.NOT_A_CURRENT_USER);
         }
         if (comment.getComments() != null) {
@@ -77,7 +77,7 @@ public class EventCommentServiceImpl implements EventCommentService {
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
         CompletableFuture.runAsync(
             () -> ratingCalculation
-                .ratingCalculation(RatingCalculationEnum.ADD_COMMENT, user, accessToken));
+                .ratingCalculation(RatingCalculationEnum.DELETE_COMMENT, user, accessToken));
         eventCommentRepo.save(comment);
     }
 }
