@@ -87,7 +87,7 @@ public class EventCommentController {
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @eventCommentServiceImpl.isCommentOwner(#id, authentication.name)")
+    @PreAuthorize("hasRole('ADMIN') or @eventCommentServiceImpl.isCommentOwner(#id, authentication.name)")
     @DeleteMapping("")
     public ResponseEntity<Void> delete(@RequestParam Long id, @Parameter(hidden = true) @CurrentUser UserVO user) {
         eventCommentService.deleteById(id, user);
