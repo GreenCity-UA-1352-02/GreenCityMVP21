@@ -4,14 +4,14 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet id="2025-05-18-create-event-reaction-table" author="Dmytro_Kravchuk">
+    <changeSet id="2025-05-18-create-event-reactions-table" author="Dmytro_Kravchuk">
         <preConditions onFail="MARK_RAN">
             <not>
-                <tableExists tableName="event_reaction"/>
+                <tableExists tableName="event_reactions"/>
             </not>
         </preConditions>
 
-        <createTable tableName="event_reaction">
+        <createTable tableName="event_reactions">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -27,21 +27,21 @@
         </createTable>
 
         <addForeignKeyConstraint
-                baseTableName="event_reaction"
+                baseTableName="event_reactions"
                 baseColumnNames="event_id"
                 constraintName="fk_event_reaction_event"
                 referencedTableName="events"
                 referencedColumnNames="id"/>
 
         <addForeignKeyConstraint
-                baseTableName="event_reaction"
+                baseTableName="event_reactions"
                 baseColumnNames="user_id"
                 constraintName="fk_event_reaction_user"
                 referencedTableName="users"
                 referencedColumnNames="id"/>
 
         <addUniqueConstraint
-                tableName="event_reaction"
+                tableName="event_reactions"
                 columnNames="event_id, user_id"
                 constraintName="uc_event_user_unique"/>
     </changeSet>

@@ -197,7 +197,9 @@ public class SecurityConfig {
                     "/habit/search",
                     "/events/reactions/{eventId}/likes",
                     "/events/reactions/{eventId}/dislikes",
-                    "/habit/{habitId}/friends/profile-pictures")
+                    "/habit/{habitId}/friends/profile-pictures",
+                    "/api/events/my",
+                    "/api/events/my/role/{role}")
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.POST,
                     "/events/create",
@@ -257,7 +259,8 @@ public class SecurityConfig {
                     "/favorite_place/{placeId}",
                     "/social-networks",
                     USER_CUSTOM_SHOPPING_LIST_ITEMS,
-                    USER_SHOPPING_LIST + "/user-shopping-list-items")
+                    USER_SHOPPING_LIST + "/user-shopping-list-items",
+                    "/api/events/my/{eventId}/cancel")
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.GET,
                     "/newsSubscriber",
