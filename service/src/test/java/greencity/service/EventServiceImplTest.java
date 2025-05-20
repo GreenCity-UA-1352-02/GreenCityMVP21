@@ -231,56 +231,34 @@ class EventServiceImplTest {
     @Test
     void searchByTitle_whenQueryMatchesSomeTitles_returnsFilteredMappedEvents() {
         Event event1 = Event.builder()
-            .title("Title Hello")
+            .title("Title HeLLo")
             .build();
-        Event event2 = Event.builder()
-            .title("Title World")
-            .build();
-
-        List<Event> events = List.of(event1, event2);
 
         EventSearchDto dto1 = EventSearchDto.builder()
-            .title("Title Hello")
-            .build();
-        EventSearchDto dto2 = EventSearchDto.builder()
-            .title("Title World")
+            .title("Title HeLLo")
             .build();
 
-        when(eventRepo.findAll()).thenReturn(events);
+        when(eventRepo.findByTitleContainingIgnoreCase("hello")).thenReturn(List.of(event1));
         when(eventSearchResponseMapper.convert(event1)).thenReturn(dto1);
-        when(eventSearchResponseMapper.convert(event2)).thenReturn(dto2);
 
         List<EventSearchDto> result = eventService.searchByTitle("hello");
 
         assertEquals(1, result.size());
-        assertEquals("Title Hello", result.get(0).getTitle());
-        assertFalse(result.contains(dto2));
+        assertEquals("Title HeLLo", result.get(0).getTitle());
+
+        verify(eventRepo).findByTitleContainingIgnoreCase("hello");
+        verify(eventRepo, never()).findAll();
     }
 
     @Test
     void searchByTitle_whenQueryMatchesNothing_returnsEmptyList() {
-        Event event1 = Event.builder()
-            .title("Title Hello")
-            .build();
-        Event event2 = Event.builder()
-            .title("Title World")
-            .build();
-
-        List<Event> events = List.of(event1, event2);
-
-        EventSearchDto dto1 = EventSearchDto.builder()
-            .title("Title Hello")
-            .build();
-        EventSearchDto dto2 = EventSearchDto.builder()
-            .title("Title World")
-            .build();
-
-        when(eventRepo.findAll()).thenReturn(events);
-        when(eventSearchResponseMapper.convert(event1)).thenReturn(dto1);
-        when(eventSearchResponseMapper.convert(event2)).thenReturn(dto2);
+        when(eventRepo.findByTitleContainingIgnoreCase("good")).thenReturn(List.of());
 
         List<EventSearchDto> result = eventService.searchByTitle("good");
 
         assertEquals(0, result.size());
+        verify(eventRepo).findByTitleContainingIgnoreCase("good");
+        verify(eventRepo, never()).findAll();
+        verify(eventSearchResponseMapper, never()).convert((Event) any());
     }
 }
