@@ -58,4 +58,14 @@ public class Habit {
         joinColumns = @JoinColumn(name = "habit_id"),
         inverseJoinColumns = @JoinColumn(name = "tag_id"))
     private Set<Tag> tags;
+
+    @Transient
+    private boolean currentUserLiked = false;
+
+    @ManyToMany
+    @JoinTable(
+            name = "habit_users_liked",
+            joinColumns = @JoinColumn(name = "habit_id"),
+            inverseJoinColumns = @JoinColumn(name = "users_liked_id"))
+    private Set<User> usersLiked;
 }
