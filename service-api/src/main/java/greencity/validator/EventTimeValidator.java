@@ -14,7 +14,7 @@ public class EventTimeValidator implements ConstraintValidator<EventTimeValidati
 
     @Override
     public boolean isValid(EventDateLocationDto dto,
-                           ConstraintValidatorContext constraintValidatorContext) {
+        ConstraintValidatorContext constraintValidatorContext) {
         if (dto == null) {
             return true;
         }

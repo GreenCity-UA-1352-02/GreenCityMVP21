@@ -10,9 +10,9 @@ public class AddressMapper extends AbstractConverter<Address, AddressDto> {
     @Override
     protected AddressDto convert(Address source) {
         return AddressDto.builder()
-                .id(source.getId())
-                .latitude(source.getLatitude())
-                .longitude(source.getLongitude())
-                .build();
+            .id(source.getId())
+            .latitude(source.getLatitude())
+            .longitude(source.getLongitude())
+            .build();
     }
 }

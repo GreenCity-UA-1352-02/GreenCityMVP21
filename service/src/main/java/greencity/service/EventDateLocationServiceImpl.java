@@ -91,8 +91,8 @@ public class EventDateLocationServiceImpl implements EventDateLocationService {
     }
 
     private void updateAddress(EventDateLocationDto eventDateLocationDto,
-                               EventType previousType,
-                               EventDateLocation eventDateLocation) {
+        EventType previousType,
+        EventDateLocation eventDateLocation) {
         EventType newType = eventDateLocation.getEventType();
         boolean addressRequired = newType != EventType.ONLINE;
         if (addressRequired) {

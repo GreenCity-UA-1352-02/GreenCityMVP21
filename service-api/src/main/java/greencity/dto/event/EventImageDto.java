@@ -5,6 +5,5 @@ import lombok.Builder;
 @Builder
 public record EventImageDto(
     Long id,
-    String link
-) {
+    String link) {
 }

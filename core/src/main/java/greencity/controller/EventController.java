@@ -4,11 +4,13 @@ import greencity.annotations.EventImageValidation;
 import greencity.constant.HttpStatuses;
 import greencity.dto.event.AddEventRequest;
 import greencity.dto.event.EventResponse;
+import greencity.dto.event.EventSearchDto;
 import greencity.dto.event.UpdateEventRequest;
 import greencity.service.EventService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.constraints.Size;
 import java.security.Principal;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -51,15 +53,14 @@ public class EventController {
     public ResponseEntity<EventResponse> create(
         @RequestPart @Validated AddEventRequest addEventRequest,
         @RequestPart @EventImageValidation List<MultipartFile> images,
-        Principal principal
-    ) {
+        Principal principal) {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(eventService.save(addEventRequest, images, principal.getName()));
     }
 
     /**
-     * Method for updating an existing {@link EventResponse}.
-     * Accessible for users with role ADMIN or the author of the event.
+     * Method for updating an existing {@link EventResponse}. Accessible for users
+     * with role ADMIN or the author of the event.
      *
      * @param updateEventRequest - DTO for updating the event.
      * @param images             - optional list of updated event images.
@@ -74,20 +75,18 @@ public class EventController {
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
-    @PreAuthorize
-        ("hasRole('ADMIN') || @eventRepo.existsByIdAndAuthor_Email(#updateEventRequest.id, principal.username)")
+    @PreAuthorize("hasRole('ADMIN') || @eventRepo.existsByIdAndAuthor_Email(#updateEventRequest.id, principal.username)")
     @PutMapping(value = "/update", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<EventResponse> update(
         @RequestPart @Validated UpdateEventRequest updateEventRequest,
-        @RequestPart(required = false) @EventImageValidation List<MultipartFile> images
-    ) {
+        @RequestPart(required = false) @EventImageValidation List<MultipartFile> images) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(eventService.update(updateEventRequest, images));
     }
 
     /**
-     * Method for deleting an {@link EventResponse} by ID.
-     * Accessible for users with role ADMIN or the author of the event.
+     * Method for deleting an {@link EventResponse} by ID. Accessible for users with
+     * role ADMIN or the author of the event.
      *
      * @param id - ID of the event to delete.
      * @return HTTP 200 OK if the event was deleted successfully.
@@ -107,5 +106,28 @@ public class EventController {
     public ResponseEntity<Object> deleteEvent(@PathVariable("eventId") Long id) {
         eventService.delete(id);
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Method for searching an {@link List<EventResponse>} by query.
+     *
+     * @param searchQuery - query for searching events by title.
+     * @return HTTP 200 OK if the event was deleted successfully.
+     * @author [Olexandr Pohranychnyi]
+     */
+    @Operation(summary = "Search event by title")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/search")
+    public ResponseEntity<List<EventSearchDto>> searchEvents(
+        @RequestParam(defaultValue = "ALL") @Size(min = 3, max = 64,
+            message = "Search query must be at least 3 characters") String searchQuery) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(eventService.searchByTitle(searchQuery));
     }
 }

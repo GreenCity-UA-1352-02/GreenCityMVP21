@@ -15,6 +15,7 @@ import greencity.entity.localization.TagTranslation;
 import greencity.enums.TagType;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.TagNotFoundException;
+import greencity.mapping.EventSearchResponseMapper;
 import greencity.repository.EventRepo;
 import greencity.repository.TagsRepo;
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ public class EventServiceImpl implements EventService {
     private final TagsRepo tagsRepo;
     private final EventDateLocationService eventDateLocationService;
     private final EventImageService eventImageService;
+    private final EventSearchResponseMapper eventSearchResponseMapper;
 
     @Override
     @Transactional
@@ -58,8 +60,8 @@ public class EventServiceImpl implements EventService {
                 EventDateLocation eventDateLocation = modelMapper.map(dateLocation, EventDateLocation.class);
                 eventDateLocation.setEvent(event);
 
-                eventDateLocation.setAddress(dateLocationDto.coordinates() == null ? null :
-                    modelMapper.map(dateLocationDto.coordinates(), Address.class));
+                eventDateLocation.setAddress(dateLocationDto.coordinates() == null ? null
+                    : modelMapper.map(dateLocationDto.coordinates(), Address.class));
                 return eventDateLocation;
             })
             .toList();
@@ -91,11 +93,15 @@ public class EventServiceImpl implements EventService {
         UserVO user = restClient.findByEmail(email);
         return modelMapper.map(user, User.class);
     }
-    
+
     private void assignMainImage(Event event, MultipartFile image) {
         EventImageDto mainImage = eventImageService.uploadImage(image, event.getId());
         EventImage eventImage = mapToEntity(mainImage, event);
         event.setMainImage(eventImage);
+        if (event.getImages() == null) {
+            event.setImages(new ArrayList<>());
+        }
+
         event.getImages().add(eventImage);
     }
 
@@ -176,8 +182,7 @@ public class EventServiceImpl implements EventService {
                     .id(tag.getId())
                     .nameUa(nameUa)
                     .nameEn(nameEn)
-                    .build()
-            );
+                    .build());
         }
         return tagUaEnDtos;
     }
@@ -232,7 +237,20 @@ public class EventServiceImpl implements EventService {
     }
 
     private void deleteDates(Event event) {
-        event.getEventDatesLocations().forEach(dateLocation ->
-            eventDateLocationService.delete(dateLocation.getId()));
+        event.getEventDatesLocations().forEach(dateLocation -> eventDateLocationService.delete(dateLocation.getId()));
+    }
+
+    @Override
+    @Transactional
+    public List<EventSearchDto> searchByTitle(String searchQuery) {
+        if (searchQuery.equalsIgnoreCase("all")) {
+            return eventRepo.findAll().stream()
+                .map(eventSearchResponseMapper::convert)
+                .toList();
+        } else {
+            return eventRepo.findByTitleContainingIgnoreCase(searchQuery).stream()
+                .map(eventSearchResponseMapper::convert)
+                .toList();
+        }
     }
 }

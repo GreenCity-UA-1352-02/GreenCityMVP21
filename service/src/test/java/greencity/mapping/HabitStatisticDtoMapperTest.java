@@ -4,7 +4,6 @@ import greencity.dto.habitstatistic.HabitStatisticDto;
 import greencity.entity.HabitStatistic;
 import org.junit.jupiter.api.Test;
 
-
 import static greencity.ModelUtils.getHabitAssign;
 import static greencity.ModelUtils.getHabitStatistic;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;

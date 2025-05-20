@@ -13,6 +13,8 @@ import java.lang.annotation.Target;
 @Constraint(validatedBy = EventImageValidator.class)
 public @interface EventImageValidation {
     String message() default "Invalid event images (must be JPG/PNG and max 10MB each, up to 5 files)";
+
     Class<?>[] groups() default {};
+
     Class<? extends Payload>[] payload() default {};
 }

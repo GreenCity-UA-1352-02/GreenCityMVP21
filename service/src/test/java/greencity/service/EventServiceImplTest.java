@@ -7,10 +7,7 @@ import static org.mockito.Mockito.*;
 import greencity.ModelUtils;
 import greencity.client.RestClient;
 import greencity.constant.ErrorMessage;
-import greencity.dto.event.AddEventRequest;
-import greencity.dto.event.EventImageDto;
-import greencity.dto.event.EventResponse;
-import greencity.dto.event.UpdateEventRequest;
+import greencity.dto.event.*;
 import greencity.dto.user.UserVO;
 import greencity.entity.Tag;
 import greencity.entity.User;
@@ -20,6 +17,7 @@ import greencity.entity.event.EventDateLocation;
 import greencity.enums.TagType;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.TagNotFoundException;
+import greencity.mapping.EventSearchResponseMapper;
 import greencity.repository.EventRepo;
 import greencity.repository.TagsRepo;
 import java.util.ArrayList;
@@ -52,15 +50,15 @@ class EventServiceImplTest {
     private EventDateLocationService eventDateLocationService;
     @Mock
     private EventImageService eventImageService;
+    @Mock
+    private EventSearchResponseMapper eventSearchResponseMapper;
 
     @InjectMocks
     private EventServiceImpl eventService;
 
-
     private User user;
     private UserVO userVO;
     private Event event;
-
 
     @BeforeEach
     void setUp() {
@@ -153,8 +151,7 @@ class EventServiceImplTest {
 
         TagNotFoundException exception = assertThrows(
             TagNotFoundException.class,
-            () -> eventService.save(request, images, user.getEmail())
-        );
+            () -> eventService.save(request, images, user.getEmail()));
 
         assertEquals(ErrorMessage.TAGS_NOT_FOUND, exception.getMessage());
     }
@@ -202,4 +199,66 @@ class EventServiceImplTest {
         verify(eventRepo).delete(event);
     }
 
+    @Test
+    void searchByTitle_whenQueryIsAll_returnsAllMappedEvents() {
+        Event event1 = Event.builder()
+            .title("Title 1")
+            .build();
+        Event event2 = Event.builder()
+            .title("Title 2")
+            .build();
+
+        List<Event> events = List.of(event1, event2);
+
+        EventSearchDto dto1 = EventSearchDto.builder()
+            .title("Title 1")
+            .build();
+        EventSearchDto dto2 = EventSearchDto.builder()
+            .title("Title 2")
+            .build();
+
+        when(eventRepo.findAll()).thenReturn(events);
+        when(eventSearchResponseMapper.convert(event1)).thenReturn(dto1);
+        when(eventSearchResponseMapper.convert(event2)).thenReturn(dto2);
+
+        List<EventSearchDto> result = eventService.searchByTitle("all");
+
+        assertEquals(2, result.size());
+        assertTrue(result.contains(dto1));
+        assertTrue(result.contains(dto2));
+    }
+
+    @Test
+    void searchByTitle_whenQueryMatchesSomeTitles_returnsFilteredMappedEvents() {
+        Event event1 = Event.builder()
+            .title("Title HeLLo")
+            .build();
+
+        EventSearchDto dto1 = EventSearchDto.builder()
+            .title("Title HeLLo")
+            .build();
+
+        when(eventRepo.findByTitleContainingIgnoreCase("hello")).thenReturn(List.of(event1));
+        when(eventSearchResponseMapper.convert(event1)).thenReturn(dto1);
+
+        List<EventSearchDto> result = eventService.searchByTitle("hello");
+
+        assertEquals(1, result.size());
+        assertEquals("Title HeLLo", result.get(0).getTitle());
+
+        verify(eventRepo).findByTitleContainingIgnoreCase("hello");
+        verify(eventRepo, never()).findAll();
+    }
+
+    @Test
+    void searchByTitle_whenQueryMatchesNothing_returnsEmptyList() {
+        when(eventRepo.findByTitleContainingIgnoreCase("good")).thenReturn(List.of());
+
+        List<EventSearchDto> result = eventService.searchByTitle("good");
+
+        assertEquals(0, result.size());
+        verify(eventRepo).findByTitleContainingIgnoreCase("good");
+        verify(eventRepo, never()).findAll();
+        verify(eventSearchResponseMapper, never()).convert((Event) any());
+    }
 }
