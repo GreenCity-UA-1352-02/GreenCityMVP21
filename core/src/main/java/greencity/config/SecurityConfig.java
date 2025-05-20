@@ -12,6 +12,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.authentication.configuration.EnableGlobalAuthentication;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -37,6 +38,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @Configuration
 @EnableWebSecurity
 @EnableGlobalAuthentication
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
     private static final String ECONEWS_COMMENTS = "/econews/comments";
     private static final String USER_CUSTOM_SHOPPING_LIST_ITEMS = "/user/{userId}/custom-shopping-list-items";
@@ -199,6 +201,7 @@ public class SecurityConfig {
                     "/habit/{habitId}/friends/profile-pictures")
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.POST,
+                    "/events/comments/{eventId}",
                     "/events/create",
                     "/category",
                     "/econews",
@@ -234,6 +237,7 @@ public class SecurityConfig {
                     CUSTOM_SHOPPING_LIST_ITEMS,
                     CUSTOM_SHOPPING_LIST_URL,
                     HABIT_ASSIGN_ID,
+                    "/events/comments",
                     "/shopping-list-items/shoppingList/{userId}",
                     HABIT_ASSIGN_ID,
                     "/habit/assign/cancel/{habitId}",
@@ -245,9 +249,9 @@ public class SecurityConfig {
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.DELETE,
                     ECONEWS_COMMENTS,
-                    "/events/comments/{eventCommentId}",
                     "/events/delete",
                     "/econews/{econewsId}",
+                    "/events/comments",
                     CUSTOM_SHOPPING_LIST_ITEMS,
                     CUSTOM_SHOPPING_LIST_URL,
                     "/favorite_place/{placeId}",

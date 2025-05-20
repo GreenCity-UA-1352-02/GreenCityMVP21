@@ -48,6 +48,9 @@ public class Event {
         inverseJoinColumns = @JoinColumn(name = "tag_id"))
     private List<Tag> tags;
 
+    @OneToMany(mappedBy = "event", fetch = FetchType.LAZY)
+    private List<EventComment> comments  = new ArrayList<>();
+
     @OneToOne(optional = false)
     @JoinColumn(nullable = false, unique = true)
     private EventImage mainImage;
