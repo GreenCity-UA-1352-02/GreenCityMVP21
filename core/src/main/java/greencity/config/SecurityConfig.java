@@ -195,10 +195,10 @@ public class SecurityConfig {
                     "/habit/assign/{habitAssignId}",
                     "/habit/tags/search",
                     "/habit/search",
-                    "/events/comments/{eventId}",
                     "/habit/{habitId}/friends/profile-pictures")
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.POST,
+                    "/events/comments/{eventId}",
                     "/events/create",
                     "/category",
                     "/econews",
@@ -235,6 +235,7 @@ public class SecurityConfig {
                     CUSTOM_SHOPPING_LIST_ITEMS,
                     CUSTOM_SHOPPING_LIST_URL,
                     HABIT_ASSIGN_ID,
+                    "/events/comments",
                     "/shopping-list-items/shoppingList/{userId}",
                     HABIT_ASSIGN_ID,
                     "/habit/assign/cancel/{habitId}",
@@ -249,6 +250,7 @@ public class SecurityConfig {
                     "/events/comments/{eventCommentId}",
                     "/events/delete",
                     "/econews/{econewsId}",
+                    "/events/comments",
                     CUSTOM_SHOPPING_LIST_ITEMS,
                     CUSTOM_SHOPPING_LIST_URL,
                     "/favorite_place/{placeId}",

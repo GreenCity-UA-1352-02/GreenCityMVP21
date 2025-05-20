@@ -67,7 +67,8 @@ public class EventCommentController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @PatchMapping("")
-    public ResponseEntity<Void> update(Long id, @RequestParam @NotBlank String text,
+    public ResponseEntity<Void> update(@RequestParam Long id,
+                                       @RequestParam @NotBlank String text,
                                        @Parameter(hidden = true) @CurrentUser UserVO user) {
         eventCommentService.update(text, id, user);
         return ResponseEntity.ok().build();
@@ -86,7 +87,7 @@ public class EventCommentController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @DeleteMapping("")
-    public ResponseEntity<Object> delete(Long id, @Parameter(hidden = true) @CurrentUser UserVO user) {
+    public ResponseEntity<Object> delete(@RequestParam Long id, @Parameter(hidden = true) @CurrentUser UserVO user) {
         eventCommentService.deleteById(id, user);
         return ResponseEntity.ok().build();
     }
