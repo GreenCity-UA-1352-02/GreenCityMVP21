@@ -8,6 +8,7 @@ import greencity.exception.exceptions.FriendRequestException;
 import greencity.exception.exceptions.FriendshipNotFoundException;
 import greencity.exception.exceptions.UserNotFoundException;
 import greencity.service.FriendService;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,6 +20,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+
 import java.util.Arrays;
 import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -518,5 +521,19 @@ public class FriendControllerTest {
         assertThat(response.getBody()).isEqualTo("An unexpected error occurred");
 
         verify(friendService, times(1)).confirmFriend(friendId);
+    }
+
+    @Test
+    void blockUser_shouldReturnForbidden_whenAccessDeniedExceptionThrown() {
+        Long toBlockId = 1L;
+        String errorMessage = "You do not have permission to block this user.";
+
+        doThrow(new AccessDeniedException(errorMessage))
+            .when(friendService).blockUser(toBlockId);
+
+        ResponseEntity<?> response = friendController.blockUser(toBlockId);
+
+        Assertions.assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        Assertions.assertEquals(errorMessage, response.getBody());
     }
 }
