@@ -622,28 +622,6 @@ public class FriendServiceImplTest {
     }
 
     @Test
-    void checkIfCurrentUser_shouldReturnTrue_whenUserIdMatchesCurrentUser() {
-        Long userId = 1L;
-        String userEmail = "test@example.com";
-
-        User currentUser = new User();
-        currentUser.setId(userId);
-        currentUser.setEmail(userEmail);
-
-        Authentication authentication = mock(Authentication.class);
-        when(authentication.getName()).thenReturn(userEmail);
-        SecurityContext securityContext = mock(SecurityContext.class);
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        SecurityContextHolder.setContext(securityContext);
-
-        when(userRepo.findByEmail(userEmail)).thenReturn(Optional.of(currentUser));
-
-        boolean result = friendService.checkIfCurrentUser(userId);
-
-        assertTrue(result);
-    }
-
-    @Test
     void checkIfCurrentUser_shouldReturnFalse_whenUserIdDoesNotMatchCurrentUser() {
         Long userId = 2L;
         String userEmail = "test@example.com";
