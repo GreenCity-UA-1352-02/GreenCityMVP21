@@ -57,7 +57,7 @@ public class EventParticipantServiceImpl implements EventParticipantService {
 
         List<Event> createdEvents = participantRepository.findAllEventsByAuthorId(userId);
 
-        List<EventParticipant> userParticipations = participantRepository.findAllByUserIdAndActiveTrue(userId);
+        List<EventParticipant> userParticipations = participantRepository.findAllByUserId(userId);
 
         Map<Long, EventParticipant> participationMap = userParticipations.stream()
             .collect(Collectors.toMap(ep -> ep.getEvent().getId(), ep -> ep));
@@ -66,6 +66,7 @@ public class EventParticipantServiceImpl implements EventParticipantService {
 
         for (Event event : createdEvents) {
             EventParticipant ep = participationMap.get(event.getId());
+
             if (ep == null) {
                 ep = EventParticipant.builder()
                     .user(user)
@@ -74,8 +75,13 @@ public class EventParticipantServiceImpl implements EventParticipantService {
                     .active(true)
                     .build();
                 participantRepository.save(ep);
-            } else if (ep.getRole() != EventRole.ORGANIZER) {
-                ep.setRole(EventRole.ORGANIZER);
+            } else {
+                if (!ep.isActive()) {
+                    ep.setActive(true);
+                }
+                if (ep.getRole() != EventRole.ORGANIZER) {
+                    ep.setRole(EventRole.ORGANIZER);
+                }
                 participantRepository.save(ep);
             }
             allRelevantParticipations.add(ep);
@@ -83,12 +89,18 @@ public class EventParticipantServiceImpl implements EventParticipantService {
 
         for (EventParticipant ep : userParticipations) {
             Long eventId = ep.getEvent().getId();
-            boolean isCreatedEvent = createdEvents.stream().anyMatch(e -> e.getId().equals(eventId));
+            boolean isCreatedEvent = createdEvents.stream()
+                .anyMatch(e -> e.getId().equals(eventId));
+
             if (!isCreatedEvent) {
+                if (!ep.isActive()) {
+                    ep.setActive(true);
+                }
                 if (ep.getRole() != EventRole.ATTENDEE) {
                     ep.setRole(EventRole.ATTENDEE);
-                    participantRepository.save(ep);
                 }
+                participantRepository.save(ep);
+
                 allRelevantParticipations.add(ep);
             }
         }

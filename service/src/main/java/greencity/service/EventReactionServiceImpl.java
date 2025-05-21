@@ -94,9 +94,10 @@ public class EventReactionServiceImpl implements EventReactionService {
      * @author Dmytro Kravchuk
      */
     public long countLikes(Long eventId) {
-        Event event = eventRepository.findById(eventId)
-            .orElseThrow(() -> new EntityNotFoundException("Event not found"));
-        return reactionRepository.countByEventAndReactionType(event, ReactionType.LIKE);
+        if (!eventRepository.existsById(eventId)) {
+            throw new EntityNotFoundException("Event not found");
+        }
+        return reactionRepository.countByEventIdAndReactionType(eventId, ReactionType.LIKE);
     }
 
     /**
@@ -116,8 +117,9 @@ public class EventReactionServiceImpl implements EventReactionService {
      * @author Dmytro Kravchuk
      */
     public long countDislikes(Long eventId) {
-        Event event = eventRepository.findById(eventId)
-            .orElseThrow(() -> new EntityNotFoundException("Event not found"));
-        return reactionRepository.countByEventAndReactionType(event, ReactionType.DISLIKE);
+        if (!eventRepository.existsById(eventId)) {
+            throw new EntityNotFoundException("Event not found");
+        }
+        return reactionRepository.countByEventIdAndReactionType(eventId, ReactionType.DISLIKE);
     }
 }

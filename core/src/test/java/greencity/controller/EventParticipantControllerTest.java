@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -110,11 +111,9 @@ public class EventParticipantControllerTest {
 
         doThrow(new RuntimeException("Event not found")).when(eventParticipantService).cancelParticipation(eventId);
 
-        try {
-            controller.cancelParticipation(eventId);
-        } catch (RuntimeException e) {
-            assertEquals("Event not found", e.getMessage());
-        }
+        RuntimeException ex = assertThrows(RuntimeException.class,
+            () -> controller.cancelParticipation(eventId));
+        assertEquals("Event not found", ex.getMessage());
 
         verify(eventParticipantService, times(1)).cancelParticipation(eventId);
     }

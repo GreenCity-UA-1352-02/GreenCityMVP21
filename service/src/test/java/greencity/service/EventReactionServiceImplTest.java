@@ -182,58 +182,54 @@ public class EventReactionServiceImplTest {
     @Test
     void countLikes_WhenEventExists_ReturnsLikeCount() {
         Long eventId = 1L;
-        Event event = new Event();
-        event.setId(eventId);
 
-        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
-        when(reactionRepository.countByEventAndReactionType(event, ReactionType.LIKE)).thenReturn(5L);
+        when(eventRepository.existsById(eventId)).thenReturn(true);
+        when(reactionRepository.countByEventIdAndReactionType(eventId, ReactionType.LIKE)).thenReturn(5L);
 
         long result = eventReactionService.countLikes(eventId);
 
         assertEquals(5L, result);
 
-        verify(eventRepository).findById(eventId);
-        verify(reactionRepository).countByEventAndReactionType(event, ReactionType.LIKE);
+        verify(eventRepository).existsById(eventId);
+        verify(reactionRepository).countByEventIdAndReactionType(eventId, ReactionType.LIKE);
     }
 
     @Test
     void countLikes_WhenEventDoesNotExist_ThrowsEntityNotFoundException() {
         Long eventId = 1L;
 
-        when(eventRepository.findById(eventId)).thenReturn(Optional.empty());
+        when(eventRepository.existsById(eventId)).thenReturn(false);
 
         assertThrows(EntityNotFoundException.class, () -> eventReactionService.countLikes(eventId));
 
-        verify(eventRepository).findById(eventId);
-        verifyNoMoreInteractions(reactionRepository);
+        verify(eventRepository).existsById(eventId);
+        verifyNoInteractions(reactionRepository);
     }
 
     @Test
     void countDislikes_WhenEventExists_ReturnsDislikeCount() {
         Long eventId = 1L;
-        Event event = new Event();
-        event.setId(eventId);
 
-        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
-        when(reactionRepository.countByEventAndReactionType(event, ReactionType.DISLIKE)).thenReturn(3L);
+        when(eventRepository.existsById(eventId)).thenReturn(true);
+        when(reactionRepository.countByEventIdAndReactionType(eventId, ReactionType.DISLIKE)).thenReturn(3L);
 
         long result = eventReactionService.countDislikes(eventId);
 
         assertEquals(3L, result);
 
-        verify(eventRepository).findById(eventId);
-        verify(reactionRepository).countByEventAndReactionType(event, ReactionType.DISLIKE);
+        verify(eventRepository).existsById(eventId);
+        verify(reactionRepository).countByEventIdAndReactionType(eventId, ReactionType.DISLIKE);
     }
 
     @Test
     void countDislikes_WhenEventDoesNotExist_ThrowsEntityNotFoundException() {
         Long eventId = 1L;
 
-        when(eventRepository.findById(eventId)).thenReturn(Optional.empty());
+        when(eventRepository.existsById(eventId)).thenReturn(false);
 
         assertThrows(EntityNotFoundException.class, () -> eventReactionService.countDislikes(eventId));
 
-        verify(eventRepository).findById(eventId);
-        verifyNoMoreInteractions(reactionRepository);
+        verify(eventRepository).existsById(eventId);
+        verifyNoInteractions(reactionRepository);
     }
 }
