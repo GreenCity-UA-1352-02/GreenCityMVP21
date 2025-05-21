@@ -656,7 +656,9 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity
             .status(HttpStatus.NOT_FOUND)
             .body("Event not found");
+    }
 
+    /**
      * Exception handler for {@link PropertyReferenceException}. This exception is
      * thrown when the requested sort field does not exist in the entity, typically
      * due to an invalid sort parameter in the request.

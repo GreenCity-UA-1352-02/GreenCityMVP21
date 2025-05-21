@@ -202,7 +202,7 @@ public class SecurityConfig {
                     "/events/reactions/{eventId}/dislikes",
                     "/habit/{habitId}/friends/profile-pictures",
                     "/api/events/my",
-                    "/api/events/my/role/{role}")
+                    "/api/events/my/role/{role}",
                     "/friends/{userId}",
                     "/friends/search-new-friends",
                     "/habit/{habitId}/friends/profile-pictures",
@@ -242,7 +242,7 @@ public class SecurityConfig {
                     "/habit/assign/{habitAssignId}/updateProgressNotificationHasDisplayed",
                     HABIT_ASSIGN_ID + "/allUserAndCustomList",
                     "/events/reactions/{eventId}/like",
-                    "/events/reactions/{eventId}/dislike")
+                    "/events/reactions/{eventId}/dislike",
                     HABIT_ASSIGN_ID + "/allUserAndCustomList")
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.PATCH,
@@ -272,7 +272,7 @@ public class SecurityConfig {
                     "/social-networks",
                     USER_CUSTOM_SHOPPING_LIST_ITEMS,
                     USER_SHOPPING_LIST + "/user-shopping-list-items",
-                    "/api/events/my/{eventId}/cancel")
+                    "/api/events/my/{eventId}/cancel",
                     "/friends/{friendId}",
                     "/friends/requests/{friendId}",
                     "/friends/{friendId}/declineFriend",
