@@ -5,6 +5,7 @@ public enum NotificationObjectType {
     HABIT_COMMENT_LIKE,
     HABIT_STATISTIC,
     HABIT_STATISTIC_LIKE,
+    HABIT_REPLY,
     HABIT_LIKE,
     ECO_NEWS_COMMENT,
     ECO_NEWS_COMMENT_LIKE,

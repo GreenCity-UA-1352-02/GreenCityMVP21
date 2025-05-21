@@ -4,10 +4,11 @@ import greencity.annotations.RatingCalculationEnum;
 import greencity.constant.ErrorMessage;
 import greencity.dto.PageableDto;
 import greencity.dto.habit.HabitDto;
-import greencity.dto.habit.HabitVO;
-import greencity.dto.habit.comment.*;
+import greencity.dto.habit.comment.AddHabitCommentDtoRequest;
+import greencity.dto.habit.comment.AddHabitCommentDtoResponse;
+import greencity.dto.habit.comment.HabitAmountCommentLikesDto;
+import greencity.dto.habit.comment.HabitCommentDto;
 import greencity.dto.user.UserVO;
-import greencity.entity.EcoNews;
 import greencity.entity.Habit;
 import greencity.entity.HabitComment;
 import greencity.entity.User;
@@ -21,7 +22,6 @@ import greencity.repository.HabitCommentRepo;
 import greencity.repository.HabitRepo;
 import greencity.repository.NotificationPayloadRepo;
 import greencity.repository.NotificationRepo;
-import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -30,13 +30,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import java.net.http.HttpClient;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 import static greencity.constant.AppConstant.AUTHORIZATION;
-import static greencity.constant.AppConstant.USER;
 
 /**
  * Service implementation for managing habit comments, including functionalities
@@ -89,7 +86,8 @@ public class HabbitCommentServiceIml implements HabitCommentService {
                         habitDto.getHabitTranslation().getName(),
                         habitDto.getUsersIdWhoCreatedCustomHabit(),
                         savedComment.getUser().getId(),
-                        savedComment.getUser().getName()
+                        savedComment.getUser().getName(),
+                        String.valueOf(NotificationObjectType.HABIT_COMMENT)
                 );
             }
         } else {
@@ -99,7 +97,7 @@ public class HabbitCommentServiceIml implements HabitCommentService {
                 notificationProducerService.sendCommentReplyNotification(
                         savedComment.getId(),
                         habitDto.getHabitTranslation().getName(),
-                        String.valueOf(NotificationObjectType.HABIT_COMMENT),
+                        String.valueOf(NotificationObjectType.HABIT_REPLY),
                         parentCommentAuthorId,
                         userVO.getId(),
                         userVO.getName()
@@ -237,7 +235,6 @@ public class HabbitCommentServiceIml implements HabitCommentService {
     public void like(Long id, UserVO user, String langCode) {
         HabitComment comment = habitCommentRepo.findById(id)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
-        HabitCommentVO habitCommentVO = modelMapper.map(comment, HabitCommentVO.class);
         Long commentAuthorId = comment.getUser().getId();
         if (comment.getUsersLiked().stream().anyMatch(u -> u.getId().equals(user.getId()))) {
             unlike(user, comment);
@@ -253,7 +250,6 @@ public class HabbitCommentServiceIml implements HabitCommentService {
                     .runAsync(() -> ratingCalculation.ratingCalculation(RatingCalculationEnum.LIKE_COMMENT, user, accessToken));
             if (!commentAuthorId.equals(user.getId())) {
                 Long articleId = comment.getHabit().getId();
-                Long habitNumber = habitRepo.findById(articleId).map(Habit::getId).orElse(0L);
 
                 String habitName = comment.getHabit().getHabitTranslations().stream()
                         .filter(x -> x.getLanguage().getCode().equals(langCode))
@@ -280,7 +276,7 @@ public class HabbitCommentServiceIml implements HabitCommentService {
      */
     private void unlike(UserVO user, HabitComment comment) {
         comment.getUsersLiked().removeIf(u -> u.getId().equals(user.getId()));
-       habitCommentRepo.save(comment);
+        habitCommentRepo.save(comment);
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
         CompletableFuture
                 .runAsync(() -> ratingCalculation.ratingCalculation(RatingCalculationEnum.LIKE_COMMENT, user, accessToken));
@@ -348,7 +344,6 @@ public class HabbitCommentServiceIml implements HabitCommentService {
     public PageableDto<HabitCommentDto> getAllActiveComments(Pageable pageable, UserVO user, Long habitId) {
         Page<HabitComment> pages =
                 habitCommentRepo.findAllByParentCommentIsNullAndDeletedFalseAndHabitIdOrderByCreatedDateDesc(pageable, habitId);
-        UserVO userVO = user == null ? UserVO.builder().build() : user;
         List<HabitCommentDto> habitCommentDtos = pages
                 .stream()
                 .map(comment -> {

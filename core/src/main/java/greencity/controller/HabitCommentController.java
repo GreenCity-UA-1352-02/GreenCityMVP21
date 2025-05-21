@@ -208,7 +208,7 @@ public class HabitCommentController {
     @ApiPageableWithoutSort
     public ResponseEntity<PageableDto<HabitCommentDto>> getCountActiveReplies(@Parameter(hidden = true) Pageable pageable,
                                                                               @Parameter(hidden = true) @CurrentUser UserVO user,
-                                                                              @RequestParam("id") @PathVariable Long id) {
-        return ResponseEntity.status(HttpStatus.OK).body(habitCommentService.findAllActiveReplies(pageable, id, user));
+                                                                              @RequestParam("id") @PathVariable Long commentId) {
+        return ResponseEntity.status(HttpStatus.OK).body(habitCommentService.findAllActiveReplies(pageable, commentId, user));
     }
 }

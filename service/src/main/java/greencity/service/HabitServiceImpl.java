@@ -1,6 +1,5 @@
 package greencity.service;
 
-import greencity.annotations.RatingCalculationEnum;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.dto.PageableDto;
@@ -8,7 +7,6 @@ import greencity.dto.habit.AddCustomHabitDtoRequest;
 import greencity.dto.habit.AddCustomHabitDtoResponse;
 import greencity.dto.habit.HabitDto;
 import greencity.dto.habit.HabitVO;
-import greencity.dto.habit.comment.HabitCommentVO;
 import greencity.dto.shoppinglistitem.ShoppingListItemDto;
 import greencity.dto.user.UserProfilePictureDto;
 import greencity.dto.user.UserVO;
@@ -18,6 +16,7 @@ import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.WrongEmailException;
 import greencity.mapping.*;
 import greencity.repository.*;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
@@ -25,13 +24,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import jakarta.transaction.Transactional;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-
-import static greencity.constant.AppConstant.AUTHORIZATION;
 
 /**
  * Implementation of {@link HabitService}.
@@ -261,7 +256,6 @@ public class HabitServiceImpl implements HabitService {
         HabitVO habitVO = modelMapper.map(habit, HabitVO.class);
 
         Long habitAuthorId = habitVO.getUserId();
-        Long habitId = habitVO.getId();
         if (habitVO.getUsersLiked().contains(user)) {
             habitVO.getUsersLiked().removeIf(u -> u.getId().equals(user.getId()));
 

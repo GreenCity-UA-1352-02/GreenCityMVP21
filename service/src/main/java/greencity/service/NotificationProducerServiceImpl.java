@@ -126,15 +126,7 @@ public class NotificationProducerServiceImpl implements NotificationProducerServ
 
 
     /**
-     * Sends a notification about a like on an article or other object.
-     *
-     * @param articleId    ID of the article or object that was liked
-     * @param articleTitle Title of the article or object that was liked
-     * @param authorId     ID of the author of the article or object (who will receive the notification)
-     * @param likerId      ID of the user who liked the article or object
-     * @param likerName    Name of the user who liked the article or object
-     * @param objectType   Type of the object that was liked (e.g., "ARTICLE", "EVENT")
-     */
+     * Sends a notification about a like on an article or other*/
     public void sendLikeNotification(Long articleId, String articleTitle,
                                      Long authorId, Long likerId, String likerName, String objectType) {
         sendNotification(
