@@ -135,6 +135,7 @@ public class EventParticipantServiceImpl implements EventParticipantService {
      * @author Dmytro Kravchuk
      */
     @Override
+    @Transactional
     public void cancelParticipation(Long eventId) {
         Long userId = getCurrentUserId();
         EventParticipant participant = participantRepository.findByUserIdAndEventIdAndActiveTrue(userId, eventId)
