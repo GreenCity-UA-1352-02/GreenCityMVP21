@@ -75,7 +75,7 @@ public class NotificationServiceImpl implements NotificationService {
         for (Notification notification : notificationRepo.findNotificationByUserId(id)) {
             if (notification.getStatus() == NotificationStatus.UNREAD) {
                 notification.setStatus(NotificationStatus.READ);
-                notification.setTimestampDeletion(LocalDateTime.now().plusMinutes(5));
+                notification.setTimestampDeletion(LocalDateTime.now().plusDays(14));
                 notificationRepo.save(notification);
             } else {
                 if (LocalDateTime.now().isAfter(notification.getTimestampDeletion())) {
