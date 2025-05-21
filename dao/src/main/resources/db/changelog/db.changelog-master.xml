@@ -183,5 +183,6 @@
     <include file="db/changelog/logs/ch-add-table -event-participant-Kravchuk.xml"/>
     <include file="db/changelog/logs/ch-add-event-comment-Pohranychnyi.xml"/>
     <include file="db/changelog/logs/ch-news-subscribers-makandrii.xml"/>
+    <include file="db/changelog/logs/ch-add-column-created_date-into-table-event_reactions-Lys.xml"/>
 </databaseChangeLog>
 
