@@ -13,6 +13,7 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -655,5 +656,46 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity
             .status(HttpStatus.NOT_FOUND)
             .body("Event not found");
+
+     * Exception handler for {@link PropertyReferenceException}. This exception is
+     * thrown when the requested sort field does not exist in the entity, typically
+     * due to an invalid sort parameter in the request.
+     *
+     * @param ex the thrown {@link PropertyReferenceException}.
+     * @return a {@link ResponseEntity} with HTTP status 400 and an error message
+     *         indicating the invalid sorting field.
+     * @author [Dmytro Kravchuk]
+     */
+    @ExceptionHandler(PropertyReferenceException.class)
+    public ResponseEntity<Object> handlePropertyReferenceException(
+        PropertyReferenceException ex, WebRequest request) {
+        log.info(ex.getMessage());
+        ExceptionResponse response = new ExceptionResponse(getErrorAttributes(request));
+        response.setMessage("Invalid sorting field: " + ex.getPropertyName());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<String> handleUserNotFound(UserNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Object> handleGenericException(Exception ex, WebRequest request) {
+        log.error("Unexpected error occurred", ex);
+        ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
+        exceptionResponse.setMessage("An unexpected error occurred");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(exceptionResponse);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgument(IllegalArgumentException ex) {
+        return ResponseEntity.badRequest().body("Invalid friend ID.");
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<String> handleRuntime(RuntimeException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .body("Friend request not found or already handled.");
     }
 }

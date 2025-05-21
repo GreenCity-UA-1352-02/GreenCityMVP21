@@ -2,6 +2,7 @@ package greencity.service;
 
 import greencity.dto.event.AddEventRequest;
 import greencity.dto.event.EventResponse;
+import greencity.dto.event.EventVO;
 import greencity.dto.event.UpdateEventRequest;
 import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,4 +34,6 @@ public interface EventService {
      * @param id the unique identifier of the entity to be deleted
      */
     void delete(Long id);
+
+    EventVO findById(Long id);
 }
