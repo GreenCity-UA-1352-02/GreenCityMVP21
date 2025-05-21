@@ -9,6 +9,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -19,7 +20,7 @@ import java.util.Set;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode
+@EqualsAndHashCode(exclude = {"parentComment", "comments", "usersLiked"})
 @EntityListeners(AuditingEntityListener.class)
 public class HabitComment {
     @Id
@@ -61,5 +62,6 @@ public class HabitComment {
             name = "habit_comment_users_liked",
             joinColumns = @JoinColumn(name = "habit_comment_id"),
             inverseJoinColumns = @JoinColumn(name = "users_liked_id"))
-    private Set<User> usersLiked;
+    private Set<User> usersLiked = new HashSet<>();
+    ;
 }

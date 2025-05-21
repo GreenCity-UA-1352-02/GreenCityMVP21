@@ -1,11 +1,10 @@
 package greencity.dto.habit.comment;
 
-import greencity.dto.econewscomment.EcoNewsCommentAuthorDto;
 import greencity.enums.CommentStatus;
-import lombok.*;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import lombok.*;
+
 import java.time.LocalDateTime;
 
 @Getter
@@ -20,10 +19,10 @@ public class HabitCommentDto {
     @Min(1)
     private Long id;
 
-    @NotEmpty
+    @NotNull
     private LocalDateTime modifiedDate;
 
-    private EcoNewsCommentAuthorDto author;
+    private HabitCommentAuthorDto author;
 
     private String text;
 

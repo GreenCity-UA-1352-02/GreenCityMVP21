@@ -43,7 +43,7 @@ import static greencity.constant.AppConstant.AUTHORIZATION;
  */
 @Service
 @AllArgsConstructor
-public class HabbitCommentServiceIml implements HabitCommentService {
+public class HabitCommentServiceIml implements HabitCommentService {
 
     private final HabitService habitService;
     private final HabitCommentRepo habitCommentRepo;
@@ -52,7 +52,7 @@ public class HabbitCommentServiceIml implements HabitCommentService {
     private final RatingCalculation ratingCalculation;
     private final SimpMessagingTemplate messagingTemplate;
     private final HabitRepo habitRepo;
-    private final NotificationProducerServiceImpl notificationProducerService;
+    private final NotificationProducerService notificationProducerService;
     private final NotificationPayloadRepo notificationPayloadRepo;
     private final NotificationRepo notificationRepo;
 
@@ -63,7 +63,8 @@ public class HabbitCommentServiceIml implements HabitCommentService {
         HabitComment habitComment = modelMapper.map(addHabitCommentDtoRequest, HabitComment.class);
         habitComment.setUser(modelMapper.map(userVO, User.class));
         habitComment.setHabit(modelMapper.map(habitDto, Habit.class));
-        if (addHabitCommentDtoRequest.getParentCommentId() != 0L) {
+        Long parentId = addHabitCommentDtoRequest.getParentCommentId();
+        if (parentId != null && parentId != 0L) {
             HabitComment parentComment = habitCommentRepo.findById(addHabitCommentDtoRequest.getParentCommentId())
                     .orElseThrow(() -> new BadRequestException(ErrorMessage.PARENT_COMMENT_NOT_FOUND_EXCEPTION));
             if (parentComment.getParentComment() == null) {
@@ -240,7 +241,7 @@ public class HabbitCommentServiceIml implements HabitCommentService {
             unlike(user, comment);
             if (!commentAuthorId.equals(user.getId())) {
                 Long notificationId = notificationPayloadRepo.findByArticleIdAndObjectType(comment.getHabit().getId(), String.valueOf(NotificationObjectType.HABIT_COMMENT_LIKE)).get().getId();
-                notificationRepo.deleteById(notificationId);
+                notificationRepo.deleteByPayload_Id(notificationId);
             }
         } else {
             comment.getUsersLiked().add(modelMapper.map(user, User.class));
@@ -375,7 +376,6 @@ public class HabbitCommentServiceIml implements HabitCommentService {
     public PageableDto<HabitCommentDto> findAllActiveReplies(Pageable pageable, Long parentCommentId, UserVO user) {
         Page<HabitComment> pages =
                 habitCommentRepo.findAllByParentCommentIdAndDeletedFalseOrderByCreatedDateDesc(pageable, parentCommentId);
-        UserVO userVO = user == null ? UserVO.builder().build() : user;
         List<HabitCommentDto> habitCommentDtos = pages
                 .stream()
                 .map(comment -> {

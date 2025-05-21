@@ -1,6 +1,7 @@
 package greencity.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Data
@@ -15,12 +16,15 @@ public class NotificationPayload {
     private Long id;
 
     @Column(name = "actor_id")
+    @NotNull
     private Long actorId;
 
     @Column(name = "actor_name")
+    @NotNull
     private String actorName;
 
     @Column(name = "article_id")
+    @NotNull
     private Long articleId;
 
     @Column(name = "article_title")

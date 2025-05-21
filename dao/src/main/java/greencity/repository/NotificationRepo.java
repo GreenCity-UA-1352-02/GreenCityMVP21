@@ -11,4 +11,6 @@ import org.springframework.stereotype.Repository;
 public interface NotificationRepo extends JpaRepository<Notification, Long> {
     @Query("SELECT n FROM Notification n WHERE n.userId = :userId ORDER BY n.timestamp ASC")
     List<Notification> findNotificationByUserId(@Param("userId") Long id);
+
+    void deleteByPayload_Id(Long payloadId);
 }

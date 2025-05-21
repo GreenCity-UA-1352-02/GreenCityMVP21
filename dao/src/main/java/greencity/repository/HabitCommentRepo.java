@@ -83,6 +83,4 @@ public interface HabitCommentRepo extends JpaRepository<HabitComment, Long> {
      */
     Page<HabitComment> findAllByParentCommentIdAndDeletedFalseOrderByCreatedDateDesc(Pageable pageable,
                                                                                        Long parentCommentId);
-
-    Long id(Long id);
 }

@@ -1,6 +1,8 @@
 package greencity.dto.habit.comment;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Getter
@@ -10,7 +12,8 @@ import lombok.*;
 @Builder
 @EqualsAndHashCode
 public class HabitCommentAuthorDto {
-    @NotEmpty
+    @NotNull
+    @Min(1)
     private Long id;
 
     @NotEmpty

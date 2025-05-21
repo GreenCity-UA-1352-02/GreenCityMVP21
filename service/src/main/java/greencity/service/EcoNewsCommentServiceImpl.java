@@ -16,6 +16,7 @@ import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import greencity.repository.EcoNewsCommentRepo;
 import greencity.repository.EcoNewsRepo;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,12 +24,15 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.servlet.http.HttpServletRequest;
+
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+
 import static greencity.constant.AppConstant.AUTHORIZATION;
 
 @Service
+@Slf4j
 @AllArgsConstructor
 public class EcoNewsCommentServiceImpl implements EcoNewsCommentService {
     private EcoNewsCommentRepo ecoNewsCommentRepo;
@@ -54,15 +58,15 @@ public class EcoNewsCommentServiceImpl implements EcoNewsCommentService {
 
     @Override
     public AddEcoNewsCommentDtoResponse save(Long econewsId, AddEcoNewsCommentDtoRequest addEcoNewsCommentDtoRequest,
-        UserVO userVO) {
+                                             UserVO userVO) {
         EcoNewsVO ecoNewsVO = ecoNewsService.findById(econewsId);
         EcoNewsComment ecoNewsComment = modelMapper.map(addEcoNewsCommentDtoRequest, EcoNewsComment.class);
         ecoNewsComment.setUser(modelMapper.map(userVO, User.class));
         ecoNewsComment.setEcoNews(modelMapper.map(ecoNewsVO, EcoNews.class));
         if (addEcoNewsCommentDtoRequest.getParentCommentId() != 0) {
             EcoNewsComment parentComment =
-                ecoNewsCommentRepo.findById(addEcoNewsCommentDtoRequest.getParentCommentId()).orElseThrow(
-                    () -> new BadRequestException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
+                    ecoNewsCommentRepo.findById(addEcoNewsCommentDtoRequest.getParentCommentId()).orElseThrow(
+                            () -> new BadRequestException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
             if (parentComment.getParentComment() == null) {
                 ecoNewsComment.setParentComment(parentComment);
             } else {
@@ -71,33 +75,44 @@ public class EcoNewsCommentServiceImpl implements EcoNewsCommentService {
         }
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
         CompletableFuture.runAsync(
-            () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.ADD_COMMENT, userVO, accessToken));
+                () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.ADD_COMMENT, userVO, accessToken));
 
         EcoNewsComment savedComment = ecoNewsCommentRepo.save(ecoNewsComment);
 
         if (addEcoNewsCommentDtoRequest.getParentCommentId() == 0) {
             Long authorId = savedComment.getEcoNews().getAuthor().getId();
             if (!authorId.equals(userVO.getId())) {
-                notificationProducerService.sendCommentNotification(
-                    savedComment.getEcoNews().getId(),
-                    savedComment.getEcoNews().getTitle(),
-                    authorId,
-                    userVO.getId(),
-                    userVO.getName());
+                try {
+                    notificationProducerService.sendCommentNotification(
+                            savedComment.getEcoNews().getId(),
+                            savedComment.getEcoNews().getTitle(),
+                            authorId,
+                            userVO.getId(),
+                            userVO.getName());
+                } catch (Exception e) {
+                    // Log error but don't fail the main operation
+                    log.error("Failed to send comment notification: {}", e.getMessage(), e);
+                }
             }
         } else {
             EcoNewsComment parentComment = savedComment.getParentComment();
             Long parentCommentAuthorId = parentComment.getUser().getId();
 
             if (!parentCommentAuthorId.equals(userVO.getId())) {
-                notificationProducerService.sendCommentReplyNotification(
-                    savedComment.getEcoNews().getId(),
-                    savedComment.getEcoNews().getTitle(),
-                    "ARTICLE",
-                    parentCommentAuthorId,
-                    userVO.getId(),
-                    userVO.getName());
+                try {
+                    notificationProducerService.sendCommentReplyNotification(
+                            savedComment.getEcoNews().getId(),
+                            savedComment.getEcoNews().getTitle(),
+                            "ARTICLE",
+                            parentCommentAuthorId,
+                            userVO.getId(),
+                            userVO.getName());
+                } catch (Exception e) {
+                    // Log error but don't fail the main operation
+                    log.error("Failed to send comment reply notification: {}", e.getMessage(), e);
+                }
             }
+
         }
 
         return modelMapper.map(savedComment, AddEcoNewsCommentDtoResponse.class);
@@ -115,26 +130,26 @@ public class EcoNewsCommentServiceImpl implements EcoNewsCommentService {
     public PageableDto<EcoNewsCommentDto> findAllComments(Pageable pageable, UserVO userVO, Long ecoNewsId) {
         ecoNewsService.findById(ecoNewsId);
         Page<EcoNewsComment> pages = ecoNewsCommentRepo.findAllByParentCommentIsNullAndEcoNewsIdOrderByCreatedDateDesc(
-            pageable, ecoNewsId);
+                pageable, ecoNewsId);
         List<EcoNewsCommentDto> ecoNewsCommentDtos = pages
-            .stream()
-            .map(comment -> {
-                comment.setCurrentUserLiked(comment.getUsersLiked().stream()
-                    .anyMatch(u -> u.getId().equals(userVO.getId())));
-                return comment;
-            })
-            .map(ecoNewsComment -> modelMapper.map(ecoNewsComment, EcoNewsCommentDto.class))
-            .map(comment -> {
-                comment.setReplies(ecoNewsCommentRepo.countByParentCommentId(comment.getId()));
-                return comment;
-            })
-            .collect(Collectors.toList());
+                .stream()
+                .map(comment -> {
+                    comment.setCurrentUserLiked(comment.getUsersLiked().stream()
+                            .anyMatch(u -> u.getId().equals(userVO.getId())));
+                    return comment;
+                })
+                .map(ecoNewsComment -> modelMapper.map(ecoNewsComment, EcoNewsCommentDto.class))
+                .map(comment -> {
+                    comment.setReplies(ecoNewsCommentRepo.countByParentCommentId(comment.getId()));
+                    return comment;
+                })
+                .collect(Collectors.toList());
 
         return new PageableDto<>(
-            ecoNewsCommentDtos,
-            pages.getTotalElements(),
-            pages.getPageable().getPageNumber(),
-            pages.getTotalPages());
+                ecoNewsCommentDtos,
+                pages.getTotalElements(),
+                pages.getPageable().getPageNumber(),
+                pages.getTotalPages());
     }
 
     /**
@@ -148,22 +163,22 @@ public class EcoNewsCommentServiceImpl implements EcoNewsCommentService {
     @Override
     public PageableDto<EcoNewsCommentDto> findAllReplies(Pageable pageable, Long parentCommentId, UserVO userVO) {
         Page<EcoNewsComment> pages = ecoNewsCommentRepo
-            .findAllByParentCommentIdOrderByCreatedDateDesc(pageable, parentCommentId);
+                .findAllByParentCommentIdOrderByCreatedDateDesc(pageable, parentCommentId);
         List<EcoNewsCommentDto> ecoNewsCommentDtos = pages
-            .stream()
-            .map(comment -> {
-                comment.setCurrentUserLiked(comment.getUsersLiked().stream()
-                    .anyMatch(u -> u.getId().equals(userVO.getId())));
-                return comment;
-            })
-            .map(ecoNewsComment -> modelMapper.map(ecoNewsComment, EcoNewsCommentDto.class))
-            .collect(Collectors.toList());
+                .stream()
+                .map(comment -> {
+                    comment.setCurrentUserLiked(comment.getUsersLiked().stream()
+                            .anyMatch(u -> u.getId().equals(userVO.getId())));
+                    return comment;
+                })
+                .map(ecoNewsComment -> modelMapper.map(ecoNewsComment, EcoNewsCommentDto.class))
+                .collect(Collectors.toList());
 
         return new PageableDto<>(
-            ecoNewsCommentDtos,
-            pages.getTotalElements(),
-            pages.getPageable().getPageNumber(),
-            pages.getTotalPages());
+                ecoNewsCommentDtos,
+                pages.getTotalElements(),
+                pages.getPageable().getPageNumber(),
+                pages.getTotalPages());
     }
 
     /**
@@ -176,7 +191,7 @@ public class EcoNewsCommentServiceImpl implements EcoNewsCommentService {
     @Override
     public void deleteById(Long id, UserVO userVO) {
         EcoNewsComment comment = ecoNewsCommentRepo.findById(id)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
 
         if (userVO.getRole() != Role.ROLE_ADMIN && !userVO.getId().equals(comment.getUser().getId())) {
             throw new UserHasNoPermissionToAccessException(ErrorMessage.USER_HAS_NO_PERMISSION);
@@ -187,7 +202,7 @@ public class EcoNewsCommentServiceImpl implements EcoNewsCommentService {
         comment.setDeleted(true);
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
         CompletableFuture.runAsync(
-            () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.DELETE_COMMENT, userVO, accessToken));
+                () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.DELETE_COMMENT, userVO, accessToken));
         ecoNewsCommentRepo.save(comment);
     }
 
@@ -203,7 +218,7 @@ public class EcoNewsCommentServiceImpl implements EcoNewsCommentService {
     @Transactional
     public void update(String text, Long id, UserVO userVO) {
         EcoNewsComment comment = ecoNewsCommentRepo.findById(id)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
         if (!userVO.getId().equals(comment.getUser().getId())) {
             throw new BadRequestException(ErrorMessage.NOT_A_CURRENT_USER);
         }
@@ -221,10 +236,10 @@ public class EcoNewsCommentServiceImpl implements EcoNewsCommentService {
     @Override
     public void like(Long id, UserVO userVO) {
         EcoNewsComment comment = ecoNewsCommentRepo.findById(id)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
         EcoNewsCommentVO ecoNewsCommentVO = modelMapper.map(comment, EcoNewsCommentVO.class);
         if (comment.getUsersLiked().stream()
-            .anyMatch(user -> user.getId().equals(userVO.getId()))) {
+                .anyMatch(user -> user.getId().equals(userVO.getId()))) {
             ecoNewsService.unlikeComment(userVO, ecoNewsCommentVO);
         } else {
             ecoNewsService.likeComment(userVO, ecoNewsCommentVO);
@@ -242,14 +257,14 @@ public class EcoNewsCommentServiceImpl implements EcoNewsCommentService {
     @Transactional
     public void countLikes(AmountCommentLikesDto amountCommentLikesDto) {
         EcoNewsComment comment = ecoNewsCommentRepo.findById(amountCommentLikesDto.getId()).orElseThrow(
-            () -> new BadRequestException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
+                () -> new BadRequestException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
         boolean isLiked = comment.getUsersLiked().stream().map(User::getId)
-            .anyMatch(x -> x.equals(amountCommentLikesDto.getUserId()));
+                .anyMatch(x -> x.equals(amountCommentLikesDto.getUserId()));
         amountCommentLikesDto.setLiked(isLiked);
         int size = comment.getUsersLiked().size();
         amountCommentLikesDto.setAmountLikes(size);
         messagingTemplate
-            .convertAndSend("/topic/" + amountCommentLikesDto.getId() + "/comment", amountCommentLikesDto);
+                .convertAndSend("/topic/" + amountCommentLikesDto.getId() + "/comment", amountCommentLikesDto);
     }
 
     /**
@@ -277,7 +292,7 @@ public class EcoNewsCommentServiceImpl implements EcoNewsCommentService {
     public int countOfComments(Long ecoNewsId) {
         // Retrieve the EcoNews object by its ID
         EcoNews ecoNews = ecoNewsRepo.findById(ecoNewsId)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.ECO_NEWS_NOT_FOUND_BY_ID + ecoNewsId));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.ECO_NEWS_NOT_FOUND_BY_ID + ecoNewsId));
 
         // Pass the ID of the EcoNews object to the repository method
         return ecoNewsCommentRepo.countEcoNewsCommentByEcoNews(ecoNews.getId());
@@ -296,28 +311,28 @@ public class EcoNewsCommentServiceImpl implements EcoNewsCommentService {
     @Override
     public PageableDto<EcoNewsCommentDto> getAllActiveComments(Pageable pageable, UserVO userVO, Long ecoNewsId) {
         Page<EcoNewsComment> pages =
-            ecoNewsCommentRepo
-                .findAllByParentCommentIsNullAndDeletedFalseAndEcoNewsIdOrderByCreatedDateDesc(pageable, ecoNewsId);
+                ecoNewsCommentRepo
+                        .findAllByParentCommentIsNullAndDeletedFalseAndEcoNewsIdOrderByCreatedDateDesc(pageable, ecoNewsId);
         UserVO user = userVO == null ? UserVO.builder().build() : userVO;
         List<EcoNewsCommentDto> ecoNewsCommentDtos = pages
-            .stream()
-            .map(comment -> {
-                comment.setCurrentUserLiked(comment.getUsersLiked().stream()
-                    .anyMatch(u -> u.getId().equals(user.getId())));
-                return comment;
-            })
-            .map(ecoNewsComment -> modelMapper.map(ecoNewsComment, EcoNewsCommentDto.class))
-            .map(comment -> {
-                comment.setReplies(ecoNewsCommentRepo.countByParentCommentId(comment.getId()));
-                return comment;
-            })
-            .collect(Collectors.toList());
+                .stream()
+                .map(comment -> {
+                    comment.setCurrentUserLiked(comment.getUsersLiked().stream()
+                            .anyMatch(u -> u.getId().equals(user.getId())));
+                    return comment;
+                })
+                .map(ecoNewsComment -> modelMapper.map(ecoNewsComment, EcoNewsCommentDto.class))
+                .map(comment -> {
+                    comment.setReplies(ecoNewsCommentRepo.countByParentCommentId(comment.getId()));
+                    return comment;
+                })
+                .collect(Collectors.toList());
 
         return new PageableDto<>(
-            ecoNewsCommentDtos,
-            pages.getTotalElements(),
-            pages.getPageable().getPageNumber(),
-            pages.getTotalPages());
+                ecoNewsCommentDtos,
+                pages.getTotalElements(),
+                pages.getPageable().getPageNumber(),
+                pages.getTotalPages());
     }
 
     /**
@@ -332,22 +347,22 @@ public class EcoNewsCommentServiceImpl implements EcoNewsCommentService {
     @Override
     public PageableDto<EcoNewsCommentDto> findAllActiveReplies(Pageable pageable, Long parentCommentId, UserVO userVO) {
         Page<EcoNewsComment> pages = ecoNewsCommentRepo
-            .findAllByParentCommentIdAndDeletedFalseOrderByCreatedDateDesc(pageable, parentCommentId);
+                .findAllByParentCommentIdAndDeletedFalseOrderByCreatedDateDesc(pageable, parentCommentId);
         UserVO user = userVO == null ? UserVO.builder().build() : userVO;
         List<EcoNewsCommentDto> ecoNewsCommentDtos = pages
-            .stream()
-            .map(comment -> {
-                comment.setCurrentUserLiked(comment.getUsersLiked().stream()
-                    .anyMatch(u -> u.getId().equals(user.getId())));
-                return comment;
-            })
-            .map(ecoNewsComment -> modelMapper.map(ecoNewsComment, EcoNewsCommentDto.class))
-            .collect(Collectors.toList());
+                .stream()
+                .map(comment -> {
+                    comment.setCurrentUserLiked(comment.getUsersLiked().stream()
+                            .anyMatch(u -> u.getId().equals(user.getId())));
+                    return comment;
+                })
+                .map(ecoNewsComment -> modelMapper.map(ecoNewsComment, EcoNewsCommentDto.class))
+                .collect(Collectors.toList());
 
         return new PageableDto<>(
-            ecoNewsCommentDtos,
-            pages.getTotalElements(),
-            pages.getPageable().getPageNumber(),
-            pages.getTotalPages());
+                ecoNewsCommentDtos,
+                pages.getTotalElements(),
+                pages.getPageable().getPageNumber(),
+                pages.getTotalPages());
     }
 }

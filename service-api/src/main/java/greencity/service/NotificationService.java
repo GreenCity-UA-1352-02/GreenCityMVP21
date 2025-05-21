@@ -19,6 +19,7 @@ public interface NotificationService {
      * Retrieves all notifications for specific user.
      *
      * @param id ID of the specific user
+     * @param filter Filter to apply on notifications (e.g., "read", "unread", or null for all)
      * @return List of all notifications for specific user
      */
     List<NotificationDtoRequest> findUserNotifications(Long id, String filter);

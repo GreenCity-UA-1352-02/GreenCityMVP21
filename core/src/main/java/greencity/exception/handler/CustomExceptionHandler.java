@@ -629,7 +629,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(NotificationNotFound.class)
     public ResponseEntity<Object> handleNotificationNotFound(NotificationNotFound ex) {
         return ResponseEntity
-            .status(HttpStatus.BAD_REQUEST)
+            .status(HttpStatus.NOT_FOUND)
             .body(ex.getMessage());
     }
 }

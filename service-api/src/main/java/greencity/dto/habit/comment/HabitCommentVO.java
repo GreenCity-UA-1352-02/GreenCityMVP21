@@ -18,18 +18,16 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
-@ToString
+@EqualsAndHashCode(exclude = {"parentComment", "comments", "usersLiked"})
+@ToString(exclude = {"parentComment", "comments", "usersLiked"})
 public class HabitCommentVO {
     private Long id;
 
     @Size(min = 1, max = 8000)
     private String text;
 
-    @CreatedDate
     private LocalDateTime createdDate;
 
-    @LastModifiedDate
     private LocalDateTime modifiedDate;
 
     private HabitCommentVO parentComment;

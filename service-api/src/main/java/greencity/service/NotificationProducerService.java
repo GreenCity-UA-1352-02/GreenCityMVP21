@@ -4,6 +4,9 @@ public interface NotificationProducerService {
     void sendCommentNotification(Long articleId, String articleTitle,
         Long authorId, Long commentatorId, String commentatorName);
 
+    void sendCommentNotification(Long articleId, String articleTitle,
+                                 Long authorId, Long commentatorId, String commentatorName, String objectType);
+
     void sendLikeNotification(Long articleId, String articleTitle,
         Long authorId, Long likerId, String likerName);
 

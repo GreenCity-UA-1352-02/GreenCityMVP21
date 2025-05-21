@@ -248,6 +248,7 @@ public class HabitServiceImpl implements HabitService {
                 habitTranslationsPage.getTotalPages());
     }
 
+    @Transactional
     @Override
     public void like(Long id, UserVO user, String languageCode) {
         Habit habit = habitRepo.findById(id)
@@ -270,7 +271,7 @@ public class HabitServiceImpl implements HabitService {
         } else {
             habitVO.getUsersLiked().add(user);
             if (habitAuthorId != null && !user.getId().equals(habitAuthorId)) {
-                Long articleId = habit.getId();
+                Long articleId = habitVO.getId();
                 notificationProducerService.sendLikeNotification(
                         articleId,
                         habit.getHabitTranslations().stream().filter(x -> x.getLanguage()

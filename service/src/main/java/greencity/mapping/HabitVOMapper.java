@@ -12,6 +12,12 @@ import java.util.stream.Collectors;
 
 @Component
 public class HabitVOMapper extends AbstractConverter<Habit, HabitVO> {
+        private final UserVOMapper userVOMapper;
+
+            public HabitVOMapper(UserVOMapper userVOMapper) {
+                this.userVOMapper = userVOMapper;
+           }
+
     @Override
     protected HabitVO convert(Habit habit) {
         return HabitVO.builder()
@@ -20,40 +26,7 @@ public class HabitVOMapper extends AbstractConverter<Habit, HabitVO> {
                 .complexity(habit.getComplexity())
                 .defaultDuration(habit.getDefaultDuration())
                 .usersLiked(habit.getUsersLiked().stream()
-                        .map(user -> UserVO.builder().id(user.getId())
-                                .name(user.getName())
-                                .email(user.getEmail())
-                                .role(user.getRole())
-                                .userCredo(user.getUserCredo())
-                                .firstName(user.getFirstName())
-                                .emailNotification(user.getEmailNotification())
-                                .userStatus(user.getUserStatus())
-                                .rating(user.getRating())
-                                .verifyEmail(user.getVerifyEmail() != null ? VerifyEmailVO.builder()
-                                        .id(user.getVerifyEmail().getId())
-                                        .user(UserVO.builder()
-                                                .id(user.getVerifyEmail().getUser().getId())
-                                                .name(user.getVerifyEmail().getUser().getName())
-                                                .build())
-                                        .expiryDate(user.getVerifyEmail().getExpiryDate())
-                                        .token(user.getVerifyEmail().getToken())
-                                        .build() : null)
-                                .refreshTokenKey(user.getRefreshTokenKey())
-                                .ownSecurity(user.getOwnSecurity() != null ? OwnSecurityVO.builder()
-                                        .id(user.getOwnSecurity().getId())
-                                        .password(user.getOwnSecurity().getPassword())
-                                        .user(UserVO.builder()
-                                                .id(user.getOwnSecurity().getUser().getId())
-                                                .email(user.getOwnSecurity().getUser().getEmail())
-                                                .build())
-                                        .build() : null)
-                                .dateOfRegistration(user.getDateOfRegistration())
-                                .profilePicturePath(user.getProfilePicturePath())
-                                .city(user.getCity())
-                                .showShoppingList(user.getShowShoppingList())
-                                .showEcoPlace(user.getShowEcoPlace())
-                                .showLocation(user.getShowLocation())
-                                .build())
+                        .map(userVOMapper::convert)
                         .collect(Collectors.toSet()))
                 .currentUserLiked(habit.isCurrentUserLiked())
                 .userId(habit.getUserId())

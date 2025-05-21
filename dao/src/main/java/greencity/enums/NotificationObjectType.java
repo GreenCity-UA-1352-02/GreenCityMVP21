@@ -2,6 +2,7 @@ package greencity.enums;
 
 public enum NotificationObjectType {
     HABIT_COMMENT,
+    ARTICLE,
     HABIT_COMMENT_LIKE,
     HABIT_STATISTIC,
     HABIT_STATISTIC_LIKE,

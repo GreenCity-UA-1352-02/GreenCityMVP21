@@ -54,7 +54,7 @@ public class HabitCommentController {
             @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
             @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
-    @PostMapping("{habitId}")
+    @PostMapping("/{habitId}")
     @ApiLocale
     public ResponseEntity<AddHabitCommentDtoResponse> save(@PathVariable Long habitId,
                                                            @ValidLanguage Locale locale,
@@ -95,7 +95,7 @@ public class HabitCommentController {
             @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
             @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("replies/{parentCommentId}")
+    @GetMapping("/replies/{parentCommentId}")
     @ApiPageable
     public ResponseEntity<PageableDto<HabitCommentDto>> findAllReplies(@Parameter(hidden = true) Pageable pageable,
                                                                        @PathVariable Long parentCommentId,
@@ -116,7 +116,7 @@ public class HabitCommentController {
             @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
             @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("count/replies/{parentCommentID}")
+    @GetMapping("/count/replies/{parentCommentID}")
     public int getCountOfReplies(@PathVariable Long parentCommentID) {
         return habitCommentService.countReplies(parentCommentID);
     }
@@ -135,8 +135,8 @@ public class HabitCommentController {
             @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
             @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
-    @DeleteMapping("")
-    public ResponseEntity<Object> delete(Long id, @Parameter(hidden = true) @CurrentUser UserVO user) {
+    @DeleteMapping
+    public ResponseEntity<Object> delete(@RequestParam Long id, @Parameter(hidden = true) @CurrentUser UserVO user) {
         habitCommentService.deleteById(id, user);
         return ResponseEntity.ok().build();
     }
@@ -157,7 +157,10 @@ public class HabitCommentController {
             @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @PatchMapping("")
-    public void update(Long id, @RequestParam @NotBlank String text, @Parameter(hidden = true) @CurrentUser UserVO user) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void update(@RequestParam Long id,
+                       @RequestParam @NotBlank String text,
+                       @Parameter(hidden = true) @CurrentUser UserVO user) {
         habitCommentService.update(text, id, user);
     }
 
@@ -169,7 +172,7 @@ public class HabitCommentController {
      * @param user the current user performing the operation, obtained from the session or token
      */
     @Operation(summary = "Like comment")
-    @PostMapping("like")
+    @PostMapping("/like")
     @ApiLocale
     public void like(@RequestParam("id") Long id
             , @Parameter(hidden = true) @CurrentUser UserVO user
@@ -193,7 +196,6 @@ public class HabitCommentController {
      *
      * @param pageable Pageable object for pagination information.
      * @param user     The current authenticated user performing the action.
-     * @param id       The ID of the parent comment for which active replies are being retrieved.
      * @return ResponseEntity containing a PageableDto of HabitCommentDto objects representing active replies.
      */
     @Operation(summary = "Get all active replies")
@@ -204,11 +206,11 @@ public class HabitCommentController {
             @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
             @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("active/{commentId}")
+    @GetMapping("/active/{commentId}")
     @ApiPageableWithoutSort
     public ResponseEntity<PageableDto<HabitCommentDto>> getCountActiveReplies(@Parameter(hidden = true) Pageable pageable,
                                                                               @Parameter(hidden = true) @CurrentUser UserVO user,
-                                                                              @RequestParam("id") @PathVariable Long commentId) {
+                                                                              @PathVariable Long commentId) {
         return ResponseEntity.status(HttpStatus.OK).body(habitCommentService.findAllActiveReplies(pageable, commentId, user));
     }
 }

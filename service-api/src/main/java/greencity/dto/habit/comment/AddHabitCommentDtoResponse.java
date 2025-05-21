@@ -17,12 +17,12 @@ public class AddHabitCommentDtoResponse {
     @Min(1)
     private Long id;
 
-    @NotEmpty
+    @NotNull
     private HabitCommentAuthorDto author;
 
     @NotEmpty
     private String text;
 
-    @NotEmpty
+    @NotNull
     private LocalDateTime modifiedDate;
 }
