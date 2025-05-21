@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="2025-05-18-create-event-reactions-table" author="Dmytro_Kravchuk">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="event_reactions"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="event_reactions">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="event_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reaction_type" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="event_reactions"
+                baseColumnNames="event_id"
+                constraintName="fk_event_reaction_event"
+                referencedTableName="events"
+                referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint
+                baseTableName="event_reactions"
+                baseColumnNames="user_id"
+                constraintName="fk_event_reaction_user"
+                referencedTableName="users"
+                referencedColumnNames="id"/>
+
+        <addUniqueConstraint
+                tableName="event_reactions"
+                columnNames="event_id, user_id"
+                constraintName="uc_event_user_unique"/>
+    </changeSet>
+
+</databaseChangeLog>

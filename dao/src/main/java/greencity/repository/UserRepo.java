@@ -133,11 +133,12 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
      * Get all user friends.
      *
      * @param userId The ID of the user.
-     *
      * @return list of {@link User}.
      */
     @Query(nativeQuery = true, value = "SELECT * FROM users WHERE id IN ( "
         + "(SELECT user_id FROM users_friends WHERE friend_id = :userId and status = 'FRIEND')"
         + "UNION (SELECT friend_id FROM users_friends WHERE user_id = :userId and status = 'FRIEND'));")
     List<User> getAllUserFriends(Long userId);
+
+    List<User> findByNameContainingIgnoreCaseOrEmailContainingIgnoreCase(String searchTerm, String searchTerm1);
 }

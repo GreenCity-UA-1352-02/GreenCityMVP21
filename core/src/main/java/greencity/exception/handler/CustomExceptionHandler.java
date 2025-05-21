@@ -13,6 +13,7 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -629,7 +630,82 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(NotificationNotFound.class)
     public ResponseEntity<Object> handleNotificationNotFound(NotificationNotFound ex) {
         return ResponseEntity
+            .status(HttpStatus.NOT_FOUND)
+            .body(ex.getMessage());
+    }
+
+    /**
+     * Exception handler for {@link OwnLikeError}.
+     * Handles the case when a user tries to react (like/dislike) to their own event.
+     * @param ex the thrown {@link OwnLikeError}.
+     * @return a {@link ResponseEntity} with HTTP status 400 and error message in the body.
+     * @author [Dmytro Kravchuk]
+     */
+    @ExceptionHandler(OwnLikeError.class)
+    public ResponseEntity<String> handleOwnLikeError(OwnLikeError ex) {
+        return ResponseEntity
             .status(HttpStatus.BAD_REQUEST)
             .body(ex.getMessage());
+    }
+
+
+    /**
+     * Handles {@link greencity.exception.exceptions.EntityNotFoundException} exceptions
+     * that are thrown when an entity, such as an event, is not found in the database.
+     *
+     * @param ex the exception instance containing the details of the error.
+     * @return a {@link ResponseEntity} with HTTP status 404 (Not Found) and a message indicating
+     *         that the event was not found.
+     *
+     * @author [Dmytro Kravchuk]
+     */
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<String> handleEntityNotFound(EntityNotFoundException ex) {
+        return ResponseEntity
+            .status(HttpStatus.NOT_FOUND)
+            .body("Event not found");
+    }
+
+    /**
+     * Exception handler for {@link PropertyReferenceException}. This exception is
+     * thrown when the requested sort field does not exist in the entity, typically
+     * due to an invalid sort parameter in the request.
+     *
+     * @param ex the thrown {@link PropertyReferenceException}.
+     * @return a {@link ResponseEntity} with HTTP status 400 and an error message
+     *         indicating the invalid sorting field.
+     * @author [Dmytro Kravchuk]
+     */
+    @ExceptionHandler(PropertyReferenceException.class)
+    public ResponseEntity<Object> handlePropertyReferenceException(
+        PropertyReferenceException ex, WebRequest request) {
+        log.info(ex.getMessage());
+        ExceptionResponse response = new ExceptionResponse(getErrorAttributes(request));
+        response.setMessage("Invalid sorting field: " + ex.getPropertyName());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<String> handleUserNotFound(UserNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Object> handleGenericException(Exception ex, WebRequest request) {
+        log.error("Unexpected error occurred", ex);
+        ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
+        exceptionResponse.setMessage("An unexpected error occurred");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(exceptionResponse);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgument(IllegalArgumentException ex) {
+        return ResponseEntity.badRequest().body("Invalid friend ID.");
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<String> handleRuntime(RuntimeException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .body("Friend request not found or already handled.");
     }
 }

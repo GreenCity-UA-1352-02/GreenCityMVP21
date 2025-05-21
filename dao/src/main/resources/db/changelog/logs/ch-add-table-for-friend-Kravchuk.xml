@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="2025-05-18-create-friend-table" author="Dmytro_Kravchuk">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="friend"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="friend">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="friend_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(50)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="city" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="friend"
+                baseColumnNames="user_id"
+                constraintName="fk_friend_user"
+                referencedTableName="users"
+                referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint
+                baseTableName="friend"
+                baseColumnNames="friend_id"
+                constraintName="fk_friend_friend"
+                referencedTableName="users"
+                referencedColumnNames="id"/>
+
+        <addUniqueConstraint
+                tableName="friend"
+                columnNames="user_id, friend_id"
+                constraintName="uc_user_friend_unique"/>
+    </changeSet>
+
+</databaseChangeLog>
