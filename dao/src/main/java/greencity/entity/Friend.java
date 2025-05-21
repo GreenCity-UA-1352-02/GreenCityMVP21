@@ -10,7 +10,8 @@ import lombok.*;
 @Setter
 @Builder
 @Entity
-@Table(name = "friend")
+@Table(name = "friend",
+    uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "friend_id"}))
 public class Friend {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

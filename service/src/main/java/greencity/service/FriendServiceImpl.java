@@ -74,7 +74,7 @@ public class FriendServiceImpl implements FriendService {
     private boolean isCurrentUser(Long userId) {
         String currentUserName = SecurityContextHolder.getContext().getAuthentication().getName();
         User currentUser = userRepo.findByEmail(currentUserName)
-            .orElseThrow(() -> new RuntimeException("Current user not found"));
+            .orElseThrow(() -> new UsernameNotFoundException("Current user not found"));
         return currentUser.getId().equals(userId);
     }
 
@@ -146,13 +146,17 @@ public class FriendServiceImpl implements FriendService {
         }
         String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User currentUser = userRepo.findByEmail(currentUserEmail)
-            .orElseThrow(() -> new RuntimeException("Current user not found."));
+            .orElseThrow(() -> new UsernameNotFoundException("Current user not found."));
 
         Long currentUserId = currentUser.getId();
 
         Friend request = friendRepo.findByUserIdAndFriendId(friendId, currentUserId);
-        if (request == null || request.getStatus() != FriendStatus.REQUESTED) {
-            throw new RuntimeException("Friend request not found or already confirmed.");
+        if (request == null) {
+            throw new UserNotFoundException("Friend request not found.");
+        }
+
+        if (request.getStatus() != FriendStatus.REQUESTED) {
+            throw new FriendRequestException("Friend request already confirmed or in another state.");
         }
 
         request.setStatus(FriendStatus.FRIEND);
@@ -259,13 +263,17 @@ public class FriendServiceImpl implements FriendService {
 
         String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User currentUser = userRepo.findByEmail(currentUserEmail)
-            .orElseThrow(() -> new RuntimeException("Current user not found."));
+            .orElseThrow(() -> new UsernameNotFoundException("Current user not found."));
 
         Long currentUserId = currentUser.getId();
 
         Friend request = friendRepo.findByUserIdAndFriendId(friendId, currentUserId);
-        if (request == null || request.getStatus() != FriendStatus.REQUESTED) {
-            throw new RuntimeException("Friend request not found or already handled.");
+        if (request == null) {
+            throw new UsernameNotFoundException("Friend request not found.");
+        }
+
+        if (request.getStatus() != FriendStatus.REQUESTED) {
+            throw new FriendRequestException("Friend request already handled.");
         }
 
         friendRepo.delete(request);

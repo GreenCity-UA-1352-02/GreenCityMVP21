@@ -638,9 +638,33 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      * @author [Dmytro Kravchuk]
      */
     @ExceptionHandler(PropertyReferenceException.class)
-    public ResponseEntity<String> handlePropertyReferenceException(PropertyReferenceException ex) {
-        return ResponseEntity
-            .status(HttpStatus.BAD_REQUEST)
-            .body("Invalid sorting field: " + ex.getPropertyName());
+    public ResponseEntity<Object> handlePropertyReferenceException(
+        PropertyReferenceException ex, WebRequest request) {
+        log.info(ex.getMessage());
+        ExceptionResponse response = new ExceptionResponse(getErrorAttributes(request));
+        response.setMessage("Invalid sorting field: " + ex.getPropertyName());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<String> handleUserNotFound(UserNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleGenericException(Exception ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body("An unexpected error occurred");
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgument(IllegalArgumentException ex) {
+        return ResponseEntity.badRequest().body("Invalid friend ID.");
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<String> handleRuntime(RuntimeException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .body("Friend request not found or already handled.");
     }
 }

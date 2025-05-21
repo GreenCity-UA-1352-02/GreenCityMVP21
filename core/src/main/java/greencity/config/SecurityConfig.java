@@ -220,7 +220,6 @@ public class SecurityConfig {
                     USER_SHOPPING_LIST,
                     "/user/{userId}/habit",
                     "/habit/custom",
-                    "/custom/shopping-list-items/{userId}/{habitId}/custom-shopping-list-items",
                     "/friends/{friendId}",
                     "/friends/block/{toBlockId}",
                     "/custom/shopping-list-items/{userId}/{habitId}/custom-shopping-list-items")
@@ -259,7 +258,6 @@ public class SecurityConfig {
                     "/favorite_place/{placeId}",
                     "/social-networks",
                     USER_CUSTOM_SHOPPING_LIST_ITEMS,
-                    USER_SHOPPING_LIST + "/user-shopping-list-items",
                     "/friends/{friendId}",
                     "/friends/requests/{friendId}",
                     "/friends/{friendId}/declineFriend",

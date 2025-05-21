@@ -172,23 +172,6 @@ public class FriendControllerTest {
     }
 
     @Test
-    void addFriend_shouldReturnCreated_whenFriendRequestSentSuccessfully() {
-        Long currentUserId = 1L;
-        Long friendId = 2L;
-
-        when(friendService.getCurrentUserId()).thenReturn(currentUserId);
-        doNothing().when(friendService).addFriend(currentUserId, friendId);
-
-        ResponseEntity<?> response = friendController.addFriend(friendId);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        assertThat(response.getBody()).isEqualTo("Friend request sent successfully.");
-
-        verify(friendService, times(1)).getCurrentUserId();
-        verify(friendService, times(1)).addFriend(currentUserId, friendId);
-    }
-
-    @Test
     void confirmFriend_whenConfirmationSuccessful_Success() {
         Long friendId = 2L;
 

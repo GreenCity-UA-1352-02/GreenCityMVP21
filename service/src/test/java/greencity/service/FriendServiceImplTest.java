@@ -728,8 +728,8 @@ public class FriendServiceImplTest {
             .thenReturn(null);
 
         assertThatThrownBy(() -> friendService.confirmFriend(anotherUser.getId()))
-            .isInstanceOf(RuntimeException.class)
-            .hasMessage("Friend request not found or already confirmed.");
+            .isInstanceOf(UserNotFoundException.class)
+            .hasMessage("Friend request not found.");
     }
 
     @Test
@@ -765,15 +765,15 @@ public class FriendServiceImplTest {
         Friend friendRequest = new Friend();
         friendRequest.setUser(anotherUser);
         friendRequest.setFriend(currentUser);
-        friendRequest.setStatus(FriendStatus.FRIEND);
+        friendRequest.setStatus(FriendStatus.FRIEND); // статус уже FRIEND, не REQUESTED
 
         when(userRepo.findByEmail(currentUser.getEmail())).thenReturn(Optional.of(currentUser));
         when(friendRepo.findByUserIdAndFriendId(anotherUser.getId(), currentUser.getId()))
             .thenReturn(friendRequest);
 
         assertThatThrownBy(() -> friendService.confirmFriend(anotherUser.getId()))
-            .isInstanceOf(RuntimeException.class)
-            .hasMessage("Friend request not found or already confirmed.");
+            .isInstanceOf(FriendRequestException.class)
+            .hasMessage("Friend request already confirmed or in another state.");
     }
 
     @Test
