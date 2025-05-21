@@ -8,6 +8,7 @@ import greencity.entity.User;
 import greencity.entity.UserSpecification;
 import greencity.enums.FriendStatus;
 import greencity.exception.exceptions.FriendRequestException;
+import greencity.exception.exceptions.FriendshipNotFoundException;
 import greencity.exception.exceptions.UserNotFoundException;
 import greencity.repository.FriendRepository;
 import greencity.repository.UserRepo;
@@ -470,7 +471,7 @@ public class FriendServiceImplTest {
         when(friendRepo.findByUserIdAndFriendId(currentUserId, friendId)).thenReturn(null);
 
         assertThatThrownBy(() -> friendService.removeFriend(friendId))
-            .isInstanceOf(RuntimeException.class)
+            .isInstanceOf(FriendshipNotFoundException.class)
             .hasMessageContaining("Friendship not found or you are not allowed to remove this friend.");
 
         verify(friendRepo, times(1)).findByUserIdAndFriendId(currentUserId, friendId);

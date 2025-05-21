@@ -268,12 +268,10 @@ public class FriendServiceImpl implements FriendService {
         Long currentUserId = currentUser.getId();
 
         Friend request = friendRepo.findByUserIdAndFriendId(friendId, currentUserId);
-        if (request == null) {
-            throw new UsernameNotFoundException("Friend request not found.");
-        }
-
-        if (request.getStatus() != FriendStatus.REQUESTED) {
-            throw new FriendRequestException("Friend request already handled.");
+        // Унифицированная проверка на отсутствие или неподходящий статус
+        if (request == null || request.getStatus() != FriendStatus.REQUESTED) {
+            // Общее сообщение, не раскрывающее, есть ли такой пользователь/заявка
+            throw new FriendRequestException("Invalid or already handled friend request.");
         }
 
         friendRepo.delete(request);
