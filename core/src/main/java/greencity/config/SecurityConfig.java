@@ -12,6 +12,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.authentication.configuration.EnableGlobalAuthentication;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -37,6 +38,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @Configuration
 @EnableWebSecurity
 @EnableGlobalAuthentication
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
     private static final String ECONEWS_COMMENTS = "/econews/comments";
     private static final String USER_CUSTOM_SHOPPING_LIST_ITEMS = "/user/{userId}/custom-shopping-list-items";
@@ -155,7 +157,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST,
                     "/ownSecurity/signUp",
                     "/ownSecurity/signIn",
-                    "/ownSecurity/changePassword")
+                    "/ownSecurity/changePassword",
+                    "/newsSubscriber")
                 .permitAll()
                 .requestMatchers(HttpMethod.GET,
                     "/achievements",
@@ -200,8 +203,13 @@ public class SecurityConfig {
                     "/habit/{habitId}/friends/profile-pictures",
                     "/api/events/my",
                     "/api/events/my/role/{role}")
+                    "/friends/{userId}",
+                    "/friends/search-new-friends",
+                    "/habit/{habitId}/friends/profile-pictures",
+                    "/habit/{habitId}/friends/profile-pictures")
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.POST,
+                    "/events/comments/{eventId}",
                     "/events/create",
                     "/category",
                     "/econews",
@@ -217,11 +225,12 @@ public class SecurityConfig {
                     "/habit/assign/{habitAssignId}/enroll/**",
                     "/habit/assign/{habitAssignId}/unenroll/{date}",
                     "/habit/statistic/{habitId}",
-                    "/newsSubscriber",
                     USER_CUSTOM_SHOPPING_LIST_ITEMS,
                     USER_SHOPPING_LIST,
                     "/user/{userId}/habit",
                     "/habit/custom",
+                    "/friends/{friendId}",
+                    "/friends/block/{toBlockId}",
                     "/custom/shopping-list-items/{userId}/{habitId}/custom-shopping-list-items")
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.PUT,
@@ -234,12 +243,14 @@ public class SecurityConfig {
                     HABIT_ASSIGN_ID + "/allUserAndCustomList",
                     "/events/reactions/{eventId}/like",
                     "/events/reactions/{eventId}/dislike")
+                    HABIT_ASSIGN_ID + "/allUserAndCustomList")
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.PATCH,
                     ECONEWS_COMMENTS,
                     CUSTOM_SHOPPING_LIST_ITEMS,
                     CUSTOM_SHOPPING_LIST_URL,
                     HABIT_ASSIGN_ID,
+                    "/events/comments",
                     "/shopping-list-items/shoppingList/{userId}",
                     HABIT_ASSIGN_ID,
                     "/habit/assign/cancel/{habitId}",
@@ -247,13 +258,14 @@ public class SecurityConfig {
                     USER_SHOPPING_LIST + "/{shoppingListItemId}/status/{status}",
                     USER_SHOPPING_LIST + "/{userShoppingListItemId}",
                     "/user/profilePicture",
-                    "/user/deleteProfilePicture")
+                    "/user/deleteProfilePicture",
+                    "/friends/{friendId}/acceptFriend")
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.DELETE,
                     ECONEWS_COMMENTS,
-                    "/events/comments/{eventCommentId}",
                     "/events/delete",
                     "/econews/{econewsId}",
+                    "/events/comments",
                     CUSTOM_SHOPPING_LIST_ITEMS,
                     CUSTOM_SHOPPING_LIST_URL,
                     "/favorite_place/{placeId}",
@@ -261,9 +273,12 @@ public class SecurityConfig {
                     USER_CUSTOM_SHOPPING_LIST_ITEMS,
                     USER_SHOPPING_LIST + "/user-shopping-list-items",
                     "/api/events/my/{eventId}/cancel")
+                    "/friends/{friendId}",
+                    "/friends/requests/{friendId}",
+                    "/friends/{friendId}/declineFriend",
+                    USER_SHOPPING_LIST + "/user-shopping-list-items")
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.GET,
-                    "/newsSubscriber",
                     "/comments",
                     "/comments/{id}",
                     "/user/all",
