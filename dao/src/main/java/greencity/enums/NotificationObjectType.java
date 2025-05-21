@@ -1,0 +1,17 @@
+package greencity.enums;
+
+public enum NotificationObjectType {
+    HABIT_COMMENT,
+    HABIT_COMMENT_LIKE,
+    HABIT_STATISTIC,
+    HABIT_STATISTIC_LIKE,
+    HABIT_LIKE,
+    ECO_NEWS_COMMENT,
+    ECO_NEWS_COMMENT_LIKE,
+    ECO_NEWS_SUBSCRIBED,
+    ECO_NEWS_UNSUBSCRIBED,
+    ECO_NEWS_LIKE,
+    ECO_NEWS_SAVE,
+    ECO_NEWS_COMMENT_SAVE,
+
+}

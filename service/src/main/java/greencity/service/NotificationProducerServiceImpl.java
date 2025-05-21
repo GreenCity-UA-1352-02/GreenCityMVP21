@@ -81,6 +81,28 @@ public class NotificationProducerServiceImpl implements NotificationProducerServ
     }
 
     /**
+     * Sends a notification about a comment on an article or other object.
+     *
+     * @param articleId       ID of the article or object where the comment was made
+     * @param articleTitle    Title of the article or object where the comment was made
+     * @param authorId        ID of the article or object author (who will receive the notification)
+     * @param commentatorId   ID of the user who made the comment
+     * @param commentatorName Name of the user who made the comment
+     * @param objectType      Type of the object (e.g., "ARTICLE", "EVENT") where the comment was made
+     */
+    public void sendCommentNotification(Long articleId, String articleTitle,
+                                        Long authorId, Long commentatorId, String commentatorName, String objectType) {
+        sendNotification(
+                NotificationType.COMMENT_CREATED,
+                authorId,
+                commentatorId,
+                commentatorName,
+                articleId,
+                articleTitle,
+                objectType);
+    }
+
+    /**
      * Sends a notification about a like on an article.
      *
      * @param articleId    ID of the article
@@ -100,6 +122,29 @@ public class NotificationProducerServiceImpl implements NotificationProducerServ
             articleId,
             articleTitle,
             "ARTICLE");
+    }
+
+
+    /**
+     * Sends a notification about a like on an article or other object.
+     *
+     * @param articleId    ID of the article or object that was liked
+     * @param articleTitle Title of the article or object that was liked
+     * @param authorId     ID of the author of the article or object (who will receive the notification)
+     * @param likerId      ID of the user who liked the article or object
+     * @param likerName    Name of the user who liked the article or object
+     * @param objectType   Type of the object that was liked (e.g., "ARTICLE", "EVENT")
+     */
+    public void sendLikeNotification(Long articleId, String articleTitle,
+                                     Long authorId, Long likerId, String likerName, String objectType) {
+        sendNotification(
+                NotificationType.ARTICLE_LIKED,
+                authorId,
+                likerId,
+                likerName,
+                articleId,
+                articleTitle,
+                objectType);
     }
 
     /**

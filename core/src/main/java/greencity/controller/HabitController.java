@@ -29,6 +29,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.security.Principal;
 import java.util.List;
 import java.util.Locale;
@@ -51,17 +52,17 @@ public class HabitController {
      */
     @Operation(summary = "Find habit by id.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
-            content = @Content(schema = @Schema(implementation = HabitDto.class))),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND),
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
+                    content = @Content(schema = @Schema(implementation = HabitDto.class))),
+            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND),
     })
     @GetMapping("/{id}")
     @ApiLocale
     public ResponseEntity<HabitDto> getHabitById(@PathVariable Long id,
-        @Parameter(hidden = true) @ValidLanguage Locale locale) {
+                                                 @Parameter(hidden = true) @ValidLanguage Locale locale) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(habitService.getByIdAndLanguageCode(id, locale.getLanguage()));
+                .body(habitService.getByIdAndLanguageCode(id, locale.getLanguage()));
     }
 
     /**
@@ -74,17 +75,17 @@ public class HabitController {
      */
     @Operation(summary = "Find all habits.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
     })
     @GetMapping("")
     @ApiPageableWithLocale
     public ResponseEntity<PageableDto<HabitDto>> getAll(
-        @Parameter(hidden = true) @CurrentUser UserVO userVO,
-        @Parameter(hidden = true) @ValidLanguage Locale locale,
-        @Parameter(hidden = true) Pageable pageable) {
+            @Parameter(hidden = true) @CurrentUser UserVO userVO,
+            @Parameter(hidden = true) @ValidLanguage Locale locale,
+            @Parameter(hidden = true) Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK).body(
-            habitService.getAllHabitsByLanguageCode(userVO, pageable, locale.getLanguage()));
+                habitService.getAllHabitsByLanguageCode(userVO, pageable, locale.getLanguage()));
     }
 
     /**
@@ -96,16 +97,16 @@ public class HabitController {
      */
     @Operation(summary = "Get shopping list.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
     })
     @GetMapping("{id}/shopping-list")
     @ApiLocale
     public ResponseEntity<List<ShoppingListItemDto>> getShoppingListItems(
-        @PathVariable Long id,
-        @Parameter(hidden = true) @ValidLanguage Locale locale) {
+            @PathVariable Long id,
+            @Parameter(hidden = true) @ValidLanguage Locale locale) {
         return ResponseEntity.status(HttpStatus.OK).body(
-            habitService.getShoppingListForHabit(id, locale.getLanguage()));
+                habitService.getShoppingListForHabit(id, locale.getLanguage()));
     }
 
     /**
@@ -118,17 +119,17 @@ public class HabitController {
      */
     @Operation(summary = "Find all habits by tags and language code.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
     })
     @GetMapping("/tags/search")
     @ApiPageableWithLocale
     public ResponseEntity<PageableDto<HabitDto>> getAllByTagsAndLanguageCode(
-        @Parameter(hidden = true) @ValidLanguage Locale locale,
-        @RequestParam List<String> tags,
-        @Parameter(hidden = true) Pageable pageable) {
+            @Parameter(hidden = true) @ValidLanguage Locale locale,
+            @RequestParam List<String> tags,
+            @Parameter(hidden = true) Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK).body(
-            habitService.getAllByTagsAndLanguageCode(pageable, tags, locale.getLanguage()));
+                habitService.getAllByTagsAndLanguageCode(pageable, tags, locale.getLanguage()));
     }
 
     /**
@@ -144,23 +145,23 @@ public class HabitController {
      */
     @Operation(summary = "Find all habits by tags, isCustomHabit, complexities.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
     })
     @GetMapping("/search")
     @ApiPageableWithLocale
     public ResponseEntity<PageableDto<HabitDto>> getAllByDifferentParameters(
-        @Parameter(hidden = true) @CurrentUser UserVO userVO,
-        @Parameter(hidden = true) @ValidLanguage Locale locale,
-        @RequestParam(required = false, name = "tags") Optional<List<String>> tags,
-        @RequestParam(required = false, name = "isCustomHabit") Optional<Boolean> isCustomHabit,
-        @RequestParam(required = false, name = "complexities") Optional<List<Integer>> complexities,
-        @Parameter(hidden = true) Pageable pageable) throws BadRequestException {
+            @Parameter(hidden = true) @CurrentUser UserVO userVO,
+            @Parameter(hidden = true) @ValidLanguage Locale locale,
+            @RequestParam(required = false, name = "tags") Optional<List<String>> tags,
+            @RequestParam(required = false, name = "isCustomHabit") Optional<Boolean> isCustomHabit,
+            @RequestParam(required = false, name = "complexities") Optional<List<Integer>> complexities,
+            @Parameter(hidden = true) Pageable pageable) throws BadRequestException {
         if (isValid(tags, isCustomHabit, complexities)) {
             return ResponseEntity.status(HttpStatus.OK).body(
-                habitService.getAllByDifferentParameters(userVO, pageable, tags,
-                    isCustomHabit, complexities, locale.getLanguage()));
+                    habitService.getAllByDifferentParameters(userVO, pageable, tags,
+                            isCustomHabit, complexities, locale.getLanguage()));
         } else {
             throw new BadRequestException("You should enter at least one parameter");
         }
@@ -173,13 +174,12 @@ public class HabitController {
      * @param tags          {@link List} of {@link String}.
      * @param isCustomHabit {@link Boolean} value.
      * @param complexities  {@link List} of {@link Integer}.
-     *
      * @author Lilia Mokhnatska
      */
     private boolean isValid(Optional<List<String>> tags, Optional<Boolean> isCustomHabit,
-        Optional<List<Integer>> complexities) {
+                            Optional<List<Integer>> complexities) {
         return ((tags.isPresent() && !tags.get().isEmpty()) || isCustomHabit.isPresent()
-            || (complexities.isPresent() && !complexities.get().isEmpty()));
+                || (complexities.isPresent() && !complexities.get().isEmpty()));
     }
 
     /**
@@ -190,8 +190,8 @@ public class HabitController {
      */
     @Operation(summary = "Find all habits tags")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
     })
     @GetMapping("/tags")
     @ApiLocale
@@ -204,26 +204,25 @@ public class HabitController {
      *
      * @param request {@link AddCustomHabitDtoRequest} - new custom habit dto.
      * @return dto {@link AddCustomHabitDtoResponse}
-     *
      * @author Lilia Mokhnatska.
      */
     @Operation(summary = "Add new custom habit.")
     @ResponseStatus(value = HttpStatus.CREATED)
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED,
-            content = @Content(schema = @Schema(implementation = AddCustomHabitDtoResponse.class))),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND),
+            @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED,
+                    content = @Content(schema = @Schema(implementation = AddCustomHabitDtoResponse.class))),
+            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND),
     })
     @PostMapping(path = "/custom", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<AddCustomHabitDtoResponse> addCustomHabit(
-        @RequestPart @Valid AddCustomHabitDtoRequest request,
-        @Parameter(description = "Image of habit") @ImageValidation MultipartFile image,
-        @Parameter(hidden = true) Principal principal) {
+            @RequestPart @Valid AddCustomHabitDtoRequest request,
+            @Parameter(description = "Image of habit") @ImageValidation MultipartFile image,
+            @Parameter(hidden = true) Principal principal) {
         return ResponseEntity
-            .status(HttpStatus.CREATED)
-            .body(habitService.addCustomHabit(request, image, principal.getName()));
+                .status(HttpStatus.CREATED)
+                .body(habitService.addCustomHabit(request, image, principal.getName()));
     }
 
     /**
@@ -235,19 +234,28 @@ public class HabitController {
      * @return List of friends profile picture.
      */
     @Operation(
-        summary = "Retrieves the list of profile pictures of the user's friends "
-            + "(which have INPROGRESS assign to the habit).")
+            summary = "Retrieves the list of profile pictures of the user's friends "
+                    + "(which have INPROGRESS assign to the habit).")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND),
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND),
     })
     @GetMapping("/{habitId}/friends/profile-pictures")
     public ResponseEntity<List<UserProfilePictureDto>> getFriendsAssignedToHabitProfilePictures(
-        @PathVariable Long habitId,
-        @Parameter(hidden = true) @CurrentUser UserVO userVO) {
+            @PathVariable Long habitId,
+            @Parameter(hidden = true) @CurrentUser UserVO userVO) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(habitService.getFriendsAssignedToHabitProfilePictures(habitId, userVO.getId()));
+                .body(habitService.getFriendsAssignedToHabitProfilePictures(habitId, userVO.getId()));
+    }
+
+    @Operation(summary = "Like habit")
+    @PostMapping("like")
+    @ApiLocale
+    public void like(@RequestParam("id") Long id,
+                     @Parameter(hidden = true) @ValidLanguage Locale locale,
+                     @Parameter(hidden = true) @CurrentUser UserVO user) {
+        habitService.like(id, user, locale.getLanguage());
     }
 }

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <changeSet id="create-habit-comment-table" author="Senyshyn">
+        <!-- Table: habit_comment -->
+        <createTable tableName="habit_comment">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="text" type="VARCHAR(8000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_date" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="parent_comment_id" type="BIGINT"/>
+            <column name="user_id" type="BIGINT"/>
+            <column name="habit_id" type="BIGINT"/>
+            <column name="deleted" type="BOOLEAN"/>
+        </createTable>
+
+        <!-- Foreign Keys -->
+        <addForeignKeyConstraint baseTableName="habit_comment"
+                                 baseColumnNames="parent_comment_id"
+                                 referencedTableName="habit_comment"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_habit_comment_parent"/>
+
+        <addForeignKeyConstraint baseTableName="habit_comment"
+                                 baseColumnNames="user_id"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_habit_comment_user"/>
+
+        <addForeignKeyConstraint baseTableName="habit_comment"
+                                 baseColumnNames="habit_id"
+                                 referencedTableName="habits"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_habit_comment_habit"/>
+    </changeSet>
+
+    <!-- Table for many-to-many: habit_comment_users_liked -->
+    <changeSet id="create-habit_comment_users_liked" author="Artem Senyshyn">
+        <createTable tableName="habit_comment_users_liked">
+            <column name="habit_comment_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="users_liked_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="habit_comment_users_liked"
+                       columnNames="habit_comment_id, users_liked_id"
+                       constraintName="pk_habit_comment_users_liked"/>
+
+        <addForeignKeyConstraint baseTableName="habit_comment_users_liked"
+                                 baseColumnNames="habit_comment_id"
+                                 referencedTableName="habit_comment"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_hcul_comment"/>
+
+        <addForeignKeyConstraint baseTableName="habit_comment_users_liked"
+                                 baseColumnNames="users_liked_id"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_hcul_user"/>
+    </changeSet>
+</databaseChangeLog>

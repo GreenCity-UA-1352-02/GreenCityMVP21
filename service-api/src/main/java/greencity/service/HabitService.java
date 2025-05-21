@@ -108,6 +108,8 @@ public interface HabitService {
      */
     List<Long> addAllShoppingListItemsByListOfId(Long habitId, List<Long> listId);
 
+    void like(Long id, UserVO user, String language);
+
     /**
      * Method to save {@link AddCustomHabitDtoResponse}.
      *
