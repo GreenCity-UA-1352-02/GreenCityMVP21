@@ -4,6 +4,7 @@ import greencity.constant.AppConstant;
 import greencity.dto.PageableAdvancedDto;
 import greencity.dto.econews.*;
 import greencity.dto.econewscomment.*;
+import greencity.dto.event.*;
 import greencity.dto.habit.*;
 import greencity.dto.habitfact.*;
 import greencity.dto.language.LanguageDTO;
@@ -17,6 +18,10 @@ import greencity.dto.tag.*;
 import greencity.dto.user.*;
 import greencity.dto.verifyemail.VerifyEmailVO;
 import greencity.entity.*;
+import greencity.entity.event.Address;
+import greencity.entity.event.Event;
+import greencity.entity.event.EventDateLocation;
+import greencity.entity.event.EventImage;
 import greencity.entity.localization.ShoppingListItemTranslation;
 import greencity.entity.localization.TagTranslation;
 import greencity.enums.*;
@@ -34,6 +39,14 @@ import java.util.*;
 import static greencity.enums.UserStatus.ACTIVATED;
 
 public class ModelUtils {
+    public static final String TITLE = "title";
+    public static final String DESCRIPTION = "Let's talk about Spring Boot";
+    public static final String EVENT_TAG = "Social";
+    public static final ZonedDateTime START_TIME = ZonedDateTime.of(2027, 11, 12, 22, 0, 0, 0, ZoneOffset.UTC);
+    public static final ZonedDateTime END_TIME = ZonedDateTime.of(2027, 12, 12, 22, 0, 0, 0, ZoneOffset.UTC);
+    public static final String ONLINE_LINK = "https://meet.google.com/test";
+    public static final String IMAGE_LINK = "Link";
+    public static final String IMAGE_LINK2 = "Link2";
     public static User TEST_USER = createUser();
     public static User TEST_USER_ROLE_USER = createUserRoleUser();
     public static UserVO TEST_USER_VO = createUserVO();
@@ -46,6 +59,11 @@ public class ModelUtils {
 
     public static Tag getTag() {
         return new Tag(1L, TagType.ECO_NEWS, getTagTranslations(), Collections.emptyList(), Collections.emptySet());
+    }
+
+    public static List<Tag> getEventTags() {
+        return List.of(
+            new Tag(1L, TagType.EVENT, getEventTagTranslations(), Collections.emptyList(), Collections.emptySet()));
     }
 
     public static Tag getHabitTag() {
@@ -75,7 +93,7 @@ public class ModelUtils {
         return Arrays.asList(
             TagTranslation.builder().id(1L).name("Соціальний").language(getLanguageUa()).build(),
             TagTranslation.builder().id(2L).name("Social").language(language).build(),
-            TagTranslation.builder().id(3L).name("Соціальний").language(language).build());
+            TagTranslation.builder().id(3L).name("Соціальний").language(getLanguageFr()).build());
     }
 
     public static TagDto getTagDto() {
@@ -172,6 +190,10 @@ public class ModelUtils {
 
     public static Language getLanguageUa() {
         return new Language(2L, "ua", Collections.emptyList(), Collections.emptyList());
+    }
+
+    public static Language getLanguageFr() {
+        return new Language(3L, "Fr", Collections.emptyList(), Collections.emptyList());
     }
 
     public static EcoNews getEcoNews() {
@@ -383,7 +405,7 @@ public class ModelUtils {
 
     public static List<TagTranslationVO> getTagTranslationsVO() {
         return Arrays.asList(TagTranslationVO.builder().id(1L).name("Новини")
-            .languageVO(LanguageVO.builder().id(1L).code("ua").build()).build(),
+                .languageVO(LanguageVO.builder().id(1L).code("ua").build()).build(),
             TagTranslationVO.builder().id(2L).name("News").languageVO(LanguageVO.builder().id(2L).code("en").build())
                 .build());
     }
@@ -666,6 +688,187 @@ public class ModelUtils {
             .id(2L)
             .text("item")
             .status(ShoppingListItemStatus.INPROGRESS)
+            .build();
+    }
+
+    public static AddEventRequest getAddEventRequest() {
+        return AddEventRequest.builder()
+            .title(TITLE)
+            .description(DESCRIPTION)
+            .isOpen(true)
+            .datesLocations(List.of(getEventDateLocationAllDto()))
+            .tags(List.of(EVENT_TAG))
+            .build();
+    }
+
+    public static AddEventRequest getAddEventRequestWithoutTags() {
+        return AddEventRequest.builder()
+            .title(TITLE)
+            .description(DESCRIPTION)
+            .isOpen(true)
+            .datesLocations(List.of(getEventDateLocationAllDto()))
+            .tags(List.of())
+            .build();
+    }
+
+    public static AddEventRequest getAddEventRequestWithoutAddress() {
+        return AddEventRequest.builder()
+            .title(TITLE)
+            .description(DESCRIPTION)
+            .isOpen(true)
+            .datesLocations(List.of(getEventDateLocationOnlineDto()))
+            .tags(List.of(EVENT_TAG))
+            .build();
+    }
+
+    public static UpdateEventRequest getUpdateEventRequest() {
+        return UpdateEventRequest.builder()
+            .id(1L)
+            .title(TITLE)
+            .description(DESCRIPTION)
+            .isOpen(true)
+            .datesLocations(List.of(getEventDateLocationAllDto()))
+            .tags(List.of(EVENT_TAG))
+            .build();
+    }
+
+    public static EventResponse getEventResponse() {
+        return EventResponse.builder()
+            .id(1L)
+            .title(TITLE)
+            .description(DESCRIPTION)
+            .open(true)
+            .titleImage(IMAGE_LINK)
+            .build();
+    }
+
+    public static Event getEvent() {
+        return Event.builder()
+            .id(1L)
+            .title(TITLE)
+            .description(DESCRIPTION)
+            .isOpen(true)
+            .eventDatesLocations(getEventDateLocationAll())
+            .author(getUser())
+            .tags(getEventTags())
+            .mainImage(getEventImages().getFirst())
+            .images(getEventImages())
+            .build();
+    }
+
+    public static List<EventDateLocation> getEventDateLocationAll() {
+        List<EventDateLocation> list = new ArrayList<>();
+        return List.of(EventDateLocation.builder()
+            .id(1L)
+            .startTime(START_TIME)
+            .endTime(END_TIME)
+            .onlineLink(ONLINE_LINK)
+            .address(getAddress())
+            .eventType(EventType.ONLINE_OFFLINE)
+            .build());
+    }
+
+    public static List<EventDateLocation> getEventDateLocationOffline() {
+        List<EventDateLocation> list = new ArrayList<>();
+        return List.of(EventDateLocation.builder()
+            .id(1L)
+            .startTime(START_TIME)
+            .endTime(END_TIME)
+            .eventType(EventType.OFFLINE)
+            .address(getAddress())
+            .build());
+    }
+
+    public static List<EventDateLocation> getEventDateLocationOnline() {
+        List<EventDateLocation> list = new ArrayList<>();
+        return List.of(EventDateLocation.builder()
+            .id(1L)
+            .startTime(START_TIME)
+            .endTime(END_TIME)
+            .onlineLink(ONLINE_LINK)
+            .eventType(EventType.ONLINE)
+            .build());
+    }
+
+    public static EventImage getEventImage() {
+        return EventImage.builder()
+            .id(1L)
+            .link(IMAGE_LINK)
+            .build();
+    }
+
+    public static List<EventImage> getEventImages() {
+        List<EventImage> result = new ArrayList<>();
+        result.add(EventImage.builder()
+            .id(1L)
+            .link(IMAGE_LINK)
+            .build());
+        result.add(EventImage.builder()
+            .id(2L)
+            .link(IMAGE_LINK2)
+            .build());
+        return result;
+    }
+
+
+    public static EventImageDto getEventImageDto() {
+        return EventImageDto.builder()
+            .id(1L)
+            .link(IMAGE_LINK)
+            .build();
+    }
+
+    public static List<EventImageDto> getEventImageDtos() {
+        List<EventImageDto> result = new ArrayList<>();
+        result.add(EventImageDto.builder()
+            .id(1L)
+            .link(IMAGE_LINK)
+            .build());
+        return result;
+    }
+
+
+    public static EventDateLocationDto getEventDateLocationOnlineDto() {
+        return EventDateLocationDto.builder()
+            .id(1L)
+            .startDate(START_TIME)
+            .finishDate(END_TIME)
+            .onlineLink(ONLINE_LINK)
+            .build();
+    }
+
+    public static EventDateLocationDto getEventDateLocationOfflineDto() {
+        return EventDateLocationDto.builder()
+            .id(1L)
+            .startDate(START_TIME)
+            .finishDate(END_TIME)
+            .coordinates(getAddressDto())
+            .build();
+    }
+
+    public static EventDateLocationDto getEventDateLocationAllDto() {
+        return EventDateLocationDto.builder()
+            .id(1L)
+            .startDate(START_TIME)
+            .finishDate(END_TIME)
+            .coordinates(getAddressDto())
+            .onlineLink(ONLINE_LINK)
+            .build();
+    }
+
+    public static AddressDto getAddressDto() {
+        return AddressDto.builder()
+            .id(1L)
+            .latitude(50.4501)
+            .longitude(30.5234)
+            .build();
+    }
+
+    public static Address getAddress() {
+        return Address.builder()
+            .id(1L)
+            .latitude(50.4501)
+            .longitude(30.5234)
             .build();
     }
 }

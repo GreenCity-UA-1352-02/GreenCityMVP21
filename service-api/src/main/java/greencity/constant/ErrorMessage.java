@@ -133,6 +133,11 @@ public final class ErrorMessage {
     public static final String FILTER_NOT_FOUND_BY_ID = "Filter not found";
     public static final String USER_HAS_NO_FRIEND_WITH_ID = "User has no friend with this id: ";
     public static final String INVALID_DURATION = "The duration for such habit is lower than previously set";
+    public static final String WRONG_EVENT_ID = "Wrong event id";
+    public static final String SOME_TAGS_NOT_FOUND = "Some tags not found";
+    public static final String WRONG_ADDRESS_ID = "Wrong address id";
+    public static final String EVENT_NOT_FOUND = "Event not found";
+    public static final String PARENT_COMMENT_NOT_FROM_EVENT = "Parent comment nor from event";
 
     private ErrorMessage() {
     }
