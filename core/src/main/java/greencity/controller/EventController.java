@@ -109,11 +109,11 @@ public class EventController {
     }
 
     /**
-     * Method for searching an {@link List<EventResponse>} by query.
+     * Method for searching events by query.
      *
      * @param searchQuery - query for searching events by title.
-     * @return HTTP 200 OK if the event was deleted successfully.
-     * @author [Olexandr Pohranychnyi]
+     * @return HTTP 200 OK and list of events.
+     * @author [Bohdan Lys]
      */
     @Operation(summary = "Search event by title")
     @ApiResponses(value = {
