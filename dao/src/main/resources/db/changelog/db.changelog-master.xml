@@ -184,5 +184,10 @@
     <include file="db/changelog/logs/ch-add-event-comment-Pohranychnyi.xml"/>
     <include file="db/changelog/logs/ch-news-subscribers-makandrii.xml"/>
     <include file="db/changelog/logs/ch-add-column-created_date-into-table-event_reactions-Lys.xml"/>
+    <include file="db/changelog/logs/ch-add-table-notification-Lys.xml"/>
+    <include file="db/changelog/logs/ch-add-table-notification-payload-Lys.xml"/>
+    <include file="db/changelog/logs/ch-add-column-foreign-key-to-notification-table-Lys.xml"/>
+    <include file="db/changelog/logs/ch-add-column-status-to-notification-table-Lys.xml"/>
+    <include file="db/changelog/logs/ch-add-column-timestampDeletion-to-notification-table-Lys.xml"/>
 </databaseChangeLog>
 

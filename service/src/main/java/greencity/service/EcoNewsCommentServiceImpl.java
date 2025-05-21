@@ -38,6 +38,7 @@ public class EcoNewsCommentServiceImpl implements EcoNewsCommentService {
     private final greencity.rating.RatingCalculation ratingCalculation;
     private final HttpServletRequest httpServletRequest;
     private final EcoNewsRepo ecoNewsRepo;
+    private final NotificationProducerService notificationProducerService;
 
     /**
      * Method to save {@link greencity.entity.EcoNewsComment}.
@@ -71,7 +72,35 @@ public class EcoNewsCommentServiceImpl implements EcoNewsCommentService {
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
         CompletableFuture.runAsync(
             () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.ADD_COMMENT, userVO, accessToken));
-        return modelMapper.map(ecoNewsCommentRepo.save(ecoNewsComment), AddEcoNewsCommentDtoResponse.class);
+
+        EcoNewsComment savedComment = ecoNewsCommentRepo.save(ecoNewsComment);
+
+        if (addEcoNewsCommentDtoRequest.getParentCommentId() == 0) {
+            Long authorId = savedComment.getEcoNews().getAuthor().getId();
+            if (!authorId.equals(userVO.getId())) {
+                notificationProducerService.sendCommentNotification(
+                    savedComment.getEcoNews().getId(),
+                    savedComment.getEcoNews().getTitle(),
+                    authorId,
+                    userVO.getId(),
+                    userVO.getName());
+            }
+        } else {
+            EcoNewsComment parentComment = savedComment.getParentComment();
+            Long parentCommentAuthorId = parentComment.getUser().getId();
+
+            if (!parentCommentAuthorId.equals(userVO.getId())) {
+                notificationProducerService.sendCommentReplyNotification(
+                    savedComment.getEcoNews().getId(),
+                    savedComment.getEcoNews().getTitle(),
+                    "ARTICLE",
+                    parentCommentAuthorId,
+                    userVO.getId(),
+                    userVO.getName());
+            }
+        }
+
+        return modelMapper.map(savedComment, AddEcoNewsCommentDtoResponse.class);
     }
 
     /**

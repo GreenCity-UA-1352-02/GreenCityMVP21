@@ -104,7 +104,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/", "/management/", "/management/login").permitAll()
                 .requestMatchers("/v2/api-docs/**", "/v3/api-docs/**", "/swagger.json",
-                    "/swagger-ui.html")
+                    "/swagger-ui.html", "/error")
                 .permitAll()
                 .requestMatchers("/swagger-resources/**", "/webjars/**", "/swagger-ui/**").permitAll()
                 .requestMatchers("/management/**",
@@ -198,15 +198,15 @@ public class SecurityConfig {
                     "/habit/assign/{habitAssignId}",
                     "/habit/tags/search",
                     "/habit/search",
+                    "/notifications/user",
                     "/events/reactions/{eventId}/likes",
                     "/events/reactions/{eventId}/dislikes",
-                    "/habit/{habitId}/friends/profile-pictures",
                     "/api/events/my",
                     "/api/events/my/role/{role}",
                     "/friends/{userId}",
                     "/friends/search-new-friends",
-                    "/habit/{habitId}/friends/profile-pictures",
                     "/habit/{habitId}/friends/profile-pictures")
+
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.POST,
                     "/events/comments/{eventId}",
@@ -229,6 +229,7 @@ public class SecurityConfig {
                     USER_SHOPPING_LIST,
                     "/user/{userId}/habit",
                     "/habit/custom",
+                    "/notifications/",
                     "/friends/{friendId}",
                     "/friends/block/{toBlockId}",
                     "/custom/shopping-list-items/{userId}/{habitId}/custom-shopping-list-items")
@@ -272,6 +273,7 @@ public class SecurityConfig {
                     "/social-networks",
                     USER_CUSTOM_SHOPPING_LIST_ITEMS,
                     USER_SHOPPING_LIST + "/user-shopping-list-items",
+                    "/notifications",
                     "/api/events/my/{eventId}/cancel",
                     "/friends/{friendId}",
                     "/friends/requests/{friendId}",

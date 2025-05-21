@@ -627,6 +627,13 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
             .body(ex.getMessage());
     }
 
+    @ExceptionHandler(NotificationNotFound.class)
+    public ResponseEntity<Object> handleNotificationNotFound(NotificationNotFound ex) {
+        return ResponseEntity
+            .status(HttpStatus.NOT_FOUND)
+            .body(ex.getMessage());
+    }
+
     /**
      * Exception handler for {@link OwnLikeError}.
      * Handles the case when a user tries to react (like/dislike) to their own event.
@@ -640,6 +647,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
             .status(HttpStatus.BAD_REQUEST)
             .body(ex.getMessage());
     }
+
 
     /**
      * Handles {@link greencity.exception.exceptions.EntityNotFoundException} exceptions

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="add-payload-id-to-notification" author="BohdanLys">
+        <addColumn tableName="notification">
+            <column name="payload_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <addForeignKeyConstraint
+                baseTableName="notification"
+                baseColumnNames="payload_id"
+                referencedTableName="notification_payload"
+                referencedColumnNames="id"
+                constraintName="fk_notification_payload"/>
+    </changeSet>
+</databaseChangeLog>
