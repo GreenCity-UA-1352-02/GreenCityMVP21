@@ -14,6 +14,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.util.List;
+
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +38,7 @@ public class NotificationController {
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
     })
     @PostMapping("/")
-    public ResponseEntity<NotificationEvent> post(@RequestBody NotificationEvent notificationEvent) {
+    public ResponseEntity<NotificationEvent> post(@Valid @RequestBody NotificationEvent notificationEvent) {
         return ResponseEntity.status(HttpStatus.CREATED).body(notificationService.saveNotification(notificationEvent));
     }
 

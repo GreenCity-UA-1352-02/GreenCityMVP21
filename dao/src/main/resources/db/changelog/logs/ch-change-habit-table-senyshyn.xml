@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <changeSet id="add-habit-users-liked-table" author="yourname">
+        <createTable tableName="habit_users_liked">
+            <column name="habit_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="users_liked_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey
+                columnNames="habit_id, users_liked_id"
+                constraintName="pk_habit_users_liked"
+                tableName="habit_users_liked"/>
+
+        <addForeignKeyConstraint
+                baseColumnNames="habit_id"
+                baseTableName="habit_users_liked"
+                constraintName="fk_habit_users_liked_habit"
+                referencedColumnNames="id"
+                referencedTableName="habits"
+                onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint
+                baseColumnNames="users_liked_id"
+                baseTableName="habit_users_liked"
+                constraintName="fk_habit_users_liked_user"
+                referencedColumnNames="id"
+                referencedTableName="users"
+                onDelete="CASCADE"/>
+    </changeSet>
+</databaseChangeLog>

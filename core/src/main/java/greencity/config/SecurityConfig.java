@@ -41,6 +41,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
     private static final String ECONEWS_COMMENTS = "/econews/comments";
+    private static final String HABIT_COMMENTS = "/habit/comments";
     private static final String USER_CUSTOM_SHOPPING_LIST_ITEMS = "/user/{userId}/custom-shopping-list-items";
     private static final String CUSTOM_SHOPPING_LIST = "/custom/shopping-list-items/{userId}";
     private static final String CUSTOM_SHOPPING_LIST_URL = "/custom/shopping-list-items/{userId}/"
@@ -113,7 +114,7 @@ public class SecurityConfig {
                 .requestMatchers("/css/**",
                     "/img/**")
                 .permitAll()
-                .requestMatchers(HttpMethod.GET, ECONEWS_COMMENTS)
+                .requestMatchers(HttpMethod.GET, ECONEWS_COMMENTS, HABIT_COMMENTS)
                 .hasAnyRole(ADMIN)
                 .requestMatchers(HttpMethod.GET,
                     "/ownSecurity/verifyEmail",
@@ -247,6 +248,7 @@ public class SecurityConfig {
                     HABIT_ASSIGN_ID + "/allUserAndCustomList")
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.PATCH,
+                    HABIT_COMMENTS,
                     ECONEWS_COMMENTS,
                     CUSTOM_SHOPPING_LIST_ITEMS,
                     CUSTOM_SHOPPING_LIST_URL,
@@ -263,6 +265,7 @@ public class SecurityConfig {
                     "/friends/{friendId}/acceptFriend")
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.DELETE,
+                    HABIT_COMMENTS,
                     ECONEWS_COMMENTS,
                     "/events/delete",
                     "/econews/{econewsId}",

@@ -100,6 +100,7 @@ public final class ErrorMessage {
     public static final String USER_CANNOT_ADD_SAME_SOCIAL_NETWORK_LINKS =
         "User cannot add the same social network links";
     public static final String COMMENT_NOT_FOUND_EXCEPTION = "The comment with entered id doesn't exist";
+    public static final String PARENT_COMMENT_NOT_FOUND_EXCEPTION = "The entered parent id doesn't exist";
     public static final String CANNOT_REPLY_THE_REPLY = "Can not make a reply to a reply";
     public static final String NOT_A_CURRENT_USER = "You can't perform actions with the data of other user";
     public static final String USER_SHOPPING_LIST_ITEMS_STATUS_IS_ALREADY_DONE =

@@ -2,6 +2,8 @@ package greencity.entity;
 
 import lombok.*;
 import jakarta.persistence.*;
+
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -13,9 +15,9 @@ import java.util.Set;
 @Builder
 @Table(name = "habits")
 @EqualsAndHashCode(
-    exclude = {"habitAssigns", "habitTranslations", "tags", "shoppingListItems"})
+        exclude = {"habitAssigns", "habitTranslations", "tags", "shoppingListItems", "usersLiked"})
 @ToString(
-    exclude = {"habitAssigns", "habitTranslations", "tags", "shoppingListItems"})
+        exclude = {"habitAssigns", "habitTranslations", "tags", "shoppingListItems", "usersLiked"})
 public class Habit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -48,14 +50,25 @@ public class Habit {
 
     @ManyToMany
     @JoinTable(
-        name = "habit_shopping_list_items",
-        joinColumns = @JoinColumn(name = "habit_id"),
-        inverseJoinColumns = @JoinColumn(name = "shopping_list_item_id"))
+            name = "habit_shopping_list_items",
+            joinColumns = @JoinColumn(name = "habit_id"),
+            inverseJoinColumns = @JoinColumn(name = "shopping_list_item_id"))
     private Set<ShoppingListItem> shoppingListItems;
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "habits_tags",
-        joinColumns = @JoinColumn(name = "habit_id"),
-        inverseJoinColumns = @JoinColumn(name = "tag_id"))
+            joinColumns = @JoinColumn(name = "habit_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id"))
     private Set<Tag> tags;
+
+    @Transient
+    private boolean currentUserLiked = false;
+
+    @ManyToMany
+    @JoinTable(
+            name = "habit_users_liked",
+            joinColumns = @JoinColumn(name = "habit_id"),
+            inverseJoinColumns = @JoinColumn(name = "users_liked_id"))
+    private Set<User> usersLiked = new HashSet<>();
+    ;
 }
